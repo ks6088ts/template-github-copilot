@@ -1,0 +1,100 @@
+name: infra
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'feature/**'
+  schedule:
+    - cron: "00 00 * * 3"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TERRAFORM_VERSION: 1.13.4
+  TFLINT_VERSION: v0.60.0
+  TRIVY_VERSION: v0.68.2
+
+jobs:
+  # Lint and security scan (no auth required)
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: ${{ env.TFLINT_VERSION }}
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.5
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+      - name: Run lint and security scan
+        run: |
+          tflint --init
+          tflint --recursive
+          trivy config .
+
+  # Test Azure scenarios (azure_*)
+  test-azure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+    environment: dev
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      ARM_USE_OIDC: ${{ secrets.ARM_USE_OIDC }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: Run Azure scenario test (${{ matrix.scenario }})
+        run: |
+          cd infra/scenarios/azure_github_oidc
+          terraform init
+          terraform fmt -check
+          terraform validate
+          terraform test
+          terraform plan
+
+  # Test GitHub scenarios (github_*)
+  test-github:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: lint
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: Run GitHub scenario test
+        run: |
+          cd infra/scenarios/github_secrets
+          terraform init
+          terraform fmt -check
+          terraform validate
+          terraform test
+          terraform plan

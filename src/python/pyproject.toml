@@ -3,4 +3,9 @@ name = "template-github-copilot"
 version = "0.1.0"
 description = "A comprehensive templates for GitHub Copilot"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "github-copilot-sdk>=0.1.25",
+    "pydantic-settings>=2.13.1",
+    "python-dotenv>=1.2.1",
+    "typer>=0.24.1",
+]

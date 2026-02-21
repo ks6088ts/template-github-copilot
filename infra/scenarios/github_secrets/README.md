@@ -81,6 +81,10 @@ actions_environment_secrets = [
   {
     name  = "ARM_USE_OIDC"
     value = "true"
+  },
+  {
+    name  = "COPILOT_GITHUB_TOKEN"
+    value = "$COPILOT_GITHUB_TOKEN"
   }
 ]
 EOF

@@ -1,0 +1,49 @@
+name: github-copilot-cli
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        type: string
+        description: "The prompt to use for Copilot CLI"
+        required: true
+        default: "Hello"
+      model:
+        type: choice
+        description: Specify the model to use for Copilot CLI
+        options:
+          - gpt-5-mini
+          - claude-opus-4.6
+          - claude-sonnet-4.6
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        platform:
+          - "ubuntu-latest"
+        node-version:
+          - "22.12.0"
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # to retrieve git tags
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install GitHub Copilot CLI
+        run: |
+          curl -fsSL https://gh.io/copilot-install | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Run GitHub Copilot CLI
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        run: |
+          copilot \
+            --prompt "${{ github.event.inputs.prompt }}" \
+            --log-level all \
+            --allow-all-tools --allow-all-paths --allow-all-urls \
+            --model "${{ github.event.inputs.model }}"

@@ -25,6 +25,7 @@ jobs:
         node-version:
           - "22.12.0"
     runs-on: ${{ matrix.platform }}
+    environment: dev
     steps:
       - name: checkout
         uses: actions/checkout@v6

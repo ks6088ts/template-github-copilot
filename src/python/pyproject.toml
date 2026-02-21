@@ -9,3 +9,14 @@ dependencies = [
     "python-dotenv>=1.2.1",
     "typer>=0.24.1",
 ]
+
+[dependency-groups]
+dev = [
+    "coverage>=7.13.4",
+    "pre-commit>=4.5.1",
+    "pyrefly>=0.53.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.15.2",
+    "ty>=0.0.18",
+]

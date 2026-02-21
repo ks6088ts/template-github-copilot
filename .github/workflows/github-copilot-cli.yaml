@@ -15,6 +15,8 @@ on:
           - gpt-5-mini
           - claude-opus-4.6
           - claude-sonnet-4.6
+        required: true
+        default: gpt-5-mini
 
 jobs:
   test:

@@ -1,6 +1,10 @@
 # GitHub Secrets and Environment Setup
 
-This Terraform scenario demonstrates how to create and manage GitHub repository environment secrets using the GitHub provider. It sets up secrets for a specified GitHub repository environment, which can be used in GitHub Actions workflows.
+> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/getting_started.md) > GitHub Secrets
+>
+> **Previous step:** [Azure GitHub OIDC](../azure_github_oidc/README.md)
+
+This Terraform scenario creates and manages GitHub repository environment secrets using the GitHub provider. It sets up secrets for a specified GitHub repository environment, which can be used in GitHub Actions workflows.
 
 ## Architecture
 
@@ -11,8 +15,8 @@ flowchart LR
     end
 
     subgraph GitHub["GitHub Repository"]
-        ENV["Environment<br/>- dev / staging / prod"]
-        SEC["Environment Secrets<br/>- ARM_CLIENT_ID<br/>- AWS credentials<br/>- GCP credentials"]
+        ENV["Environment<br/>e.g. dev"]
+        SEC["Environment Secrets<br/>- ARM_CLIENT_ID<br/>- ARM_SUBSCRIPTION_ID<br/>- ARM_TENANT_ID<br/>- ARM_USE_OIDC<br/>- COPILOT_GITHUB_TOKEN"]
         GA["GitHub Actions<br/>Workflow"]
     end
 
@@ -23,13 +27,15 @@ flowchart LR
 
 ## Prerequisites
 
-- Terraform CLI installed
-- GitHub account
+- Terraform CLI (>= 1.6.0)
+- GitHub account with repository admin access
+- A GitHub Personal Access Token (PAT) with `repo` and `admin:org` scopes (or fine-grained token with environment secrets permission)
+- Outputs from the [Azure GitHub OIDC](../azure_github_oidc/README.md) scenario (Step 1)
 
-## How to use
+## How to Use
 
 ```shell
-# create backend.tf if needed
+# (Optional) Create backend.tf for remote state storage
 cat <<EOF > backend.tf
 terraform {
   backend "azurerm" {
@@ -41,25 +47,27 @@ terraform {
 }
 EOF
 
-# Set environment variables if azure backend is used
+# Set environment variables if Azure backend is used
 export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
 
-# create terraform.tfvars
-
-# Log in to Azure
+# Log in to Azure (required for Azure backend)
 az login
 
 # (Optional) Confirm the details for the currently logged-in user
 az ad signed-in-user show
 
-# Azure
+# --- Gather values from Step 1 (azure_github_oidc) ---
 APPLICATION_NAME="template-github-copilot_dev"
 APPLICATION_ID=$(az ad sp list --display-name "$APPLICATION_NAME" --query "[0].appId" --output tsv)
 SUBSCRIPTION_ID=$(az account show --query id --output tsv)
 TENANT_ID=$(az account show --query tenantId --output tsv)
 
-# GitHub
-COPILOT_GITHUB_TOKEN="YOUR_GITHUB_PAT_WITH_REPO_AND_SECRET_PERMISSIONS"
+# --- GitHub authentication ---
+# Set GITHUB_TOKEN for the GitHub Terraform provider
+export GITHUB_TOKEN="YOUR_GITHUB_PAT"
+
+# COPILOT_GITHUB_TOKEN is a separate PAT used by Copilot CLI in GitHub Actions
+COPILOT_GITHUB_TOKEN="YOUR_COPILOT_GITHUB_TOKEN"
 
 cat <<EOF > terraform.tfvars
 github_owner = "ks6088ts"
@@ -92,6 +100,12 @@ EOF
 # Initialize Terraform
 terraform init
 
+# Format check (matches CI)
+terraform fmt -check
+
+# Validate configuration
+terraform validate
+
 # Plan the deployment
 terraform plan
 
@@ -101,6 +115,12 @@ terraform apply -auto-approve
 # Confirm the output
 terraform output
 
-# Destroy the deployment
+# Destroy the deployment (when no longer needed)
 terraform destroy -auto-approve
 ```
+
+## Outputs
+
+| Output | Description |
+|---|---|
+| `github_repository_environment_name` | Name of the created GitHub repository environment |

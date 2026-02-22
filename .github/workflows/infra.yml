@@ -67,8 +67,8 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - name: Run Azure scenario test (azure_github_oidc)
+        working-directory: infra/scenarios/azure_github_oidc
         run: |
-          cd infra/scenarios/azure_github_oidc
           terraform init
           terraform fmt -check
           terraform validate
@@ -91,8 +91,8 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - name: Run GitHub scenario test
+        working-directory: infra/scenarios/github_secrets
         run: |
-          cd infra/scenarios/github_secrets
           terraform init
           terraform fmt -check
           terraform validate

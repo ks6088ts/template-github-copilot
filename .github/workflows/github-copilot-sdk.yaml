@@ -52,10 +52,13 @@ jobs:
           curl -fsSL https://gh.io/copilot-install | bash
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Install Python dependencies
-        run: make install-deps
+        working-directory: src/python
+        run: |
+          make install-deps
       - name: Start Copilot server
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        working-directory: src/python
         run: |
           make copilot COPILOT_MODEL="${{ github.event.inputs.model }}" &
           # Wait for the server to be ready on port 3000
@@ -71,7 +74,7 @@ jobs:
       - name: Run Copilot SDK app
         env:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        working-directory: src/python
         run: |
-          cd src/python
           cp .env.template .env
           uv run python scripts/chat.py chat --verbose --prompt "${{ github.event.inputs.prompt }}"

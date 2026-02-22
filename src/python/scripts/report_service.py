@@ -12,10 +12,14 @@ from template_github_copilot.loggers import get_logger
 
 app = typer.Typer(
     add_completion=False,
-    help="Report service CLI",
 )
 
 logger = get_logger(__name__)
+
+
+@app.callback()
+def callback():
+    """Report service CLI"""
 
 
 def set_verbose_logging(

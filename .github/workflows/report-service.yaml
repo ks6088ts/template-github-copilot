@@ -100,4 +100,5 @@ jobs:
             --system-prompt "${{ github.event.inputs.system_prompt }}" \
             --queries "${{ github.event.inputs.queries }}" \
             --account-url "${{ github.event.inputs.azure_blob_storage_account_url }}" \
-            --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}"
+            --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}" \
+            --blob-name "report_${{ github.run_id }}.json"

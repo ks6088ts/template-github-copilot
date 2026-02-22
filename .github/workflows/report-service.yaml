@@ -1,0 +1,52 @@
+name: report-service
+
+on:
+  workflow_dispatch:
+    inputs:
+      azure_blob_storage_account_url:
+        type: string
+        description: "The URL of the Azure Blob Storage account to which the report service will write. Format: https://<your-storage-account>.blob.core.windows.net"
+        required: true
+      azure_blob_storage_container_name:
+        type: string
+        description: "The name of the Azure Blob Storage container to which the report service will write. Format: <your-container-name>"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  report-service:
+    strategy:
+      matrix:
+        platform:
+          - "ubuntu-latest"
+        python-version:
+          - "3.13"
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 5
+    environment: dev
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up uv with caching enabled
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+            client-id: ${{ secrets.ARM_CLIENT_ID }}
+            tenant-id: ${{ secrets.ARM_TENANT_ID }}
+            subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      - name: Run report service
+        shell: bash
+        working-directory: src/python
+        env:
+          AZURE_BLOB_STORAGE_ACCOUNT_URL: ${{ github.event.inputs.azure_blob_storage_account_url }}
+          AZURE_BLOB_STORAGE_CONTAINER_NAME: ${{ github.event.inputs.azure_blob_storage_container_name }}
+        run: make report-service

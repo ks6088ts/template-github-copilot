@@ -22,12 +22,10 @@ jobs:
   # Lint and security scan (no auth required)
   lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -36,10 +34,17 @@ jobs:
         uses: terraform-linters/setup-tflint@v6
         with:
           tflint_version: ${{ env.TFLINT_VERSION }}
+      - name: Cache TFLint plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/.tflint.d/plugins
+          key: tflint-${{ runner.os }}-${{ hashFiles('**/.tflint.hcl') }}
+          restore-keys: tflint-${{ runner.os }}-
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@v0.2.5
         with:
           version: ${{ env.TRIVY_VERSION }}
+          cache: true
       - name: Run lint and security scan
         run: |
           tflint --init
@@ -49,7 +54,7 @@ jobs:
   # Test Azure scenarios (azure_*)
   test-azure:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     needs: lint
     environment: dev
     env:
@@ -57,15 +62,22 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_USE_OIDC: ${{ secrets.ARM_USE_OIDC }}
+      TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-${{ runner.os }}-azure-${{ hashFiles('infra/scenarios/azure_github_oidc/.terraform.lock.hcl') }}
+          restore-keys: terraform-${{ runner.os }}-azure-
+      - name: Create plugin cache directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
       - name: Run Azure scenario test (azure_github_oidc)
         working-directory: infra/scenarios/azure_github_oidc
         run: |
@@ -78,18 +90,26 @@ jobs:
   # Test GitHub scenarios (github_*)
   test-github:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     needs: lint
     environment: dev
+    env:
+      TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - name: Cache Terraform plugins
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: terraform-${{ runner.os }}-github-${{ hashFiles('infra/scenarios/github_secrets/.terraform.lock.hcl') }}
+          restore-keys: terraform-${{ runner.os }}-github-
+      - name: Create plugin cache directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
       - name: Run GitHub scenario test
         working-directory: infra/scenarios/github_secrets
         run: |

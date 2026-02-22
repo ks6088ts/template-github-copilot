@@ -1,5 +1,9 @@
 # Azure GitHub OIDC
 
+> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/getting_started.md) > Azure GitHub OIDC
+>
+> **Next step:** [GitHub Secrets](../github_secrets/README.md)
+
 This Terraform scenario creates an Azure Service Principal with federated identity credentials for GitHub Actions to authenticate with Azure using OpenID Connect (OIDC). This eliminates the need for storing long-lived Azure credentials as GitHub secrets.
 
 ## Architecture
@@ -21,13 +25,24 @@ flowchart LR
     GA -->|"4. Access Resources"| SUB
 ```
 
+## What It Creates
+
+| Resource | Purpose |
+|---|---|
+| Entra ID Application | App registration for GitHub Actions |
+| Service Principal | Identity with federated credentials for OIDC |
+| Federated Identity Credential | Trust relationship with GitHub Actions OIDC provider |
+| Role Assignment (Contributor) | Manage Azure resources at subscription scope |
+| Role Assignment (Storage Blob Data Contributor) | Read/write Azure Blob Storage data |
+| Service Principal Password | Credential with 1-year expiry for non-OIDC scenarios |
+
 ## Prerequisites
 
-- Terraform CLI installed
-- Azure CLI installed
-- Azure subscription
+- Terraform CLI (>= 1.6.0)
+- Azure CLI installed and authenticated
+- Azure subscription with sufficient permissions (ability to create App registrations and role assignments)
 
-## How to use
+## How to Use
 
 ```shell
 # create backend.tf if needed
@@ -54,6 +69,12 @@ export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
 # Initialize Terraform
 terraform init
 
+# Format check (matches CI)
+terraform fmt -check
+
+# Validate configuration
+terraform validate
+
 # Plan the deployment
 terraform plan
 
@@ -63,12 +84,26 @@ terraform apply -auto-approve
 # Confirm the output
 terraform output
 
-# Destroy the deployment
+# Destroy the deployment (when no longer needed)
 terraform destroy -auto-approve
 ```
+
+## Outputs
+
+| Output | Description |
+|---|---|
+| `service_principal_client_id` | Service Principal Client ID (used as `ARM_CLIENT_ID`) |
+| `application_object_id` | Application Object ID |
+| `tenant_id` | Azure AD Tenant ID (used as `ARM_TENANT_ID`) |
+| `service_principal_password` | Service Principal password (sensitive) |
 
 ## FAQ
 
 ### Error: Listing service principals for filter "appId eq '00000003-0000-0000-c000-000000000000'"
 
-This error may occur if the logged-in user does not have sufficient permissions to list service principals in Microsoft Entra ID. Ensure that the user has at least the "Directory Readers" role assigned in Microsoft Entra ID. You can assign this role using the Azure portal or Azure CLI. Go to the Azure portal, navigate to "App registrations" > "Manage" > "API permissions", and ensure that the necessary permissions are granted.
+This error may occur if the logged-in user does not have sufficient permissions to list service principals in Microsoft Entra ID. Ensure that the user has at least the **Directory Readers** role assigned in Microsoft Entra ID.
+
+To resolve:
+1. Go to the Azure portal
+2. Navigate to **App registrations** > **Manage** > **API permissions**
+3. Ensure the necessary permissions are granted

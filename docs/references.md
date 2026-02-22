@@ -1,5 +1,9 @@
 # References
 
+> **Navigation:** [README](../README.md) > **References**
+>
+> **See also:** [Getting Started](getting_started.md)
+
 ## GitHub Copilot
 
 - [Installing GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli)

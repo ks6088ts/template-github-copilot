@@ -12,3 +12,7 @@
 ## Azure
 
 - [Assign an Azure role for access to blob data](https://learn.microsoft.com/en-us/azure/storage/blobs/assign-azure-role-data-access?tabs=portal)
+
+## Tools
+
+- [Draw.io MCP Server](https://github.com/jgraph/drawio-mcp)

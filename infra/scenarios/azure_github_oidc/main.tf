@@ -42,6 +42,12 @@ resource "azurerm_role_assignment" "this" {
   principal_id         = azuread_service_principal.this.object_id
 }
 
+resource "azurerm_role_assignment" "storage_blob_data_contributor" {
+  scope                = data.azurerm_subscription.this.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_service_principal.this.object_id
+}
+
 resource "azuread_service_principal_password" "this" {
   service_principal_id = azuread_service_principal.this.id
   # Security: Set password expiration to enforce credential rotation (1 year from now)

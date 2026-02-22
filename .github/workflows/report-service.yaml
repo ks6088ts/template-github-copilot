@@ -1,0 +1,103 @@
+name: report-service
+
+on:
+  workflow_dispatch:
+    inputs:
+      system_prompt:
+        type: string
+        description: "The system prompt to configure the assistant's behavior"
+        required: true
+        default: "You are a helpful assistant."
+      queries:
+        type: string
+        description: "Comma-separated user queries (e.g. 'query1,query2,query3')"
+        required: true
+      model:
+        type: choice
+        description: "Specify the model to use for Copilot CLI server"
+        options:
+          - gpt-5-mini
+          - claude-opus-4.6
+          - claude-sonnet-4.6
+        required: true
+        default: gpt-5-mini
+      azure_blob_storage_account_url:
+        type: string
+        description: "The URL of the Azure Blob Storage account to which the report service will write. Format: https://<your-storage-account>.blob.core.windows.net"
+        required: true
+      azure_blob_storage_container_name:
+        type: string
+        description: "The name of the Azure Blob Storage container to which the report service will write. Format: <your-container-name>"
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  report-service:
+    strategy:
+      matrix:
+        platform:
+          - "ubuntu-latest"
+        python-version:
+          - "3.13"
+        node-version:
+          - "22.12.0"
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 5
+    environment: dev
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Set up uv with caching enabled
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install GitHub Copilot CLI
+        run: |
+          curl -fsSL https://gh.io/copilot-install | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install Python dependencies
+        working-directory: src/python
+        run: |
+          make install-deps
+      - name: Start Copilot server
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        working-directory: src/python
+        run: |
+          make copilot COPILOT_MODEL="${{ github.event.inputs.model }}" &
+          echo "Waiting for Copilot server to start on port 3000..."
+          for i in $(seq 1 30); do
+            if nc -z localhost 3000 2>/dev/null; then
+              echo "Copilot server is ready!"
+              break
+            fi
+            echo "Attempt $i/30: Server not ready yet, retrying in 2s..."
+            sleep 2
+          done
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      - name: Run report service
+        shell: bash
+        working-directory: src/python
+        run: |
+          cp .env.template .env
+          uv run python scripts/report_service.py generate \
+            --verbose \
+            --system-prompt "${{ github.event.inputs.system_prompt }}" \
+            --queries "${{ github.event.inputs.queries }}" \
+            --account-url "${{ github.event.inputs.azure_blob_storage_account_url }}" \
+            --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}"

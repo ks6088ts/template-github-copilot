@@ -29,6 +29,11 @@ on:
         type: string
         description: "The name of the Azure Blob Storage container to which the report service will write. Format: <your-container-name>"
         required: true
+      sas_expiry_hours:
+        type: number
+        description: "Hours until the SAS URL expires"
+        required: false
+        default: 1
 
 permissions:
   id-token: write
@@ -91,6 +96,7 @@ jobs:
           tenant-id: ${{ secrets.ARM_TENANT_ID }}
           subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       - name: Run report service
+        id: report
         shell: bash
         working-directory: src/python
         run: |
@@ -101,4 +107,8 @@ jobs:
             --queries "${{ github.event.inputs.queries }}" \
             --account-url "${{ github.event.inputs.azure_blob_storage_account_url }}" \
             --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}" \
-            --blob-name "report_${{ github.run_id }}.json"
+            --blob-name "report_${{ github.run_id }}.json" \
+            --sas-expiry-hours "${{ github.event.inputs.sas_expiry_hours }}"
+      - name: Print SAS URL
+        run: |
+          echo "SAS URL: ${{ steps.report.outputs.sas_url }}"

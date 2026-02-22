@@ -110,7 +110,3 @@ copilot: ## run GitHub Copilot CLI server
 .PHONY: copilot-app
 copilot-app: ## run application with GitHub Copilot SDK
 	uv run python scripts/chat.py chat-loop --verbose
-
-.PHONY: report-service
-report-service: ## run report service
-	uv run python scripts/blob.py list-blobs --verbose

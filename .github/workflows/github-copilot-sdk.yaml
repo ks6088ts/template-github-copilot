@@ -72,8 +72,6 @@ jobs:
             sleep 2
           done
       - name: Run Copilot SDK app
-        env:
-          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
         working-directory: src/python
         run: |
           cp .env.template .env

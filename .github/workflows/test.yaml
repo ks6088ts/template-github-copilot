@@ -10,6 +10,10 @@ on:
     branches:
       - "main"
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   test:
     strategy:
@@ -20,6 +24,7 @@ jobs:
           - "3.13"
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 5
+    environment: dev
     steps:
       - uses: actions/checkout@v6
       - name: Set up uv with caching enabled
@@ -34,8 +39,15 @@ jobs:
         shell: bash
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest /usr/local/bin
+      - name: Azure Login via OIDC
+        uses: azure/login@v2
+        with:
+            client-id: ${{ secrets.ARM_CLIENT_ID }}
+            tenant-id: ${{ secrets.ARM_TENANT_ID }}
+            subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       - name: Run CI tests
         shell: bash
         working-directory: src/python
         run: |
+          az account show --output table
           make ci-test

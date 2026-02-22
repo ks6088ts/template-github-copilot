@@ -46,7 +46,7 @@ test: ## run tests
 	uv run pytest --capture=no -vv
 
 .PHONY: ci-test
-ci-test: install-deps-dev format-check lint test ## run CI tests
+ci-test: install-deps-dev format-check lint test blob-list ## run CI tests
 
 .PHONY: update
 update: ## update packages
@@ -110,3 +110,7 @@ copilot: ## run GitHub Copilot CLI server
 .PHONY: copilot-app
 copilot-app: ## run application with GitHub Copilot SDK
 	uv run python scripts/chat.py chat-loop --verbose
+
+.PHONY: blob-list
+blob-list: ## list blobs in the repository
+	uv run python scripts/blob.py list-blobs --verbose

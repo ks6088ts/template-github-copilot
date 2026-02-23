@@ -5,7 +5,6 @@ from typing import Any
 import typer
 from copilot import CopilotClient
 from copilot.generated.session_events import SessionEventType
-from copilot.tools import define_tool
 from copilot.types import (
     CopilotClientOptions,
     MessageOptions,
@@ -18,6 +17,8 @@ from copilot.types import (
     Tool,
 )
 from pydantic import BaseModel, Field
+
+from template_github_copilot.internals.tools import get_custom_tools
 
 # Type alias for the writer function used by the event handler
 WriterFunc = Callable[[str], Any]
@@ -77,25 +78,6 @@ class ReportOutput(BaseModel):
 def _default_writer(message: str) -> None:
     """Default writer that prints to stdout."""
     print(message)
-
-
-class KorinLocation(BaseModel):
-    """Example Pydantic model for a custom tool input."""
-
-    city: str = Field("MOBARA", description="The city on KORIN to get the weather for.")
-
-
-@define_tool(description="Get the weather forecast for KORIN planet.")
-def get_korin_weather(location: KorinLocation) -> str:
-    """Example custom tool that returns a static weather forecast."""
-    return f"The weather on KORIN in {location.city} is sunny with a chance of meteor showers."
-
-
-def _get_custom_tools() -> list[Tool]:
-    """Example function to provide default custom tools for the session config."""
-    return [
-        get_korin_weather,
-    ]
 
 
 def _get_system_message() -> SystemMessageConfig:
@@ -214,7 +196,7 @@ def create_session_config(
     system_message: SystemMessageAppendConfig
     | SystemMessageReplaceConfig
     | None = _get_system_message(),
-    tools: list[Tool] | None = _get_custom_tools(),
+    tools: list[Tool] | None = get_custom_tools(),
     streaming: bool = True,
     **kwargs: Any,
 ) -> SessionConfig:

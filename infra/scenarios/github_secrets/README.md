@@ -16,7 +16,7 @@ flowchart LR
 
     subgraph GitHub["GitHub Repository"]
         ENV["Environment<br/>e.g. dev"]
-        SEC["Environment Secrets<br/>- ARM_CLIENT_ID<br/>- ARM_SUBSCRIPTION_ID<br/>- ARM_TENANT_ID<br/>- ARM_USE_OIDC<br/>- COPILOT_GITHUB_TOKEN"]
+        SEC["Environment Secrets<br/>- ARM_CLIENT_ID<br/>- ARM_SUBSCRIPTION_ID<br/>- ARM_TENANT_ID<br/>- ARM_USE_OIDC<br/>- COPILOT_GITHUB_TOKEN<br/>- SLACK_WEBHOOK_URL"]
         GA["GitHub Actions<br/>Workflow"]
     end
 
@@ -69,6 +69,9 @@ export GITHUB_TOKEN="YOUR_GITHUB_PAT"
 # COPILOT_GITHUB_TOKEN is a separate PAT used by Copilot CLI in GitHub Actions
 COPILOT_GITHUB_TOKEN="YOUR_COPILOT_GITHUB_TOKEN"
 
+# SLACK_WEBHOOK_URL is the Slack incoming webhook URL for notifications. e.g. https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+SLACK_WEBHOOK_URL="YOUR_SLACK_WEBHOOK_URL"
+
 cat <<EOF > terraform.tfvars
 github_owner = "ks6088ts"
 repository_name = "template-github-copilot"
@@ -93,6 +96,10 @@ actions_environment_secrets = [
   {
     name  = "COPILOT_GITHUB_TOKEN"
     value = "$COPILOT_GITHUB_TOKEN"
+  },
+  {
+    name  = "SLACK_WEBHOOK_URL"
+    value = "$SLACK_WEBHOOK_URL"
   }
 ]
 EOF
@@ -121,6 +128,6 @@ terraform destroy -auto-approve
 
 ## Outputs
 
-| Output | Description |
-|---|---|
+| Output                               | Description                                       |
+| ------------------------------------ | ------------------------------------------------- |
 | `github_repository_environment_name` | Name of the created GitHub repository environment |

@@ -109,6 +109,27 @@ jobs:
             --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}" \
             --blob-name "report_${{ github.run_id }}.json" \
             --sas-expiry-hours "${{ github.event.inputs.sas_expiry_hours }}"
-      - name: Print SAS URL
+      - name: Send message to Slack
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        working-directory: src/python
         run: |
-          echo "SAS URL: ${{ steps.report.outputs.sas_url }}"
+          MESSAGE=$(cat <<'EOF'
+          :white_check_mark: *Report Generation Complete*
+
+          *Workflow:* `${{ github.workflow }}` (Run #${{ github.run_number }})
+          *Triggered by:* ${{ github.actor }}
+          *Model:* `${{ github.event.inputs.model }}`
+          *System Prompt:* ${{ github.event.inputs.system_prompt }}
+          *Queries:* ${{ github.event.inputs.queries }}
+          *Blob:* `report_${{ github.run_id }}.json`
+          *Container:* `${{ github.event.inputs.azure_blob_storage_container_name }}`
+          *SAS Expiry:* ${{ github.event.inputs.sas_expiry_hours }} hour(s)
+
+          :link: *Download Report:* ${{ steps.report.outputs.sas_url }}
+          EOF
+          )
+          uv run python scripts/slacks.py send \
+            --webhook-url "$SLACK_WEBHOOK_URL" \
+            --message "$MESSAGE"

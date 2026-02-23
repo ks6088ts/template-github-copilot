@@ -1,11 +1,9 @@
-import asyncio
 from collections.abc import Callable
 from typing import Any
 
 import typer
 from copilot import CopilotClient
 from copilot.generated.session_events import SessionEventType
-from copilot.tools import define_tool
 from copilot.types import (
     CopilotClientOptions,
     MessageOptions,
@@ -17,85 +15,16 @@ from copilot.types import (
     SystemMessageReplaceConfig,
     Tool,
 )
-from pydantic import BaseModel, Field
+
+from template_github_copilot.internals.tools import get_custom_tools
 
 # Type alias for the writer function used by the event handler
 WriterFunc = Callable[[str], Any]
 
 
-class ChatResult(BaseModel):
-    """Result of a single chat prompt."""
-
-    prompt: str = Field(..., description="The original prompt sent to Copilot.")
-    response: str | None = Field(
-        None, description="The response content from Copilot, or None if no response."
-    )
-    error: str | None = Field(None, description="Error message if the request failed.")
-
-
-class ChatParallelOutput(BaseModel):
-    """Structured output for the chat_parallel command."""
-
-    results: list[ChatResult] = Field(
-        ..., description="List of results for each prompt."
-    )
-    total: int = Field(..., description="Total number of prompts processed.")
-    succeeded: int = Field(
-        ..., description="Number of prompts that received a response."
-    )
-    failed: int = Field(
-        ..., description="Number of prompts that failed or had no response."
-    )
-
-
-class ReportResult(BaseModel):
-    """Result of a single report query."""
-
-    query: str = Field(..., description="The original user query.")
-    response: str | None = Field(
-        None, description="The response content from Copilot, or None if no response."
-    )
-    error: str | None = Field(None, description="Error message if the request failed.")
-
-
-class ReportOutput(BaseModel):
-    """Structured output for the report service."""
-
-    system_prompt: str = Field(..., description="The system prompt used.")
-    results: list[ReportResult] = Field(
-        ..., description="List of results for each query."
-    )
-    total: int = Field(..., description="Total number of queries processed.")
-    succeeded: int = Field(
-        ..., description="Number of queries that received a response."
-    )
-    failed: int = Field(
-        ..., description="Number of queries that failed or had no response."
-    )
-
-
 def _default_writer(message: str) -> None:
     """Default writer that prints to stdout."""
     print(message)
-
-
-class KorinLocation(BaseModel):
-    """Example Pydantic model for a custom tool input."""
-
-    city: str = Field("MOBARA", description="The city on KORIN to get the weather for.")
-
-
-@define_tool(description="Get the weather forecast for KORIN planet.")
-def get_korin_weather(location: KorinLocation) -> str:
-    """Example custom tool that returns a static weather forecast."""
-    return f"The weather on KORIN in {location.city} is sunny with a chance of meteor showers."
-
-
-def _get_custom_tools() -> list[Tool]:
-    """Example function to provide default custom tools for the session config."""
-    return [
-        get_korin_weather,
-    ]
 
 
 def _get_system_message() -> SystemMessageConfig:
@@ -214,7 +143,7 @@ def create_session_config(
     system_message: SystemMessageAppendConfig
     | SystemMessageReplaceConfig
     | None = _get_system_message(),
-    tools: list[Tool] | None = _get_custom_tools(),
+    tools: list[Tool] | None = get_custom_tools(),
     streaming: bool = True,
     **kwargs: Any,
 ) -> SessionConfig:
@@ -253,55 +182,4 @@ def create_message_options(
     """
     return MessageOptions(
         prompt=prompt,
-    )
-
-
-async def run_parallel_chat(
-    cli_url: str,
-    queries: list[str],
-    system_prompt: str,
-    writer: WriterFunc = _default_writer,
-) -> ReportOutput:
-    """Run multiple chat queries in parallel sessions and return structured results.
-
-    Args:
-        cli_url: The URL of the Copilot CLI server.
-        queries: A list of user queries to send in parallel.
-        system_prompt: The system prompt to configure each session.
-        writer: A callable for logging messages.
-
-    Returns:
-        A ``ReportOutput`` containing all results.
-    """
-
-    async def _process_query(client: CopilotClient, query: str) -> ReportResult:
-        try:
-            session_config = create_session_config(
-                system_message=SystemMessageReplaceConfig(
-                    mode="replace", content=system_prompt
-                ),
-            )
-            session = await client.create_session(session_config)
-            handler = create_event_handler(writer=writer)
-            session.on(handler)
-
-            reply = await session.send_and_wait(create_message_options(query))
-            content = reply.data.content if reply else None
-            return ReportResult(query=query, response=content)
-        except Exception as e:
-            return ReportResult(query=query, error=str(e))
-
-    client = create_copilot_client(cli_url)
-    await client.start()
-
-    tasks = [_process_query(client, q) for q in queries]
-    results = await asyncio.gather(*tasks)
-
-    succeeded = sum(1 for r in results if r.response is not None)
-    return ReportOutput(
-        system_prompt=system_prompt,
-        results=list(results),
-        total=len(results),
-        succeeded=succeeded,
-        failed=len(results) - succeeded,
     )

@@ -6,13 +6,12 @@ import typer
 from dotenv import load_dotenv
 
 from template_github_copilot.core import (
-    ChatParallelOutput,
-    ChatResult,
     create_copilot_client,
     create_event_handler,
     create_message_options,
     create_session_config,
 )
+from template_github_copilot.internals.chat import ChatParallelOutput, ChatResult
 from template_github_copilot.loggers import get_logger
 from template_github_copilot.settings import get_project_settings
 

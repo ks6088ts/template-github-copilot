@@ -34,6 +34,7 @@ flowchart LR
 | Federated Identity Credential | Trust relationship with GitHub Actions OIDC provider |
 | Role Assignment (Contributor) | Manage Azure resources at subscription scope |
 | Role Assignment (Storage Blob Data Contributor) | Read/write Azure Blob Storage data |
+| Role Assignment (Storage Blob Delegator) | Generate user delegation keys for SAS URLs |
 | Service Principal Password | Credential with 1-year expiry for non-OIDC scenarios |
 
 ## Prerequisites

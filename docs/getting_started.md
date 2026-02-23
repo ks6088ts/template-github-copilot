@@ -88,6 +88,7 @@ This scenario creates an Azure Service Principal with federated identity credent
 | Federated Identity Credential | OIDC trust with GitHub Actions |
 | Role Assignment (Contributor) | Manage Azure resources |
 | Role Assignment (Storage Blob Data Contributor) | Read/write blob data |
+| Role Assignment (Storage Blob Delegator) | Generate user delegation keys for SAS URLs |
 
 > **Detailed setup instructions:** See [azure_github_oidc/README.md](../infra/scenarios/azure_github_oidc/README.md)
 

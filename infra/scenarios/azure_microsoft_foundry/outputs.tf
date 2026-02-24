@@ -17,3 +17,13 @@ output "microsoft_foundry_project_name" {
   value       = module.microsoft_foundry.project_name
   description = "Microsoft Foundry project name"
 }
+
+output "search_service_name" {
+  value       = var.deploy_search ? module.search[0].name : null
+  description = "Azure AI Search service name"
+}
+
+output "search_service_endpoint" {
+  value       = var.deploy_search ? module.search[0].endpoint : null
+  description = "Azure AI Search service endpoint"
+}

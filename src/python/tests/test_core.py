@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import typer
 from copilot.generated.session_events import SessionEventType
+from copilot.types import PermissionRequest
 
 from template_github_copilot.core import (
     _default_writer,
@@ -75,7 +76,7 @@ def test_get_system_message():
 
 def test_approve_all():
     """approve_all should return an approved result."""
-    request = MagicMock()
+    request: PermissionRequest = MagicMock()  # type: ignore[assignment]
     result = approve_all(request, {})
     assert result["kind"] == "approved"
     assert result["rules"] == []

@@ -45,5 +45,6 @@ def test_get_logger_formatter():
     handler = next(h for h in logger.handlers if isinstance(h, logging.StreamHandler))
     fmt = handler.formatter
     assert fmt is not None
+    assert fmt._fmt is not None
     assert "%(asctime)s" in fmt._fmt
     assert "%(levelname)" in fmt._fmt

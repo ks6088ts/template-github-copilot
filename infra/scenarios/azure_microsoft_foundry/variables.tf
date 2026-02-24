@@ -22,7 +22,7 @@ variable "tags" {
 }
 
 variable "model_deployments" {
-  description = "Specifies the model deployments for Azure AI Foundry"
+  description = "Specifies the model deployments for Microsoft Foundry"
   type = list(object({
     format   = optional(string, "OpenAI")
     name     = string

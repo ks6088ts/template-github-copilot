@@ -114,6 +114,21 @@ sequenceDiagram
     GA->>AZ: 5. Access resources<br/>(Blob Storage, etc.)
 ```
 
+### Azure Microsoft Foundry (`azure_microsoft_foundry`)
+
+This standalone scenario deploys a Microsoft Foundry environment on Azure. It provisions an AI Hub with AI Services and configures model deployments (e.g., GPT-5.1, GPT-5, GPT-4o, text-embedding models).
+
+**What it creates:**
+
+| Resource | Purpose |
+|---|---|
+| Resource Group | Container for all Foundry resources |
+| Microsoft Foundry Account (AI Services) | Cognitive Services account with AI Foundry capabilities |
+| Microsoft Foundry Project | Project workspace within the Foundry account |
+| Model Deployments | OpenAI model deployments (configurable via `model_deployments` variable) |
+
+> **Detailed setup instructions:** See [azure_microsoft_foundry/README.md](../infra/scenarios/azure_microsoft_foundry/README.md)
+
 ---
 
 ## GitHub Actions Workflows

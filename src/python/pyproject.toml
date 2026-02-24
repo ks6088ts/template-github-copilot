@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "A comprehensive templates for GitHub Copilot"
 requires-python = ">=3.13"
 dependencies = [
+    "azure-ai-agents>=1.2.0b6",
+    "azure-ai-projects>=2.0.0b3",
     "azure-identity>=1.25.2",
     "azure-storage-blob>=12.28.0",
     "github-copilot-sdk>=0.1.25",

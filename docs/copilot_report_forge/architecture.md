@@ -97,7 +97,40 @@ The Copilot CLI (`copilot serve`) runs as a local HTTP server on `localhost:3000
 - Handles rate limiting and retries transparently
 - Exposes a local API consumed by the Python SDK client
 
-### 3. Python SDK Client (`core.py`)
+### 3. Package Structure
+
+The Python package follows a layered architecture with clear separation of concerns:
+
+```
+template_github_copilot/
+├── core.py                    # Copilot SDK wrappers (client, session, events)
+├── loggers.py                 # Logging utilities
+├── internals/                 # Azure service integrations
+│   ├── agents.py              # Azure AI Foundry agent CRUD + run
+│   └── azure_blob_storages.py # Azure Blob Storage client
+├── services/                  # Business logic layer
+│   ├── __init__.py            # Re-exports (ChatResult, ReportOutput, etc.)
+│   ├── chat.py                # Chat Pydantic models (ChatResult, ChatParallelOutput)
+│   └── reports.py             # Report generation (ReportResult, ReportOutput, run_parallel_chat)
+├── settings/                  # Configuration (pydantic-settings from .env)
+│   ├── __init__.py            # Re-exports all settings + factory functions
+│   ├── azure_blob_storage.py  # AzureBlobStorageSettings
+│   ├── microsoft_foundry.py   # MicrosoftFoundrySettings
+│   └── project.py             # ProjectSettings (name, log level)
+└── tools/                     # Copilot custom tools (@define_tool)
+    ├── __init__.py             # get_custom_tools() registry
+    └── foundry_agent.py        # list_foundry_agents, call_foundry_agent
+```
+
+| Layer | Responsibility |
+|---|---|
+| `core` | Copilot SDK session lifecycle (client, config, events, permissions) |
+| `internals` | Direct integrations with Azure services (Blob Storage, AI Foundry agents) |
+| `services` | Business logic and data models for chat and report workflows |
+| `settings` | Environment-based configuration via `pydantic-settings` |
+| `tools` | Custom tools registered with the Copilot SDK for tool-calling |
+
+### 4. Python SDK Client (`core.py`)
 
 The core module provides factory functions for creating Copilot sessions with tool-calling capabilities:
 
@@ -115,7 +148,7 @@ CopilotClient → SessionConfig (+ tools, system_message) → Session → send_a
 
 **Key extensibility point:** `create_session_config()` accepts a `tools` parameter populated by `get_custom_tools()`, which currently registers `list_foundry_agents` and `call_foundry_agent`. Adding new tools automatically extends the Copilot session's capabilities.
 
-### 4. Report Service (`reports.py` + `report_service.py`)
+### 5. Report Service (`services/reports.py` + `scripts/report_service.py`)
 
 The report generation pipeline is the primary orchestration layer:
 
@@ -150,7 +183,7 @@ flowchart TD
 
 **Cross-industry note:** By changing only the `system_prompt` and `queries` parameters, this same pipeline produces product evaluations, clinical summaries, risk assessments, or creative briefs — no code changes needed.
 
-### 5. Azure Blob Storage Client (`azure_blob_storages.py`)
+### 6. Azure Blob Storage Client (`internals/azure_blob_storages.py`)
 
 Wraps the `azure-storage-blob` SDK with:
 
@@ -161,7 +194,7 @@ Wraps the `azure-storage-blob` SDK with:
 
 The Blob Storage layer also serves as a **reference data store** for Foundry Agents. Floor plans, product images, brand guidelines, or any document can be uploaded and referenced by agents during evaluation workflows.
 
-### 6. Microsoft Foundry Agents (`agents.py` + `foundry_agent.py`)
+### 7. Microsoft Foundry Agents (`internals/agents.py` + `tools/foundry_agent.py`)
 
 For agentic AI workflows, the platform integrates Azure AI Foundry through two mechanisms:
 
@@ -172,18 +205,18 @@ For agentic AI workflows, the platform integrates Azure AI Foundry through two m
 - Run agents in conversational threads with multi-turn support
 - Uses `PromptAgentDefinition` for declarative agent setup
 
-**Copilot Tool Integration (`internals/tools/foundry_agent.py`):**
+**Copilot Tool Integration (`tools/foundry_agent.py`):**
 
 - `list_foundry_agents` — Discover available agents at runtime
 - `call_foundry_agent` — Invoke a named agent with a user message and optional conversation context
 
 When registered as Copilot tools, these enable **agentic delegation**: the Copilot session can autonomously decide which Foundry Agent to invoke based on the user's query, enabling multi-agent orchestration within a single session.
 
-### 7. Slack Notification (`scripts/slacks.py`)
+### 8. Slack Notification (`scripts/slacks.py`)
 
 A lightweight CLI for sending results to Slack via incoming webhooks — enabling real-time notification when reports are generated or agents complete tasks.
 
-### 8. Terraform Infrastructure
+### 9. Terraform Infrastructure
 
 ```mermaid
 flowchart LR
@@ -317,6 +350,39 @@ sequenceDiagram
 | **New Copilot tool** | Implement with `@define_tool` + add to `get_custom_tools()` | Web scraper, database lookup, calculation engine |
 | **New output channel** | Post-process `ReportOutput` | Slack webhook, email, dashboard API, PowerBI |
 | **New data source** | Upload to Blob Storage + reference from Agent | Floor plans, product specs, clinical data, financial models |
+
+---
+
+## Test Structure
+
+Tests reside in `src/python/tests/`, mirroring the package layout:
+
+```
+tests/
+├── test_core.py                      # 20 tests — Copilot SDK wrappers
+├── test_loggers.py                   # 6 tests — Logger configuration
+├── internals/
+│   ├── test_agents.py                # 16 tests — Foundry agent CRUD & run
+│   └── test_azure_blob_storages.py   # 15 tests — Blob Storage client
+├── services/
+│   ├── test_chat.py                  # Chat model tests (placeholder)
+│   └── test_reports.py              # 5 tests — Parallel report generation
+├── settings/
+│   ├── test_azure_blob_storage.py    # 3 tests — BlobStorage settings
+│   ├── test_microsoft_foundry.py     # 3 tests — Foundry settings
+│   └── test_project.py              # 3 tests — Project settings
+└── tools/
+    └── test_foundry_agent.py         # 9 tests — Copilot custom tools
+```
+
+pytest is configured in `pyproject.toml` with coverage reporting, `tests/` as the test path, and `.` as the Python path:
+
+```toml
+[tool.pytest.ini_options]
+addopts = "-ra --cov"
+testpaths = ["tests"]
+pythonpath = ['.']
+```
 
 ---
 

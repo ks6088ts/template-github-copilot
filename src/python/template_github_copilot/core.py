@@ -16,7 +16,7 @@ from copilot.types import (
     Tool,
 )
 
-from template_github_copilot.internals.tools import get_custom_tools
+from template_github_copilot.tools import get_custom_tools
 
 # Type alias for the writer function used by the event handler
 WriterFunc = Callable[[str], Any]

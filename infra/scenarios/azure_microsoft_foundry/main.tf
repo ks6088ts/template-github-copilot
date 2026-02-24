@@ -27,3 +27,21 @@ module "microsoft_foundry" {
   tags              = var.tags
   model_deployments = var.model_deployments
 }
+
+# =============================================================================
+# Storage Account
+# =============================================================================
+
+module "storage" {
+  source = "../../modules/azure/storage"
+
+  name                     = "st${module.random_string.result}"
+  storage_account_name     = replace("st${module.random_string.result}", "-", "")
+  resource_group_name      = module.resource_group.name
+  location                 = module.resource_group.location
+  tags                     = var.tags
+  account_tier             = var.storage_account_tier
+  account_replication_type = var.storage_account_replication_type
+  is_hns_enabled           = true
+  create_queue             = true
+}

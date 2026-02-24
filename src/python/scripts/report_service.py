@@ -7,7 +7,7 @@ from typing import Annotated
 import typer
 from dotenv import load_dotenv
 
-from template_github_copilot.internals.reports import ReportOutput, run_parallel_chat
+from template_github_copilot.services.reports import ReportOutput, run_parallel_chat
 from template_github_copilot.internals.azure_blob_storages import AzureBlobStorageClient
 from template_github_copilot.loggers import get_logger
 

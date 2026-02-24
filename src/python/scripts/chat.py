@@ -11,7 +11,7 @@ from template_github_copilot.core import (
     create_message_options,
     create_session_config,
 )
-from template_github_copilot.internals.chat import ChatParallelOutput, ChatResult
+from template_github_copilot.services.chat import ChatParallelOutput, ChatResult
 from template_github_copilot.loggers import get_logger
 from template_github_copilot.settings import get_project_settings
 

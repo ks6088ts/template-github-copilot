@@ -1,6 +1,6 @@
 # Azure GitHub OIDC
 
-> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/getting_started.md) > Azure GitHub OIDC
+> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/copilot_report_forge/getting_started.md) > Azure GitHub OIDC
 >
 > **Next step:** [GitHub Secrets](../github_secrets/README.md)
 

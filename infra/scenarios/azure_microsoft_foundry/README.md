@@ -1,6 +1,6 @@
 # Azure Microsoft Foundry Scenario
 
-> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/getting_started.md) > Azure Microsoft Foundry
+> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/copilot_report_forge/getting_started.md) > Azure Microsoft Foundry
 
 This Terraform scenario deploys a Microsoft Foundry environment on Azure. It provisions an AI Hub with AI Services, creates a Foundry project, and configures OpenAI model deployments.
 

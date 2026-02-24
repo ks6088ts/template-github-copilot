@@ -1,6 +1,6 @@
 # GitHub Secrets and Environment Setup
 
-> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/getting_started.md) > GitHub Secrets
+> **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/copilot_report_forge/getting_started.md) > GitHub Secrets
 >
 > **Previous step:** [Azure GitHub OIDC](../azure_github_oidc/README.md)
 

@@ -1,13 +1,5 @@
-from azure.ai.agents import AgentsClient
-from azure.ai.agents.models import (
-    Agent,
-    AgentThreadCreationOptions,
-    MessageRole,
-    MessageTextContent,
-    RunStatus,
-    ThreadMessageOptions,
-    ThreadRun,
-)
+from azure.ai.projects import AIProjectClient
+from azure.ai.projects.models import PromptAgentDefinition
 from azure.identity import DefaultAzureCredential
 from pydantic import BaseModel, Field
 
@@ -19,17 +11,15 @@ class AgentInfo(BaseModel):
     name: str = Field("", description="The name of the agent.")
     model: str = Field("", description="The model used by the agent.")
     instructions: str = Field("", description="The instructions for the agent.")
+    version: str = Field("", description="The version of the agent.")
 
 
 class AgentRunResult(BaseModel):
     """Result of running an agent."""
 
-    agent_id: str = Field(..., description="The ID of the agent used.")
-    thread_id: str = Field(..., description="The ID of the thread.")
-    run_id: str = Field(..., description="The ID of the run.")
-    messages: list[str] = Field(
-        default_factory=list, description="The assistant messages from the run."
-    )
+    agent_name: str = Field(..., description="The name of the agent used.")
+    conversation_id: str = Field("", description="The ID of the conversation.")
+    output_text: str = Field("", description="The assistant's response text.")
     error: str | None = Field(None, description="Error message if the run failed.")
 
 
@@ -40,147 +30,186 @@ class AgentListOutput(BaseModel):
     total: int = Field(0, description="Total number of agents.")
 
 
-def create_agents_client(endpoint: str) -> AgentsClient:
-    """Create an AgentsClient with DefaultAzureCredential.
+def create_project_client(endpoint: str) -> AIProjectClient:
+    """Create an AIProjectClient with DefaultAzureCredential.
 
     Args:
         endpoint: The Microsoft Foundry project endpoint.
 
     Returns:
-        An authenticated AgentsClient instance.
+        An authenticated AIProjectClient instance.
     """
-    return AgentsClient(
+    return AIProjectClient(
         endpoint=endpoint,
         credential=DefaultAzureCredential(),
     )
 
 
 def create_agent(
-    client: AgentsClient,
+    client: AIProjectClient,
     model: str,
     name: str,
     instructions: str,
-) -> Agent:
-    """Create a new agent.
+) -> AgentInfo:
+    """Create a new agent version.
 
     Args:
-        client: The AgentsClient instance.
+        client: The AIProjectClient instance.
         model: The model to use (e.g. "gpt-4o").
         name: The name of the agent.
         instructions: The system instructions for the agent.
 
     Returns:
-        The created Agent object.
+        AgentInfo with the created agent details.
     """
-    return client.create_agent(
+    agent = client.agents.create_version(
+        agent_name=name,
+        definition=PromptAgentDefinition(
+            model=model,
+            instructions=instructions,
+        ),
+    )
+    return AgentInfo(
+        agent_id=agent.id,
+        name=agent.name or "",
         model=model,
-        name=name,
         instructions=instructions,
+        version=getattr(agent, "version", ""),
     )
 
 
-def get_agent(client: AgentsClient, agent_id: str) -> Agent:
-    """Get an agent by ID.
+def _extract_agent_info(agent: object) -> AgentInfo:
+    """Extract AgentInfo from an AgentDetails object.
+
+    The Azure AI Foundry SDK returns agent details with model, instructions,
+    and version nested under ``versions.latest.definition``.
 
     Args:
-        client: The AgentsClient instance.
-        agent_id: The ID of the agent to retrieve.
+        agent: An AgentDetails object returned by the SDK.
 
     Returns:
-        The Agent object.
+        AgentInfo populated from the nested structure.
     """
-    return client.get_agent(agent_id=agent_id)
+    model = ""
+    instructions = ""
+    version = ""
+    versions = getattr(agent, "versions", None)
+    if versions:
+        latest = (
+            versions.get("latest")
+            if isinstance(versions, dict)
+            else getattr(versions, "latest", None)
+        )
+        if latest:
+            definition = (
+                latest.get("definition")
+                if isinstance(latest, dict)
+                else getattr(latest, "definition", None)
+            )
+            if definition:
+                model = (
+                    definition.get("model")
+                    if isinstance(definition, dict)
+                    else getattr(definition, "model", "")
+                ) or ""
+                instructions = (
+                    definition.get("instructions")
+                    if isinstance(definition, dict)
+                    else getattr(definition, "instructions", "")
+                ) or ""
+            version = (
+                latest.get("version")
+                if isinstance(latest, dict)
+                else getattr(latest, "version", "")
+            ) or ""
+    return AgentInfo(
+        agent_id=getattr(agent, "id", ""),
+        name=getattr(agent, "name", "") or "",
+        model=model,
+        instructions=instructions,
+        version=version,
+    )
 
 
-def list_agents(client: AgentsClient) -> AgentListOutput:
+def get_agent(client: AIProjectClient, agent_name: str) -> AgentInfo:
+    """Get an agent by name.
+
+    Args:
+        client: The AIProjectClient instance.
+        agent_name: The name of the agent to retrieve.
+
+    Returns:
+        AgentInfo with the agent details.
+    """
+    agent = client.agents.get(agent_name=agent_name)
+    return _extract_agent_info(agent)
+
+
+def list_agents(client: AIProjectClient) -> AgentListOutput:
     """List all agents.
 
     Args:
-        client: The AgentsClient instance.
+        client: The AIProjectClient instance.
 
     Returns:
         AgentListOutput with all agents.
     """
-    agent_infos = [
-        AgentInfo(
-            agent_id=a.id,
-            name=a.name or "",
-            model=a.model,
-            instructions=a.instructions or "",
-        )
-        for a in client.list_agents()
-    ]
+    agent_infos = [_extract_agent_info(a) for a in client.agents.list()]
     return AgentListOutput(agents=agent_infos, total=len(agent_infos))
 
 
-def delete_agent(client: AgentsClient, agent_id: str) -> None:
-    """Delete an agent by ID.
+def delete_agent(client: AIProjectClient, agent_name: str) -> None:
+    """Delete an agent by name.
 
     Args:
-        client: The AgentsClient instance.
-        agent_id: The ID of the agent to delete.
+        client: The AIProjectClient instance.
+        agent_name: The name of the agent to delete.
     """
-    client.delete_agent(agent_id=agent_id)  # type: ignore[unresolved-attribute]
+    client.agents.delete(agent_name=agent_name)
 
 
 def run_agent(
-    client: AgentsClient,
-    agent_id: str,
+    client: AIProjectClient,
+    agent_name: str,
     user_message: str,
+    conversation_id: str | None = None,
 ) -> AgentRunResult:
     """Run an agent with a user message.
 
-    Creates a thread with the user message, runs the agent to completion,
-    and returns the assistant's response messages.
+    Creates a conversation (if not provided), sends the user message
+    to the agent via the OpenAI client, and returns the response.
 
     Args:
-        client: The AgentsClient instance.
-        agent_id: The ID of the agent to run.
+        client: The AIProjectClient instance.
+        agent_name: The name of the agent to run.
         user_message: The user message to send.
+        conversation_id: Optional existing conversation ID for multi-turn.
 
     Returns:
-        AgentRunResult with the run details and assistant messages.
+        AgentRunResult with the response details.
     """
     try:
-        run: ThreadRun = client.create_thread_and_process_run(  # type: ignore[unresolved-attribute]
-            agent_id=agent_id,
-            thread=AgentThreadCreationOptions(
-                messages=[
-                    ThreadMessageOptions(
-                        role=MessageRole.USER,
-                        content=user_message,
-                    ),
-                ],
-            ),
+        # The get_openai_client method is added by azure.ai.projects._patch at runtime
+        openai_client = client.get_openai_client()  # type: ignore[unresolved-attribute]
+
+        if conversation_id is None:
+            conversation = openai_client.conversations.create()
+            conversation_id = conversation.id
+
+        response = openai_client.responses.create(
+            conversation=conversation_id,
+            extra_body={"agent": {"name": agent_name, "type": "agent_reference"}},
+            input=user_message,
         )
 
-        if run.status == RunStatus.FAILED:
-            return AgentRunResult(
-                agent_id=agent_id,
-                thread_id=run.thread_id,
-                run_id=run.id,
-                error=f"Run failed: {run.last_error}",
-            )
-
-        messages = client.messages.list(thread_id=run.thread_id)
-        assistant_messages = [
-            content_part.text.value
-            for msg in messages
-            if msg.role == MessageRole.AGENT
-            for content_part in msg.content
-            if isinstance(content_part, MessageTextContent) and content_part.text
-        ]
-
         return AgentRunResult(
-            agent_id=agent_id,
-            thread_id=run.thread_id,
-            run_id=run.id,
-            messages=assistant_messages,
+            agent_name=agent_name,
+            conversation_id=conversation_id,
+            output_text=response.output_text,
         )
     except Exception as e:
         return AgentRunResult(
-            agent_id=agent_id,
-            thread_id="",
-            run_id="",
+            agent_name=agent_name,
+            conversation_id=conversation_id or "",
             error=str(e),
         )

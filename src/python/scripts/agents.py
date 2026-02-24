@@ -5,9 +5,8 @@ import typer
 from dotenv import load_dotenv
 
 from template_github_copilot.internals.agents import (
-    AgentInfo,
     create_agent,
-    create_agents_client,
+    create_project_client,
     delete_agent,
     get_agent,
     list_agents,
@@ -80,26 +79,19 @@ def create(
     set_verbose_logging(verbose)
 
     ep = endpoint or _default_endpoint()
-    client = create_agents_client(ep)
-    agent = create_agent(client, model=model, name=name, instructions=instructions)
-
-    info = AgentInfo(
-        agent_id=agent.id,
-        name=agent.name or "",
-        model=agent.model,
-        instructions=agent.instructions or "",
-    )
+    client = create_project_client(ep)
+    info = create_agent(client, model=model, name=name, instructions=instructions)
     typer.echo(info.model_dump_json(indent=2))
 
 
 @app.command(name="get")
 def get_cmd(
-    agent_id: Annotated[
+    agent_name: Annotated[
         str,
         typer.Option(
-            "--agent-id",
-            "-a",
-            help="ID of the agent to retrieve",
+            "--agent-name",
+            "-n",
+            help="Name of the agent to retrieve",
         ),
     ],
     endpoint: Annotated[
@@ -115,19 +107,12 @@ def get_cmd(
         typer.Option("--verbose", "-v", help="Enable verbose output"),
     ] = False,
 ):
-    """Get an agent by ID."""
+    """Get an agent by name."""
     set_verbose_logging(verbose)
 
     ep = endpoint or _default_endpoint()
-    client = create_agents_client(ep)
-    agent = get_agent(client, agent_id=agent_id)
-
-    info = AgentInfo(
-        agent_id=agent.id,
-        name=agent.name or "",
-        model=agent.model,
-        instructions=agent.instructions or "",
-    )
+    client = create_project_client(ep)
+    info = get_agent(client, agent_name=agent_name)
     typer.echo(info.model_dump_json(indent=2))
 
 
@@ -150,19 +135,19 @@ def list_cmd(
     set_verbose_logging(verbose)
 
     ep = endpoint or _default_endpoint()
-    client = create_agents_client(ep)
+    client = create_project_client(ep)
     output = list_agents(client)
     typer.echo(output.model_dump_json(indent=2))
 
 
 @app.command()
 def delete(
-    agent_id: Annotated[
+    agent_name: Annotated[
         str,
         typer.Option(
-            "--agent-id",
-            "-a",
-            help="ID of the agent to delete",
+            "--agent-name",
+            "-n",
+            help="Name of the agent to delete",
         ),
     ],
     endpoint: Annotated[
@@ -178,23 +163,23 @@ def delete(
         typer.Option("--verbose", "-v", help="Enable verbose output"),
     ] = False,
 ):
-    """Delete an agent by ID."""
+    """Delete an agent by name."""
     set_verbose_logging(verbose)
 
     ep = endpoint or _default_endpoint()
-    client = create_agents_client(ep)
-    delete_agent(client, agent_id=agent_id)
-    logger.info(f"Agent {agent_id} deleted successfully.")
+    client = create_project_client(ep)
+    delete_agent(client, agent_name=agent_name)
+    logger.info(f"Agent {agent_name} deleted successfully.")
 
 
 @app.command()
 def run(
-    agent_id: Annotated[
+    agent_name: Annotated[
         str,
         typer.Option(
-            "--agent-id",
-            "-a",
-            help="ID of the agent to run",
+            "--agent-name",
+            "-n",
+            help="Name of the agent to run",
         ),
     ],
     prompt: Annotated[
@@ -205,6 +190,14 @@ def run(
             help="User message to send to the agent",
         ),
     ] = "Hello!",
+    conversation_id: Annotated[
+        str,
+        typer.Option(
+            "--conversation-id",
+            "-c",
+            help="Existing conversation ID for multi-turn chat",
+        ),
+    ] = "",
     endpoint: Annotated[
         str,
         typer.Option(
@@ -222,8 +215,13 @@ def run(
     set_verbose_logging(verbose)
 
     ep = endpoint or _default_endpoint()
-    client = create_agents_client(ep)
-    result = run_agent(client, agent_id=agent_id, user_message=prompt)
+    client = create_project_client(ep)
+    result = run_agent(
+        client,
+        agent_name=agent_name,
+        user_message=prompt,
+        conversation_id=conversation_id or None,
+    )
     typer.echo(result.model_dump_json(indent=2))
 
 

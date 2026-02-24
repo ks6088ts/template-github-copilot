@@ -45,3 +45,20 @@ module "storage" {
   is_hns_enabled           = true
   create_queue             = true
 }
+
+# =============================================================================
+# Azure AI Search
+# =============================================================================
+
+module "search" {
+  count  = var.deploy_search ? 1 : 0
+  source = "../../modules/azure/search"
+
+  search_service_name = "search${module.random_string.result}"
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
+  tags                = var.tags
+  sku                 = var.search_sku
+  replica_count       = var.search_replica_count
+  partition_count     = var.search_partition_count
+}

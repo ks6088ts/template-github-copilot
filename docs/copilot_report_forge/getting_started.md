@@ -208,7 +208,12 @@ flowchart LR
 |---|---|---|---|
 | `system_prompt` | string | `"You are a helpful assistant."` | System prompt (persona) for the assistant |
 | `queries` | string | *(required)* | Comma-separated queries (evaluation dimensions) |
-| `model` | choice | `gpt-5-mini` | Model selection |
+| `auth_method` | choice | `copilot` | LLM provider authentication method (`copilot`, `entra_id`) |
+| `model` | choice | `gpt-5-mini` | Model selection (used when `auth_method` is `copilot`) |
+| `byok_provider_type` | choice | `openai` | BYOK provider type (`openai`, `azure`, `anthropic`; used when `auth_method` is `entra_id`) |
+| `byok_base_url` | string | `https://api.openai.com/v1/` | BYOK provider base URL (used when `auth_method` is `entra_id`) |
+| `byok_model` | string | `gpt-5` | Model identifier for the BYOK provider (used when `auth_method` is `entra_id`) |
+| `byok_wire_api` | choice | `responses` | Wire API format (`completions`, `responses`; used when `auth_method` is `entra_id`) |
 | `azure_blob_storage_account_url` | string | *(required)* | Storage account URL |
 | `azure_blob_storage_container_name` | string | *(required)* | Container name |
 | `sas_expiry_hours` | number | `1` | SAS URL expiry in hours |
@@ -298,6 +303,12 @@ uv run python scripts/report_service.py generate \
 | `--blob-name` | `-b` | No | `report_<timestamp>.json` | Blob name |
 | `--cli-url` | `-c` | No | `localhost:3000` | Copilot CLI server URL |
 | `--sas-expiry-hours` | — | No | `1` | SAS URL expiry hours |
+| `--auth-method` | `-m` | No | `copilot` | LLM provider auth method (`copilot`, `api_key`, `entra_id`) |
+| `--byok-provider-type` | — | No | `openai` | BYOK provider type (`openai`, `azure`, `anthropic`) |
+| `--byok-base-url` | — | No | `https://api.openai.com/v1/` | BYOK provider base URL |
+| `--byok-api-key` | — | No | `""` | BYOK provider API key |
+| `--byok-model` | — | No | `gpt-4o` | Model identifier for the BYOK provider |
+| `--byok-wire-api` | — | No | `responses` | Wire API format (`completions` or `responses`) |
 | `--verbose` | `-v` | No | `false` | Enable debug logging |
 
 #### Output Schema (ReportOutput)
@@ -395,6 +406,53 @@ uv run python scripts/slacks.py send \
   --message "Report generated: https://..."
 ```
 
+### `scripts/byok.py` — BYOK (Bring Your Own Key) CLI
+
+A dedicated CLI for interacting with LLMs using your own API keys or Azure Entra ID authentication instead of the default Copilot backend.
+
+| Command | Auth Method | Description |
+|---|---|---|
+| `chat-api-key` | API Key | Send a single prompt using a static API key |
+| `chat-loop-api-key` | API Key | Interactive chat REPL with API key auth |
+| `chat-parallel-api-key` | API Key | Send multiple prompts in parallel with API key auth |
+| `chat-entra-id` | Entra ID | Send a single prompt using Azure Entra ID bearer token |
+| `chat-loop-entra-id` | Entra ID | Interactive chat REPL with Entra ID auth |
+| `chat-parallel-entra-id` | Entra ID | Send multiple prompts in parallel with Entra ID auth |
+
+#### Usage Examples
+
+```shell
+# Single chat with API key
+uv run python scripts/byok.py chat-api-key \
+  --prompt "What is Python?" \
+  --cli-url localhost:3000 --verbose
+
+# Interactive chat loop with API key
+uv run python scripts/byok.py chat-loop-api-key --cli-url localhost:3000
+
+# Parallel prompts with API key
+uv run python scripts/byok.py chat-parallel-api-key \
+  -p "What is Python?" \
+  -p "What is Rust?" \
+  --cli-url localhost:3000
+
+# Single chat with Entra ID
+uv run python scripts/byok.py chat-entra-id \
+  --prompt "Summarize Azure AI services" \
+  --cli-url localhost:3000
+
+# Interactive chat loop with Entra ID
+uv run python scripts/byok.py chat-loop-entra-id --cli-url localhost:3000
+
+# Parallel prompts with Entra ID
+uv run python scripts/byok.py chat-parallel-entra-id \
+  -p "Explain OIDC" \
+  -p "Explain RBAC" \
+  --cli-url localhost:3000
+```
+
+> **Note:** BYOK settings (`BYOK_PROVIDER_TYPE`, `BYOK_BASE_URL`, `BYOK_API_KEY`, `BYOK_MODEL`, `BYOK_WIRE_API`) are read from `.env` or environment variables. See the [Configuration](#configuration) section.
+
 ---
 
 ## Configuration
@@ -414,6 +472,13 @@ AZURE_BLOB_STORAGE_CONTAINER_NAME=adhoc
 
 # Microsoft Foundry Settings (for agent commands)
 MICROSOFT_FOUNDRY_PROJECT_ENDPOINT=https://<endpoint>.services.ai.azure.com/api/projects/<project>
+
+# BYOK Settings (for Bring Your Own Key workflows)
+BYOK_PROVIDER_TYPE=openai              # Provider type: openai, azure, anthropic
+BYOK_BASE_URL=https://<your-resource>.openai.azure.com/openai/v1/
+BYOK_API_KEY=<your-api-key>            # Static API key (for api_key auth method)
+BYOK_MODEL=gpt-5                       # Model identifier for the BYOK provider
+BYOK_WIRE_API=responses                # Wire API format: completions, responses
 ```
 
 ### Makefile Targets
@@ -434,6 +499,12 @@ Run `make help` in `src/python/` to see all available targets:
 | `update` | Update all packages |
 | `copilot` | Start Copilot CLI server on port 3000 |
 | `copilot-app` | Run interactive chat loop |
+| `jupyterlab` | Run Jupyter Lab |
+| `docker-build` | Build Docker image |
+| `docker-run` | Run Docker container |
+| `docker-lint` | Lint Dockerfile with hadolint |
+| `docker-scan` | Scan Docker image with Trivy |
+| `ci-test-docker` | Full Docker CI pipeline (lint + build + scan + run) |
 
 ---
 

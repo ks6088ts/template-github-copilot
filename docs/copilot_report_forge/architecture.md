@@ -105,6 +105,7 @@ The Python package follows a layered architecture with clear separation of conce
 template_github_copilot/
 ├── core.py                    # Copilot SDK wrappers (client, session, events)
 ├── loggers.py                 # Logging utilities
+├── providers.py               # LLM provider factory (Copilot, API Key, Entra ID)
 ├── internals/                 # Azure service integrations
 │   ├── agents.py              # Azure AI Foundry agent CRUD + run
 │   └── azure_blob_storages.py # Azure Blob Storage client
@@ -115,8 +116,9 @@ template_github_copilot/
 ├── settings/                  # Configuration (pydantic-settings from .env)
 │   ├── __init__.py            # Re-exports all settings + factory functions
 │   ├── azure_blob_storage.py  # AzureBlobStorageSettings
+│   ├── byok.py                # ByokSettings (BYOK provider type, URL, key, model, wire API)
 │   ├── microsoft_foundry.py   # MicrosoftFoundrySettings
-│   └── project.py             # ProjectSettings (name, log level)
+│   └── project.py             # Settings (name, log level)
 └── tools/                     # Copilot custom tools (@define_tool)
     ├── __init__.py             # get_custom_tools() registry
     └── foundry_agent.py        # list_foundry_agents, call_foundry_agent
@@ -125,6 +127,7 @@ template_github_copilot/
 | Layer | Responsibility |
 |---|---|
 | `core` | Copilot SDK session lifecycle (client, config, events, permissions) |
+| `providers` | Unified LLM provider factory — supports default Copilot, static API key, and Entra ID bearer-token authentication |
 | `internals` | Direct integrations with Azure services (Blob Storage, AI Foundry agents) |
 | `services` | Business logic and data models for chat and report workflows |
 | `settings` | Environment-based configuration via `pydantic-settings` |
@@ -138,15 +141,38 @@ The core module provides factory functions for creating Copilot sessions with to
 CopilotClient → SessionConfig (+ tools, system_message) → Session → send_and_wait() → Response
 ```
 
-| Function | Responsibility |
+| Function / Type | Responsibility |
 |---|---|
 | `create_copilot_client()` | Instantiate and configure the SDK client |
 | `create_session_config()` | Build session config with system message, custom tools, permissions |
 | `create_event_handler()` | Factory for session event callbacks (turn start, tool execution, progress, errors) |
 | `create_message_options()` | Wrap a user prompt into SDK-compatible `MessageOptions` |
 | `approve_all()` | Default permission handler (replace with restrictive policy in production) |
+| `write_status()` | Write a colored status message using a writer function |
+| `WriterFunc` | Type alias (`Callable[[str], Any]`) for pluggable output writers |
 
 **Key extensibility point:** `create_session_config()` accepts a `tools` parameter populated by `get_custom_tools()`, which currently registers `list_foundry_agents` and `call_foundry_agent`. Adding new tools automatically extends the Copilot session's capabilities.
+
+### 4a. LLM Provider Factory (`providers.py`)
+
+The `providers` module provides a unified interface for selecting the LLM backend authentication method, enabling **Bring Your Own Key (BYOK)** scenarios alongside the default Copilot backend:
+
+| Component | Responsibility |
+|---|---|
+| `AuthMethod` | Enum (`copilot`, `api_key`, `entra_id`) selecting the authentication strategy |
+| `ProviderResult` | Frozen dataclass returning the `ProviderConfig` (if any) and target `model` name |
+| `create_provider()` | Main factory — returns a `ProviderResult` based on the chosen `AuthMethod` |
+| `register_provider()` | Plugin point — register custom provider builders for new auth methods |
+| `_build_api_key_provider()` | Internal builder for static API key authentication |
+| `_build_entra_id_provider()` | Internal builder for Azure Entra ID bearer-token authentication via `DefaultAzureCredential` |
+
+```
+create_provider(AuthMethod.API_KEY) → ProviderResult(provider=ProviderConfig(...), model="gpt-5")
+create_provider(AuthMethod.ENTRA_ID) → ProviderResult(provider=ProviderConfig(..., bearer_token=...), model="gpt-5")
+create_provider(AuthMethod.COPILOT) → ProviderResult(provider=None, model=None)  # default backend
+```
+
+This factory is consumed by `scripts/report_service.py`, `scripts/byok.py`, and `scripts/chat.py` to support multiple LLM backends without code changes — only the `--auth-method` flag or `AuthMethod` enum value needs to change.
 
 ### 5. Report Service (`services/reports.py` + `scripts/report_service.py`)
 
@@ -212,11 +238,26 @@ For agentic AI workflows, the platform integrates Azure AI Foundry through two m
 
 When registered as Copilot tools, these enable **agentic delegation**: the Copilot session can autonomously decide which Foundry Agent to invoke based on the user's query, enabling multi-agent orchestration within a single session.
 
-### 8. Slack Notification (`scripts/slacks.py`)
+### 8. BYOK CLI (`scripts/byok.py`)
+
+A dedicated CLI for **Bring Your Own Key** workflows, providing both API-key and Entra ID authentication variants:
+
+| Command | Auth Method | Description |
+|---|---|---|
+| `chat-api-key` | API Key | Send a single prompt using a static API key |
+| `chat-loop-api-key` | API Key | Interactive chat REPL with API key auth |
+| `chat-parallel-api-key` | API Key | Parallel prompts with API key auth |
+| `chat-entra-id` | Entra ID | Send a single prompt using Azure Entra ID bearer token |
+| `chat-loop-entra-id` | Entra ID | Interactive chat REPL with Entra ID auth |
+| `chat-parallel-entra-id` | Entra ID | Parallel prompts with Entra ID auth |
+
+This script mirrors the interface of `scripts/chat.py` but uses `providers.create_provider()` to configure a BYOK backend instead of the default Copilot backend.
+
+### 9. Slack Notification (`scripts/slacks.py`)
 
 A lightweight CLI for sending results to Slack via incoming webhooks — enabling real-time notification when reports are generated or agents complete tasks.
 
-### 9. Terraform Infrastructure
+### 10. Terraform Infrastructure
 
 ```mermaid
 flowchart LR
@@ -359,16 +400,18 @@ Tests reside in `src/python/tests/`, mirroring the package layout:
 
 ```
 tests/
-├── test_core.py                      # 20 tests — Copilot SDK wrappers
+├── test_core.py                      # 27 tests — Copilot SDK wrappers
 ├── test_loggers.py                   # 6 tests — Logger configuration
+├── test_providers.py                 # 9 tests — LLM provider factory
 ├── internals/
 │   ├── test_agents.py                # 16 tests — Foundry agent CRUD & run
-│   └── test_azure_blob_storages.py   # 15 tests — Blob Storage client
+│   └── test_azure_blob_storages.py   # 16 tests — Blob Storage client
 ├── services/
 │   ├── test_chat.py                  # Chat model tests (placeholder)
 │   └── test_reports.py              # 5 tests — Parallel report generation
 ├── settings/
 │   ├── test_azure_blob_storage.py    # 3 tests — BlobStorage settings
+│   ├── test_byok.py                  # 3 tests — BYOK settings
 │   ├── test_microsoft_foundry.py     # 3 tests — Foundry settings
 │   └── test_project.py              # 3 tests — Project settings
 └── tools/

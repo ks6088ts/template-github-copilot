@@ -147,4 +147,4 @@ copilot-app: ## run application with GitHub Copilot SDK
 
 .PHONY: copilot-api
 copilot-api: ## run API server with GitHub Copilot SDK
-	uv run python scripts/api_server.py --verbose --reload
+	uv run python scripts/api_server.py serve --verbose --reload

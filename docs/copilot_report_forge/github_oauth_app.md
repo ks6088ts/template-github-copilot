@@ -177,6 +177,7 @@ uv run python scripts/api_server.py serve --host 0.0.0.0 --port 9000
 | `GET` | `/auth/logout` | No | Clear session |
 | `GET` | `/api/me` | Yes | Current user info |
 | `POST` | `/api/chat` | Yes | Send message to Copilot |
+| `POST` | `/api/report` | Yes | Run parallel queries and return structured report |
 
 ### Example: `/api/chat`
 
@@ -186,6 +187,34 @@ curl -X POST http://127.0.0.1:8000/api/chat \
   -H "Content-Type: application/json" \
   -H "Cookie: session_id=<your-session-cookie>" \
   -d '{"message": "What is GitHub Copilot?"}'
+```
+
+### Example: `/api/report`
+
+```shell
+# Generate a parallel report (requires authentication)
+curl -X POST http://127.0.0.1:8000/api/report \
+  -H "Content-Type: application/json" \
+  -H "Cookie: session_id=<your-session-cookie>" \
+  -d '{
+    "queries": ["Evaluate durability", "Evaluate usability"],
+    "system_prompt": "You are a product evaluation specialist."
+  }'
+```
+
+**Response schema (`ReportOutput`):**
+
+```json
+{
+  "system_prompt": "You are a product evaluation specialist.",
+  "results": [
+    { "query": "Evaluate durability", "response": "...", "error": null },
+    { "query": "Evaluate usability", "response": "...", "error": null }
+  ],
+  "total": 2,
+  "succeeded": 2,
+  "failed": 0
+}
 ```
 
 ---
@@ -200,11 +229,10 @@ template_github_copilot/
 │   └── oauth.py              # OAuthSettings (pydantic-settings)
 ├── services/
 │   └── apis/
-│       ├── __init__.py
+│       ├── __init__.py        # Re-exports create_app, OAuthSettings
 │       ├── app.py             # FastAPI app factory (create_app)
-│       ├── settings.py        # Re-export from settings/oauth.py
 │       └── templates/
-│           └── index.html     # Plain HTML chat frontend
+│           └── index.html     # Plain HTML chat + report frontend
 scripts/
 └── api_server.py              # Typer CLI to launch the server
 ```

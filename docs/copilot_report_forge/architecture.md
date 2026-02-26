@@ -8,11 +8,49 @@
 
 ## Design Philosophy
 
-CopilotReportForge is built on three architectural principles:
+CopilotReportForge is built on four architectural principles:
 
 1. **Composability** — Every component (LLM query, Foundry Agent, Blob Storage, Slack) is independent and composable. Swap system prompts to change domains; swap tools to change capabilities.
 2. **Zero-Infrastructure AI** — The Copilot CLI serves as a runtime proxy to hosted LLMs. No GPU provisioning, no model management, no inference servers.
 3. **Security by Default** — OIDC federation, user-delegation SAS keys, and RBAC-scoped access eliminate long-lived secrets entirely.
+4. **Ephemeral & Auditable Execution** — All AI agent execution happens within GitHub Actions runners, providing sandboxed, disposable environments with built-in observability.
+
+---
+
+## GitHub Actions as a Secure Execution Platform
+
+A distinguishing design choice of CopilotReportForge is that **all agent execution runs within GitHub Actions runners** rather than on developers' local machines. This provides several critical advantages:
+
+### Ephemeral Sandbox Environments
+
+GitHub Actions runners are **ephemeral** — each workflow execution spins up a fresh, isolated environment and discards it upon completion. This means:
+
+- **No persistent state leakage** — Secrets, intermediate files, and model outputs exist only for the duration of the run.
+- **Casual provisioning** — Creating a new execution environment is as simple as dispatching a workflow; no infrastructure setup or teardown required.
+- **Higher security than local execution** — Artifacts are produced in a sandboxed environment, eliminating the risk of credential exposure, malware interaction, or data leakage inherent in running AI agents on developer workstations.
+
+### Unified Execution Environment
+
+By centralizing execution on GitHub Actions, the platform ensures:
+
+- **No environment silos** — Every team member, every workflow, and every domain uses the same runner configuration, Python version, and dependency set. This prevents the "works on my machine" problem and eliminates environment drift across teams.
+- **No scattered development resources** — Compute, storage, and credentials are managed centrally through GitHub environments and Azure RBAC, avoiding duplication of setup effort across individual developers.
+
+### Built-in Observability
+
+GitHub Actions provides **out-of-the-box observability** without additional tooling:
+
+- **Who executed what, when, and for how long** — Every workflow run is logged with the triggering user, timestamp, duration, inputs, and outputs.
+- **Full execution logs** — Step-by-step logs are retained and searchable, providing an audit trail for every AI agent invocation.
+- **Usage metrics** — Billable minutes, runner utilization, and workflow frequency are tracked natively, enabling cost monitoring and capacity planning.
+- **Integration with GitHub audit log** — For organizations, all workflow activity is captured in the enterprise audit log for compliance and governance purposes.
+
+### Entra ID–Based RBAC & IaC-Driven Operations
+
+Security and operational efficiency are further reinforced through:
+
+- **Entra ID authentication** — All Azure resource access is gated by Microsoft Entra ID, enabling fine-grained RBAC (Role-Based Access Control) that ensures each workflow has only the minimum permissions required.
+- **IaC-managed identities and roles** — Service principals, federated identity credentials, and RBAC role assignments are provisioned via Terraform from GitHub Actions (`azure_github_oidc` scenario). This eliminates manual Azure portal operations and reduces operational overhead — role changes are code-reviewed, version-controlled, and applied through the standard CI/CD pipeline.
 
 ---
 
@@ -83,10 +121,13 @@ flowchart TB
 | Workflow | Trigger | Purpose |
 |---|---|---|
 | `test.yaml` | Push / PR to `main` | Lint, format check, unit tests |
+| `docker.yaml` | Push / PR to `main` | Docker image build, lint, scan |
 | `infra.yaml` | Push to `main`, weekly, manual | Terraform lint, validate, plan |
 | `github-copilot-cli.yaml` | Manual dispatch | Run a single Copilot CLI prompt |
 | `github-copilot-sdk.yaml` | Manual dispatch | Run Copilot SDK chat app with tool-calling support |
 | `report-service.yaml` | Manual dispatch | Parallel queries → JSON report → Blob Storage → SAS URL |
+| `ghcr-release.yaml` | Tag push (`v*`) | Build and publish Docker images to GitHub Container Registry |
+| `docker-release.yaml` | Tag push (`v*`) | Build and publish Docker images to Docker Hub |
 
 ### 2. Copilot CLI Server
 
@@ -118,10 +159,21 @@ template_github_copilot/
 │   ├── azure_blob_storage.py  # AzureBlobStorageSettings
 │   ├── byok.py                # ByokSettings (BYOK provider type, URL, key, model, wire API)
 │   ├── microsoft_foundry.py   # MicrosoftFoundrySettings
+│   ├── oauth.py               # OAuthSettings (GitHub OAuth App, session, server host/port)
 │   └── project.py             # Settings (name, log level)
 └── tools/                     # Copilot custom tools (@define_tool)
     ├── __init__.py             # get_custom_tools() registry
     └── foundry_agent.py        # list_foundry_agents, call_foundry_agent
+
+scripts/
+├── api_server.py              # Typer CLI to launch the FastAPI server
+├── ...
+
+services/apis/                 # FastAPI web application (OAuth + chat + report)
+├── __init__.py                # Re-exports create_app, OAuthSettings
+├── app.py                     # FastAPI app factory, OAuth flow, chat/report endpoints
+└── templates/
+    └── index.html             # HTML chat + report frontend
 ```
 
 | Layer | Responsibility |
@@ -131,6 +183,8 @@ template_github_copilot/
 | `internals` | Direct integrations with Azure services (Blob Storage, AI Foundry agents) |
 | `services` | Business logic and data models for chat and report workflows |
 | `settings` | Environment-based configuration via `pydantic-settings` |
+| `settings/oauth` | GitHub OAuth App and API server configuration |
+| `services/apis` | FastAPI web application with OAuth login, chat, and report endpoints |
 | `tools` | Custom tools registered with the Copilot SDK for tool-calling |
 
 ### 4. Python SDK Client (`core.py`)
@@ -257,7 +311,25 @@ This script mirrors the interface of `scripts/chat.py` but uses `providers.creat
 
 A lightweight CLI for sending results to Slack via incoming webhooks — enabling real-time notification when reports are generated or agents complete tasks.
 
-### 10. Terraform Infrastructure
+### 10. Copilot Chat API Server (`services/apis/` + `scripts/api_server.py`)
+
+A FastAPI web application that authenticates users via a **GitHub OAuth App** and proxies chat and report requests to the Copilot SDK on behalf of each logged-in user.
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/` | `GET` | HTML chat + report frontend |
+| `/auth/login` | `GET` | Start GitHub OAuth flow |
+| `/auth/callback` | `GET` | OAuth callback (exchanges code for token) |
+| `/auth/logout` | `GET` | Clear session |
+| `/api/me` | `GET` | Current user info |
+| `/api/chat` | `POST` | Send a message to Copilot (body: `ChatRequest`) |
+| `/api/report` | `POST` | Run parallel queries and return structured report (body: `ReportRequest`) |
+
+The server uses signed-cookie sessions and stores GitHub OAuth tokens per user. Configuration is managed via `OAuthSettings` in `settings/oauth.py`.
+
+> **Detailed setup instructions:** See [GitHub OAuth App Setup](github_oauth_app.md).
+
+### 11. Terraform Infrastructure
 
 ```mermaid
 flowchart LR

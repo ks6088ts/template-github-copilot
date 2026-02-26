@@ -2,7 +2,7 @@
 
 > **Navigation:** [README](../../README.md) > **Deployment**
 >
-> **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md) · [Problem & Solution](problem_and_solution.md)
+> **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md) · [GitHub OAuth App](github_oauth_app.md) · [Running Containers](container_local_run.md) · [Problem & Solution](problem_and_solution.md)
 
 ---
 
@@ -75,6 +75,14 @@ BYOK_BASE_URL=https://<your-resource>.openai.azure.com/openai/v1/
 BYOK_API_KEY=<your-api-key>
 BYOK_MODEL=gpt-5
 BYOK_WIRE_API=responses
+
+# OAuth GitHub App Settings (for API server — see github_oauth_app.md)
+GITHUB_CLIENT_ID=Ov23liXXXXXXXXXXXXXX
+GITHUB_CLIENT_SECRET=<your-secret>
+SESSION_SECRET=<random-string>
+API_HOST=127.0.0.1
+API_PORT=8000
+COPILOT_CLI_URL=localhost:3000
 ```
 
 ### 4. Verify Setup
@@ -207,6 +215,8 @@ All dispatch-able workflows are triggered via **`workflow_dispatch`** from the G
 | `github-copilot-cli.yaml` | Run a single Copilot CLI prompt | `COPILOT_GITHUB_TOKEN` |
 | `github-copilot-sdk.yaml` | Run Copilot SDK chat app with tool-calling | `COPILOT_GITHUB_TOKEN` |
 | `report-service.yaml` | Generate report → upload to Blob Storage | `COPILOT_GITHUB_TOKEN`, Azure OIDC secrets |
+| `ghcr-release.yaml` | Publish Docker images to GitHub Container Registry | Automatic (`GITHUB_TOKEN`) |
+| `docker-release.yaml` | Publish Docker images to Docker Hub | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` |
 
 ### Report Service Workflow Inputs
 
@@ -223,6 +233,9 @@ All dispatch-able workflows are triggered via **`workflow_dispatch`** from the G
 | `azure_blob_storage_account_url` | Yes | — | Storage account URL |
 | `azure_blob_storage_container_name` | Yes | — | Container name |
 | `sas_expiry_hours` | No | `1` | SAS URL expiry in hours |
+| `microsoft_foundry_project_endpoint` | No | — | Microsoft Foundry project endpoint URL |
+| `save_artifacts` | No | `false` | Whether to save artifacts as workflow outputs |
+| `retention_days` | No | `1` | Number of days to retain artifacts |
 
 **Domain adaptation tip:** Change `system_prompt` to a domain-specific persona (e.g., "You are a real estate layout evaluator") and `queries` to evaluation dimensions (e.g., "Assess accessibility,Assess traffic flow") to repurpose the workflow for any industry.
 
@@ -232,7 +245,7 @@ All dispatch-able workflows are triggered via **`workflow_dispatch`** from the G
 
 ### 1. Check CI Workflows
 
-Push a commit or open a PR to `main` and verify that `test.yaml` passes.
+Push a commit or open a PR to `main` and verify that `test.yaml` and `docker.yaml` pass.
 
 ### 2. Check Infrastructure CI
 

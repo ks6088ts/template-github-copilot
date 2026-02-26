@@ -2,7 +2,7 @@
 
 > **Navigation:** [README](../../README.md) > **Getting Started**
 >
-> **See also:** [Architecture](architecture.md) · [Deployment](deployment.md) · [References](references.md)
+> **See also:** [Architecture](architecture.md) · [Deployment](deployment.md) · [GitHub OAuth App](github_oauth_app.md) · [Running Containers](container_local_run.md) · [References](references.md)
 
 ---
 
@@ -146,7 +146,8 @@ All dispatch-able workflows are triggered via **`workflow_dispatch`** from the G
 flowchart LR
     subgraph "CI/CD (Automatic)"
         TEST["test.yaml<br/>Push/PR → main"]
-        INFRA_CI["infra.yaml<br/>Push → main / Weekly"]
+        DOCKER_CI["docker.yaml<br/>Push/PR \u2192 main"]
+        INFRA_CI["infra.yaml<br/>Push \u2192 main / Weekly"]
     end
 
     subgraph "On-Demand (Manual Dispatch)"
@@ -155,12 +156,26 @@ flowchart LR
         REPORT["report-service.yaml<br/>Generate & upload reports"]
     end
 
+    subgraph "Release (Tag Push v*)"
+        GHCR["ghcr-release.yaml<br/>Publish to GHCR"]
+        DHUB["docker-release.yaml<br/>Publish to Docker Hub"]
+    end
+
     TEST --> |"Lint + Test"| PYTHON["Python Code"]
+    DOCKER_CI --> |"Lint + Build + Scan"| DIMG["Docker Images"]
     INFRA_CI --> |"Lint + Validate + Plan"| TF["Terraform"]
     CLI --> |"Direct prompt"| COPILOT_CLI["Copilot CLI"]
     SDK --> |"SDK chat + tools"| COPILOT_SDK["Copilot Server + SDK + Foundry Agents"]
-    REPORT --> |"Parallel queries → Blob"| AZURE["Azure Blob Storage"]
+    REPORT --> |"Parallel queries \u2192 Blob"| AZURE["Azure Blob Storage"]
+    GHCR --> |"Build + Push"| GHCR_REG["ghcr.io"]
+    DHUB --> |"Build + Push"| DHUB_REG["Docker Hub"]
 ```
+
+### `docker.yaml` — Docker CI
+
+- **Trigger:** Push to `main`, `feature/**` branches; PRs to `main`
+- **Actions:** Runs `make ci-test-docker` (Dockerfile lint, image build, Trivy scan)
+- **No secrets required**
 
 ### `test.yaml` — CI Tests
 
@@ -185,7 +200,9 @@ flowchart LR
 | Input | Type | Default | Description |
 |---|---|---|---|
 | `prompt` | string | `"Hello"` | The prompt to send |
-| `model` | choice | `gpt-5-mini` | Model: `gpt-5-mini`, `claude-opus-4.6`, `claude-sonnet-4.6` |
+| `model` | choice | `gpt-5-mini` | Model: `gpt-5-mini`, `claude-sonnet-4.6`, `claude-opus-4.6`, `claude-opus-4.6-fast` |
+| `save_artifacts` | boolean | `false` | Whether to save artifacts as workflow outputs |
+| `retention_days` | number | `1` | Number of days to retain artifacts |
 
 ### `github-copilot-sdk.yaml` — Copilot SDK App
 
@@ -195,7 +212,9 @@ flowchart LR
 | Input | Type | Default | Description |
 |---|---|---|---|
 | `prompt` | string | `"Hello"` | The prompt to send |
-| `model` | choice | `gpt-5-mini` | Model selection |
+| `model` | choice | `gpt-5-mini` | Model: `gpt-5-mini`, `claude-sonnet-4.6`, `claude-opus-4.6`, `claude-opus-4.6-fast` |
+| `save_artifacts` | boolean | `false` | Whether to save artifacts as workflow outputs |
+| `retention_days` | number | `1` | Number of days to retain artifacts |
 
 - **What it does:** Starts Copilot CLI as a server, then runs the Python SDK chat app with tool-calling support (including Foundry Agent tools)
 
@@ -209,7 +228,7 @@ flowchart LR
 | `system_prompt` | string | `"You are a helpful assistant."` | System prompt (persona) for the assistant |
 | `queries` | string | *(required)* | Comma-separated queries (evaluation dimensions) |
 | `auth_method` | choice | `copilot` | LLM provider authentication method (`copilot`, `entra_id`) |
-| `model` | choice | `gpt-5-mini` | Model selection (used when `auth_method` is `copilot`) |
+| `model` | choice | `gpt-5-mini` | Model selection (used when `auth_method` is `copilot`): `gpt-5-mini`, `claude-sonnet-4.6`, `claude-opus-4.6`, `claude-opus-4.6-fast` |
 | `byok_provider_type` | choice | `openai` | BYOK provider type (`openai`, `azure`, `anthropic`; used when `auth_method` is `entra_id`) |
 | `byok_base_url` | string | `https://api.openai.com/v1/` | BYOK provider base URL (used when `auth_method` is `entra_id`) |
 | `byok_model` | string | `gpt-5` | Model identifier for the BYOK provider (used when `auth_method` is `entra_id`) |
@@ -217,8 +236,23 @@ flowchart LR
 | `azure_blob_storage_account_url` | string | *(required)* | Storage account URL |
 | `azure_blob_storage_container_name` | string | *(required)* | Container name |
 | `sas_expiry_hours` | number | `1` | SAS URL expiry in hours |
+| `microsoft_foundry_project_endpoint` | string | *(optional)* | Microsoft Foundry project endpoint URL |
+| `save_artifacts` | boolean | `false` | Whether to save artifacts as workflow outputs |
+| `retention_days` | number | `1` | Number of days to retain artifacts |
 
 **Tip:** By changing `system_prompt` to a domain-specific persona and `queries` to evaluation dimensions, this same workflow serves as a product evaluation tool, compliance checker, or creative review pipeline.
+
+### `ghcr-release.yaml` — GitHub Container Registry Release
+
+- **Trigger:** Tag push matching `v*`
+- **Actions:** Builds and publishes `copilot` and `api` Docker images to `ghcr.io`
+- **Requires:** `packages: write` permission (automatic via `GITHUB_TOKEN`)
+
+### `docker-release.yaml` — Docker Hub Release
+
+- **Trigger:** Tag push matching `v*`
+- **Actions:** Builds and publishes `copilot` and `api` Docker images to Docker Hub
+- **Requires:** `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` repository secrets
 
 ---
 
@@ -453,6 +487,39 @@ uv run python scripts/byok.py chat-parallel-entra-id \
 
 > **Note:** BYOK settings (`BYOK_PROVIDER_TYPE`, `BYOK_BASE_URL`, `BYOK_API_KEY`, `BYOK_MODEL`, `BYOK_WIRE_API`) are read from `.env` or environment variables. See the [Configuration](#configuration) section.
 
+### `scripts/api_server.py` — Copilot Chat API Server
+
+A Typer CLI to launch the FastAPI-based Copilot Chat API server with GitHub OAuth App authentication. Users authenticate via GitHub OAuth and interact with Copilot through a web UI.
+
+| Command | Description |
+|---|---|
+| `serve` | Start the Copilot Chat API server |
+
+#### Usage Examples
+
+```shell
+# Start the API server (defaults from .env)
+uv run python scripts/api_server.py serve
+
+# With auto-reload for development
+uv run python scripts/api_server.py serve --reload
+
+# Custom host and port
+uv run python scripts/api_server.py serve --host 0.0.0.0 --port 9000 --verbose
+```
+
+#### Options
+
+| Option | Short | Required | Default | Description |
+|---|---|---|---|---|
+| `--host` | `-h` | No | From `.env` (`API_HOST`) | Server bind address |
+| `--port` | `-p` | No | From `.env` (`API_PORT`) | Server bind port |
+| `--copilot-cli-url` | `-c` | No | From `.env` (`COPILOT_CLI_URL`) | Copilot CLI server URL |
+| `--reload` | `-r` | No | `false` | Enable auto-reload for development |
+| `--verbose` | `-v` | No | `false` | Enable debug logging |
+
+> **Setup guide:** See [GitHub OAuth App Setup](github_oauth_app.md) for creating the OAuth App and configuring environment variables.
+
 ---
 
 ## Configuration
@@ -479,7 +546,17 @@ BYOK_BASE_URL=https://<your-resource>.openai.azure.com/openai/v1/
 BYOK_API_KEY=<your-api-key>            # Static API key (for api_key auth method)
 BYOK_MODEL=gpt-5                       # Model identifier for the BYOK provider
 BYOK_WIRE_API=responses                # Wire API format: completions, responses
+
+# OAuth GitHub App Settings (for API server)
+GITHUB_CLIENT_ID=Ov23liXXXXXXXXXXXXXX # OAuth App Client ID
+GITHUB_CLIENT_SECRET=<your-secret>     # OAuth App Client Secret
+SESSION_SECRET=<random-string>         # Secret for signing session cookies
+API_HOST=127.0.0.1                     # Server bind address
+API_PORT=8000                          # Server bind port
+COPILOT_CLI_URL=localhost:3000         # Copilot CLI server URL
 ```
+
+> **OAuth setup:** See [GitHub OAuth App Setup](github_oauth_app.md) for creating the OAuth App and generating these values.
 
 ### Makefile Targets
 
@@ -499,12 +576,18 @@ Run `make help` in `src/python/` to see all available targets:
 | `update` | Update all packages |
 | `copilot` | Start Copilot CLI server on port 3000 |
 | `copilot-app` | Run interactive chat loop |
+| `copilot-api` | Run API server with GitHub Copilot SDK |
 | `jupyterlab` | Run Jupyter Lab |
 | `docker-build` | Build Docker image |
 | `docker-run` | Run Docker container |
 | `docker-lint` | Lint Dockerfile with hadolint |
 | `docker-scan` | Scan Docker image with Trivy |
 | `ci-test-docker` | Full Docker CI pipeline (lint + build + scan + run) |
+| `compose-build` | Build Docker Compose services |
+| `compose-up` | Start Docker Compose services |
+| `compose-up-d` | Start Docker Compose services in background |
+| `compose-down` | Stop Docker Compose services |
+| `compose-logs` | Show Docker Compose logs |
 
 ---
 

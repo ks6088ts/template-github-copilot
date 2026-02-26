@@ -89,6 +89,23 @@ All Azure and GitHub resources are managed via Terraform:
 | `github_secrets` | GitHub environment with ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID, ARM_USE_OIDC, COPILOT_GITHUB_TOKEN |
 | `azure_microsoft_foundry` | Resource group, AI Foundry account, project, model deployments |
 
+### Ephemeral Sandbox Execution on GitHub Actions
+
+All agent execution runs within **GitHub Actions runners** — ephemeral, sandboxed environments that are created on demand and discarded after each run. This design choice provides:
+
+- **Security over local execution** — Artifacts are produced in a sandbox environment, eliminating the risk of credential exposure, malware interaction, or data leakage inherent in running AI agents on developer workstations.
+- **Unified execution environment** — Every team member and workflow uses the same runner configuration, preventing environment silos and avoiding scattered development resources across individual machines.
+- **Built-in observability** — GitHub Actions natively records who executed what, when, and for how long. Full execution logs, billable minutes, and workflow frequency are tracked without additional tooling, providing a comprehensive audit trail for compliance and governance.
+
+### BYOK & Regulated Industry Support
+
+The platform supports **Bring Your Own Key (BYOK)** workflows, enabling deployment in environments where external internet access is restricted or prohibited — a common requirement in financial services, government, and healthcare:
+
+- **Private network compatibility** — BYOK mode allows calling LLM APIs through private endpoints, eliminating the need for outbound internet connectivity from the execution environment.
+- **Private endpoint extensibility** — The architecture is designed to support calling Foundry APIs via Azure Private Endpoints, enabling fully network-isolated AI workflows.
+- **Entra ID–based RBAC** — All resource access is gated by Microsoft Entra ID authentication, enabling fine-grained Role-Based Access Control (RBAC) that ensures each identity has only the minimum permissions required.
+- **IaC-managed security** — Service principals, federated identity credentials, and RBAC role assignments are provisioned via Terraform from GitHub Actions (`azure_github_oidc` scenario), reducing operational overhead by making security configuration code-reviewed, version-controlled, and automatically applied.
+
 ### Notification and Integration
 
 A Slack notification CLI (`scripts/slacks.py`) enables real-time alerts when reports are generated, making it easy to integrate AI-driven outputs into existing team communication workflows.
@@ -125,3 +142,6 @@ The platform's design — **parameterized system prompts as personas**, **querie
 | **SAS URLs over public blob access** | Time-bounded, revocable, scoped to individual blobs |
 | **Foundry Agents as Copilot tools** | Enables autonomous agent delegation within Copilot sessions — no manual orchestration |
 | **System prompt as persona parameter** | Makes domain adaptation a configuration change, not a code change |
+| **GitHub Actions runners over local execution** | Ephemeral sandbox isolation, unified environments, built-in audit trail, no local credential exposure |
+| **BYOK support** | Enables deployment in air-gapped or restricted-network environments (e.g., financial sector) via private endpoints |
+| **IaC-managed RBAC** | Service principals and role assignments provisioned via Terraform — code-reviewed, version-controlled, low operational overhead |

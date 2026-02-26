@@ -1,6 +1,8 @@
 [![test](https://github.com/ks6088ts/template-github-copilot/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/test.yaml?query=branch%3Amain)
 [![docker](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker.yaml?query=branch%3Amain)
 [![infra](https://github.com/ks6088ts/template-github-copilot/actions/workflows/infra.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/infra.yaml?query=branch%3Amain)
+[![ghcr-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml?query=branch%3Amain)
+[![docker-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml?query=branch%3Amain)
 
 # CopilotReportForge
 
@@ -137,6 +139,11 @@ Simultaneously query multiple AI personas (patent attorney, domain scientist, co
 | **Zero Infrastructure** | No GPU clusters, no model hosting — leverage GitHub-hosted Copilot models and Azure AI Foundry with pay-per-use pricing |
 | **Minutes to Production** | From `git clone` to production-ready AI pipeline in under an hour with Terraform + GitHub Actions |
 | **Enterprise Security** | Passwordless OIDC, zero long-lived secrets, RBAC-scoped access, time-bounded SAS URLs |
+| **Ephemeral Sandbox Execution** | All agent execution runs in GitHub Actions runners — sandboxed, disposable environments that are more secure than local execution and prevent credential leakage |
+| **Unified Environment & No Silos** | Centralized execution eliminates environment drift across teams; compute, storage, and credentials are managed in one place, preventing scattered development resources |
+| **Built-in Observability** | GitHub Actions natively tracks who ran what, when, and for how long — full audit trail for compliance without additional tooling |
+| **BYOK & Regulated Industries** | Bring Your Own Key support enables deployment in air-gapped environments (e.g., financial services); extensible to private endpoint–based Foundry API calls |
+| **IaC-Managed RBAC** | Service principals, federated credentials, and role assignments provisioned via Terraform — code-reviewed, version-controlled, low operational overhead |
 | **Domain Agnostic** | Swap system prompts and queries to adapt to any industry — no code changes required |
 | **Auditability** | Structured `ReportOutput` with success/failure counters; immutable Blob Storage artifacts; full GitHub Actions audit logs |
 | **Scalability** | Async parallel execution scales horizontally; Blob Storage handles arbitrary artifact volumes |
@@ -198,6 +205,8 @@ uv run python scripts/agents.py run --agent-name "quality-reviewer" \
 | [Architecture](docs/copilot_report_forge/architecture.md) | System architecture, component details, data flows, and extensibility points |
 | [Deployment](docs/copilot_report_forge/deployment.md) | Prerequisites, environment setup, and step-by-step deployment instructions |
 | [Responsible AI](docs/copilot_report_forge/responsible_ai.md) | Fairness, transparency, safety, privacy, and deployment checklist |
+| [GitHub OAuth App](docs/copilot_report_forge/github_oauth_app.md) | Setting up GitHub OAuth App for the Copilot Chat API server |
+| [Running Containers Locally](docs/copilot_report_forge/container_local_run.md) | Running copilot and api services via Docker Compose and GitHub Packages |
 | [References](docs/copilot_report_forge/references.md) | External links and resources |
 
 ## Infrastructure (Terraform Scenarios)

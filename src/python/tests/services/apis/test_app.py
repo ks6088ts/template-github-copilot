@@ -89,7 +89,7 @@ class TestIndex:
         resp = client.get("/")
         assert resp.status_code == 200
         assert "text/html" in resp.headers["content-type"]
-        assert "Copilot Chat" in resp.text
+        assert "template-github-copilot" in resp.text
 
 
 class TestAuthLogin:

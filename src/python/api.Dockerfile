@@ -1,5 +1,7 @@
 # --- Build stage ---
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+FROM python:3.13-slim-bookworm AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 

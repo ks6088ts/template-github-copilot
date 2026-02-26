@@ -2,14 +2,16 @@ import asyncio
 import logging
 import os
 from datetime import datetime, timezone
-from typing import Annotated
+from typing import Annotated, Literal
 
 import typer
 from dotenv import load_dotenv
 
-from template_github_copilot.services.reports import ReportOutput, run_parallel_chat
 from template_github_copilot.internals.azure_blob_storages import AzureBlobStorageClient
 from template_github_copilot.loggers import get_logger
+from template_github_copilot.providers import AuthMethod, create_provider
+from template_github_copilot.services.reports import ReportOutput, run_parallel_chat
+from template_github_copilot.settings.byok import ByokSettings
 
 app = typer.Typer(
     add_completion=False,
@@ -41,9 +43,14 @@ def _resolve_blob_name(blob_name: str | None) -> str:
 
 
 def _generate_report(
-    cli_url: str, queries: list[str], system_prompt: str
+    cli_url: str,
+    queries: list[str],
+    system_prompt: str,
+    auth_method: AuthMethod = AuthMethod.COPILOT,
+    byok_settings: ByokSettings | None = None,
 ) -> ReportOutput:
     """Run parallel chat queries and return the aggregated report."""
+    provider_result = create_provider(auth_method, byok_settings=byok_settings)
 
     async def _run() -> ReportOutput:
         return await run_parallel_chat(
@@ -51,6 +58,8 @@ def _generate_report(
             queries=queries,
             system_prompt=system_prompt,
             writer=logger.debug,
+            provider=provider_result.provider,
+            model=provider_result.model,
         )
 
     return asyncio.run(_run())
@@ -141,6 +150,54 @@ def generate(
             help="Hours until the SAS URL expires",
         ),
     ] = DEFAULT_SAS_EXPIRY_HOURS,
+    auth_method: Annotated[
+        AuthMethod,
+        typer.Option(
+            "--auth-method",
+            "-m",
+            help="LLM provider authentication method (copilot, api_key, entra_id)",
+        ),
+    ] = AuthMethod.COPILOT,
+    byok_provider_type: Annotated[
+        Literal["openai", "azure", "anthropic"],
+        typer.Option(
+            "--byok-provider-type",
+            envvar="BYOK_PROVIDER_TYPE",
+            help="BYOK provider type (e.g. openai, azure, anthropic)",
+        ),
+    ] = "openai",
+    byok_base_url: Annotated[
+        str,
+        typer.Option(
+            "--byok-base-url",
+            envvar="BYOK_BASE_URL",
+            help="BYOK provider base URL",
+        ),
+    ] = "https://api.openai.com/v1/",
+    byok_api_key: Annotated[
+        str,
+        typer.Option(
+            "--byok-api-key",
+            envvar="BYOK_API_KEY",
+            help="BYOK provider API key",
+        ),
+    ] = "",
+    byok_model: Annotated[
+        str,
+        typer.Option(
+            "--byok-model",
+            envvar="BYOK_MODEL",
+            help="Model identifier for the BYOK provider",
+        ),
+    ] = "gpt-4o",
+    byok_wire_api: Annotated[
+        Literal["completions", "responses"],
+        typer.Option(
+            "--byok-wire-api",
+            envvar="BYOK_WIRE_API",
+            help="Wire API format (completions or responses)",
+        ),
+    ] = "responses",
     verbose: Annotated[
         bool,
         typer.Option("--verbose", "-v", help="Enable verbose output"),
@@ -155,7 +212,19 @@ def generate(
         raise typer.Exit(code=1)
 
     try:
-        report = _generate_report(cli_url, query_list, system_prompt)
+        byok_settings: ByokSettings | None = None
+        if auth_method in (AuthMethod.API_KEY, AuthMethod.ENTRA_ID):
+            byok_settings = ByokSettings(
+                byok_provider_type=byok_provider_type,
+                byok_base_url=byok_base_url,
+                byok_api_key=byok_api_key,
+                byok_model=byok_model,
+                byok_wire_api=byok_wire_api,
+            )
+
+        report = _generate_report(
+            cli_url, query_list, system_prompt, auth_method, byok_settings
+        )
         logger.info(f"Report generated: {report.succeeded}/{report.total} succeeded")
 
         azure_blob_storage_client = AzureBlobStorageClient(

@@ -68,6 +68,13 @@ AZURE_BLOB_STORAGE_CONTAINER_NAME=adhoc
 
 # Microsoft Foundry (required for agent commands)
 MICROSOFT_FOUNDRY_PROJECT_ENDPOINT=https://<endpoint>.services.ai.azure.com/api/projects/<project>
+
+# BYOK Settings (for Bring Your Own Key workflows)
+BYOK_PROVIDER_TYPE=openai
+BYOK_BASE_URL=https://<your-resource>.openai.azure.com/openai/v1/
+BYOK_API_KEY=<your-api-key>
+BYOK_MODEL=gpt-5
+BYOK_WIRE_API=responses
 ```
 
 ### 4. Verify Setup
@@ -205,9 +212,14 @@ All dispatch-able workflows are triggered via **`workflow_dispatch`** from the G
 
 | Input | Required | Default | Description |
 |---|---|---|---|
-| `system_prompt` | No | `"You are a helpful assistant."` | System prompt (persona) for the assistant |
+| `system_prompt` | Yes | `"You are a helpful assistant."` | System prompt (persona) for the assistant |
 | `queries` | Yes | — | Comma-separated queries (evaluation dimensions) |
-| `model` | No | `gpt-5-mini` | LLM model selection |
+| `auth_method` | Yes | `copilot` | LLM provider authentication method (`copilot`, `entra_id`) |
+| `model` | No | `gpt-5-mini` | LLM model selection (used when `auth_method` is `copilot`) |
+| `byok_provider_type` | No | `openai` | BYOK provider type (`openai`, `azure`, `anthropic`; used when `auth_method` is `entra_id`) |
+| `byok_base_url` | No | `https://api.openai.com/v1/` | BYOK provider base URL (used when `auth_method` is `entra_id`) |
+| `byok_model` | No | `gpt-5` | Model identifier for the BYOK provider (used when `auth_method` is `entra_id`) |
+| `byok_wire_api` | No | `responses` | Wire API format (`completions`, `responses`; used when `auth_method` is `entra_id`) |
 | `azure_blob_storage_account_url` | Yes | — | Storage account URL |
 | `azure_blob_storage_container_name` | Yes | — | Container name |
 | `sas_expiry_hours` | No | `1` | SAS URL expiry in hours |

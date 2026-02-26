@@ -13,6 +13,7 @@ from template_github_copilot.core import (
 )
 from template_github_copilot.services.chat import ChatParallelOutput, ChatResult
 from template_github_copilot.loggers import get_logger
+from template_github_copilot.providers import AuthMethod, create_provider
 from template_github_copilot.settings import get_project_settings
 
 app = typer.Typer(
@@ -80,11 +81,18 @@ def chat(
 ):
     set_verbose_logging(verbose)
 
+    result = create_provider(AuthMethod.COPILOT)
+
     async def main():
         client = create_copilot_client(cli_url)
         await client.start()
 
-        session = await client.create_session(create_session_config())
+        session = await client.create_session(
+            create_session_config(
+                model=result.model,
+                provider=result.provider,
+            )
+        )
 
         handler = create_event_handler(writer=logger.info)
         session.on(handler)
@@ -117,11 +125,18 @@ def chat_loop(
     """Interactive chat loop with Copilot."""
     set_verbose_logging(verbose)
 
+    result = create_provider(AuthMethod.COPILOT)
+
     async def main():
         client = create_copilot_client(cli_url)
         await client.start()
 
-        session = await client.create_session(create_session_config())
+        session = await client.create_session(
+            create_session_config(
+                model=result.model,
+                provider=result.provider,
+            )
+        )
 
         handler = create_event_handler(
             writer=logger.info,
@@ -174,9 +189,16 @@ def chat_parallel(
     """Send multiple prompts to Copilot in parallel (separate sessions) and output structured JSON."""
     set_verbose_logging(verbose)
 
+    result = create_provider(AuthMethod.COPILOT)
+
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:
-            session = await client.create_session(create_session_config())
+            session = await client.create_session(
+                create_session_config(
+                    model=result.model,
+                    provider=result.provider,
+                )
+            )
             handler = create_event_handler(writer=logger.debug)
             session.on(handler)
 

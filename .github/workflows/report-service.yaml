@@ -12,15 +12,50 @@ on:
         type: string
         description: "Comma-separated user queries (e.g. 'query1,query2,query3')"
         required: true
+      auth_method:
+        type: choice
+        description: "LLM provider authentication method"
+        options:
+          - copilot
+          - entra_id
+        required: true
+        default: copilot
       model:
         type: choice
-        description: "Specify the model to use for Copilot CLI server"
+        description: "Specify the model to use for Copilot CLI server (used when auth_method is copilot)"
         options:
           - gpt-5-mini
           - claude-opus-4.6
           - claude-sonnet-4.6
-        required: true
+        required: false
         default: gpt-5-mini
+      byok_provider_type:
+        type: choice
+        description: "BYOK provider type (used when auth_method is entra_id)"
+        options:
+          - openai
+          - azure
+          - anthropic
+        required: false
+        default: openai
+      byok_base_url:
+        type: string
+        description: "BYOK provider base URL (used when auth_method is entra_id)"
+        required: false
+        default: "https://api.openai.com/v1/"
+      byok_model:
+        type: string
+        description: "Model identifier for the BYOK provider (used when auth_method is entra_id)"
+        required: false
+        default: gpt-5
+      byok_wire_api:
+        type: choice
+        description: "Wire API format (used when auth_method is entra_id)"
+        options:
+          - completions
+          - responses
+        required: false
+        default: responses
       azure_blob_storage_account_url:
         type: string
         description: "The URL of the Azure Blob Storage account to which the report service will write. Format: https://<your-storage-account>.blob.core.windows.net"
@@ -100,15 +135,27 @@ jobs:
         shell: bash
         working-directory: src/python
         run: |
-          cp .env.template .env
-          uv run python scripts/report_service.py generate \
-            --verbose \
-            --system-prompt "${{ github.event.inputs.system_prompt }}" \
-            --queries "${{ github.event.inputs.queries }}" \
-            --account-url "${{ github.event.inputs.azure_blob_storage_account_url }}" \
-            --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}" \
-            --blob-name "report_${{ github.run_id }}.json" \
+          ARGS=(
+            --verbose
+            --system-prompt "${{ github.event.inputs.system_prompt }}"
+            --queries "${{ github.event.inputs.queries }}"
+            --account-url "${{ github.event.inputs.azure_blob_storage_account_url }}"
+            --container-name "${{ github.event.inputs.azure_blob_storage_container_name }}"
+            --blob-name "report_${{ github.run_id }}.json"
             --sas-expiry-hours "${{ github.event.inputs.sas_expiry_hours }}"
+            --auth-method "${{ github.event.inputs.auth_method }}"
+          )
+
+          if [[ "${{ github.event.inputs.auth_method }}" != "copilot" ]]; then
+            ARGS+=(
+              --byok-provider-type "${{ github.event.inputs.byok_provider_type }}"
+              --byok-base-url "${{ github.event.inputs.byok_base_url }}"
+              --byok-model "${{ github.event.inputs.byok_model }}"
+              --byok-wire-api "${{ github.event.inputs.byok_wire_api }}"
+            )
+          fi
+
+          uv run python scripts/report_service.py generate "${ARGS[@]}"
       - name: Send message to Slack
         if: env.SLACK_WEBHOOK_URL != ''
         env:

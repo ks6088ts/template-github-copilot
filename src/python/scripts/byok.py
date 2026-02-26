@@ -3,8 +3,6 @@ import logging
 from typing import Annotated
 
 import typer
-from azure.identity import DefaultAzureCredential
-from copilot.types import ProviderConfig
 from dotenv import load_dotenv
 
 from template_github_copilot.core import (
@@ -15,9 +13,7 @@ from template_github_copilot.core import (
 )
 from template_github_copilot.services.chat import ChatParallelOutput, ChatResult
 from template_github_copilot.loggers import get_logger
-from template_github_copilot.settings import get_byok_settings
-
-COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default"
+from template_github_copilot.providers import AuthMethod, create_provider
 
 app = typer.Typer(
     add_completion=False,
@@ -34,34 +30,6 @@ def set_verbose_logging(
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         target_logger.setLevel(logging.DEBUG)
-
-
-def _build_api_key_provider() -> ProviderConfig:
-    """Build a ProviderConfig using a static API key from BYOK settings."""
-    settings = get_byok_settings()
-    provider = ProviderConfig(
-        type=settings.byok_provider_type,
-        base_url=settings.byok_base_url,
-        api_key=settings.byok_api_key,
-    )
-    if settings.byok_wire_api:
-        provider["wire_api"] = settings.byok_wire_api
-    return provider
-
-
-def _build_entra_id_provider() -> ProviderConfig:
-    """Build a ProviderConfig using a short-lived Entra ID bearer token."""
-    settings = get_byok_settings()
-    credential = DefaultAzureCredential()
-    token = credential.get_token(COGNITIVE_SERVICES_SCOPE).token
-    provider = ProviderConfig(
-        type=settings.byok_provider_type,
-        base_url=settings.byok_base_url,
-        bearer_token=token,
-    )
-    if settings.byok_wire_api:
-        provider["wire_api"] = settings.byok_wire_api
-    return provider
 
 
 # --- API Key-based BYOK commands ---
@@ -93,8 +61,7 @@ def chat_api_key(
     """Send a single prompt using BYOK with a static API key."""
     set_verbose_logging(verbose)
 
-    settings = get_byok_settings()
-    provider = _build_api_key_provider()
+    result = create_provider(AuthMethod.API_KEY)
 
     async def main():
         client = create_copilot_client(cli_url)
@@ -102,8 +69,8 @@ def chat_api_key(
 
         session = await client.create_session(
             create_session_config(
-                model=settings.byok_model,
-                provider=provider,
+                model=result.model,
+                provider=result.provider,
             )
         )
 
@@ -138,8 +105,7 @@ def chat_loop_api_key(
     """Interactive chat loop using BYOK with a static API key."""
     set_verbose_logging(verbose)
 
-    settings = get_byok_settings()
-    provider = _build_api_key_provider()
+    result = create_provider(AuthMethod.API_KEY)
 
     async def main():
         client = create_copilot_client(cli_url)
@@ -147,8 +113,8 @@ def chat_loop_api_key(
 
         session = await client.create_session(
             create_session_config(
-                model=settings.byok_model,
-                provider=provider,
+                model=result.model,
+                provider=result.provider,
             )
         )
 
@@ -201,15 +167,14 @@ def chat_parallel_api_key(
     """Send multiple prompts in parallel using BYOK with a static API key."""
     set_verbose_logging(verbose)
 
-    settings = get_byok_settings()
-    provider = _build_api_key_provider()
+    result = create_provider(AuthMethod.API_KEY)
 
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:
             session = await client.create_session(
                 create_session_config(
-                    model=settings.byok_model,
-                    provider=provider,
+                    model=result.model,
+                    provider=result.provider,
                 )
             )
             handler = create_event_handler(writer=logger.debug)
@@ -272,8 +237,7 @@ def chat_entra_id(
     """Send a single prompt using BYOK with Entra ID (DefaultAzureCredential) bearer token."""
     set_verbose_logging(verbose)
 
-    settings = get_byok_settings()
-    provider = _build_entra_id_provider()
+    result = create_provider(AuthMethod.ENTRA_ID)
 
     async def main():
         client = create_copilot_client(cli_url)
@@ -281,8 +245,8 @@ def chat_entra_id(
 
         session = await client.create_session(
             create_session_config(
-                model=settings.byok_model,
-                provider=provider,
+                model=result.model,
+                provider=result.provider,
             )
         )
 
@@ -321,18 +285,16 @@ def chat_loop_entra_id(
     """
     set_verbose_logging(verbose)
 
-    settings = get_byok_settings()
-
     async def main():
         client = create_copilot_client(cli_url)
         await client.start()
 
         # Obtain a fresh bearer token for the session
-        provider = _build_entra_id_provider()
+        result = create_provider(AuthMethod.ENTRA_ID)
         session = await client.create_session(
             create_session_config(
-                model=settings.byok_model,
-                provider=provider,
+                model=result.model,
+                provider=result.provider,
             )
         )
 
@@ -388,15 +350,14 @@ def chat_parallel_entra_id(
     """
     set_verbose_logging(verbose)
 
-    settings = get_byok_settings()
-    provider = _build_entra_id_provider()
+    result = create_provider(AuthMethod.ENTRA_ID)
 
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:
             session = await client.create_session(
                 create_session_config(
-                    model=settings.byok_model,
-                    provider=provider,
+                    model=result.model,
+                    provider=result.provider,
                 )
             )
             handler = create_event_handler(writer=logger.debug)

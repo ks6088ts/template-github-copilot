@@ -1,7 +1,7 @@
 import asyncio
 
 from copilot import CopilotClient
-from copilot.types import SystemMessageReplaceConfig
+from copilot.types import ProviderConfig, SystemMessageReplaceConfig
 from pydantic import BaseModel, Field
 
 from template_github_copilot.core import (
@@ -45,6 +45,8 @@ async def run_parallel_chat(
     queries: list[str],
     system_prompt: str,
     writer: WriterFunc = _default_writer,
+    provider: ProviderConfig | None = None,
+    model: str | None = None,
 ) -> ReportOutput:
     """Run multiple chat queries in parallel sessions and return structured results.
 
@@ -53,6 +55,8 @@ async def run_parallel_chat(
         queries: A list of user queries to send in parallel.
         system_prompt: The system prompt to configure each session.
         writer: A callable for logging messages.
+        provider: Optional ``ProviderConfig`` for BYOK providers.
+        model: Optional model identifier (e.g. ``"gpt-4o"``).
 
     Returns:
         A ``ReportOutput`` containing all results.
@@ -60,10 +64,16 @@ async def run_parallel_chat(
 
     async def _process_query(client: CopilotClient, query: str) -> ReportResult:
         try:
+            extra_kwargs: dict = {}
+            if provider is not None:
+                extra_kwargs["provider"] = provider
+            if model is not None:
+                extra_kwargs["model"] = model
             session_config = create_session_config(
                 system_message=SystemMessageReplaceConfig(
                     mode="replace", content=system_prompt
                 ),
+                **extra_kwargs,
             )
             session = await client.create_session(session_config)
             handler = create_event_handler(writer=writer)

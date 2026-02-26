@@ -28,8 +28,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from copilot.types import ProviderConfig
+
+if TYPE_CHECKING:
+    from template_github_copilot.settings.byok import ByokSettings
 
 COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default"
 
@@ -57,11 +62,15 @@ class ProviderResult:
     model: str | None = None
 
 
-def _build_api_key_provider() -> ProviderResult:
+def _build_api_key_provider(
+    byok_settings: "ByokSettings | None" = None,
+) -> ProviderResult:
     """Build a :class:`ProviderResult` using a static API key."""
-    from template_github_copilot.settings import get_byok_settings
+    if byok_settings is None:
+        from template_github_copilot.settings import get_byok_settings
 
-    settings = get_byok_settings()
+        byok_settings = get_byok_settings()
+    settings = byok_settings
     provider = ProviderConfig(
         type=settings.byok_provider_type,
         base_url=settings.byok_base_url,
@@ -72,13 +81,17 @@ def _build_api_key_provider() -> ProviderResult:
     return ProviderResult(provider=provider, model=settings.byok_model)
 
 
-def _build_entra_id_provider() -> ProviderResult:
+def _build_entra_id_provider(
+    byok_settings: "ByokSettings | None" = None,
+) -> ProviderResult:
     """Build a :class:`ProviderResult` using an Azure Entra ID bearer token."""
     from azure.identity import DefaultAzureCredential
 
-    from template_github_copilot.settings import get_byok_settings
+    if byok_settings is None:
+        from template_github_copilot.settings import get_byok_settings
 
-    settings = get_byok_settings()
+        byok_settings = get_byok_settings()
+    settings = byok_settings
     credential = DefaultAzureCredential()
     token = credential.get_token(COGNITIVE_SERVICES_SCOPE).token
     provider = ProviderConfig(
@@ -95,17 +108,23 @@ def _build_entra_id_provider() -> ProviderResult:
 # Factory registry – maps AuthMethod → builder callable
 # ---------------------------------------------------------------------------
 
-_PROVIDER_BUILDERS: dict[AuthMethod, callable] = {
+_PROVIDER_BUILDERS: dict[AuthMethod, Callable[..., ProviderResult]] = {
     AuthMethod.API_KEY: _build_api_key_provider,
     AuthMethod.ENTRA_ID: _build_entra_id_provider,
 }
 
 
-def create_provider(auth_method: AuthMethod = AuthMethod.COPILOT) -> ProviderResult:
+def create_provider(
+    auth_method: AuthMethod = AuthMethod.COPILOT,
+    byok_settings: "ByokSettings | None" = None,
+) -> ProviderResult:
     """Create an LLM provider configuration for the given authentication method.
 
     Args:
         auth_method: The authentication strategy to use.
+        byok_settings: Optional :class:`ByokSettings` to use instead of
+            reading from the environment.  Ignored when *auth_method* is
+            ``COPILOT``.
 
     Returns:
         A :class:`ProviderResult` containing the ``ProviderConfig`` (if any)
@@ -123,12 +142,16 @@ def create_provider(auth_method: AuthMethod = AuthMethod.COPILOT) -> ProviderRes
             f"Unknown auth method: {auth_method!r}. "
             f"Supported methods: {', '.join(m.value for m in AuthMethod)}"
         )
-    return builder()
+    try:
+        return builder(byok_settings=byok_settings)
+    except TypeError:
+        # Custom-registered builders may not accept byok_settings
+        return builder()
 
 
 def register_provider(
     auth_method: AuthMethod,
-    builder: callable,
+    builder: Callable[..., ProviderResult],
 ) -> None:
     """Register (or override) a provider builder for a given auth method.
 

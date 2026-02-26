@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Copilot Chat</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #238636;
+      --accent-hover: #2ea043;
+      --user-bg: #1f2937;
+      --bot-bg: #21262d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { font-size: 1.1rem; }
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .user-info img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+    .btn {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .btn:hover { border-color: var(--muted); }
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* Chat area */
+    #chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .message {
+      max-width: 72%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 0.92rem;
+    }
+    .message.user {
+      align-self: flex-end;
+      background: var(--user-bg);
+    }
+    .message.bot {
+      align-self: flex-start;
+      background: var(--bot-bg);
+      border: 1px solid var(--border);
+    }
+    .message.error {
+      color: #f85149;
+      border-color: #f85149;
+    }
+    .typing {
+      align-self: flex-start;
+      color: var(--muted);
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    /* Input bar */
+    #input-bar {
+      display: flex;
+      gap: 8px;
+      padding: 12px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    #input-bar input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.92rem;
+      outline: none;
+    }
+    #input-bar input:focus { border-color: var(--accent); }
+
+    /* Login screen */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 16px;
+    }
+    #login-screen p { color: var(--muted); }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+    }
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+
+    /* Report panel */
+    #report-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .report-form { display: flex; flex-direction: column; gap: 12px; }
+    .report-form label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .report-form textarea,
+    .report-form input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+      outline: none;
+    }
+    .report-form textarea:focus,
+    .report-form input[type="text"]:focus { border-color: var(--accent); }
+    .query-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .query-row input { flex: 1; }
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { color: var(--text); border-color: var(--muted); }
+    .btn-icon.danger:hover { color: #f85149; border-color: #f85149; }
+    .report-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    #report-status {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* Report results */
+    .report-results { display: flex; flex-direction: column; gap: 12px; }
+    .report-summary {
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+    .report-summary .stat {
+      display: inline-block;
+      margin-right: 16px;
+    }
+    .report-summary .stat b { color: var(--accent); }
+    .report-summary .stat.fail b { color: #f85149; }
+    .report-item {
+      padding: 12px 16px;
+      background: var(--bot-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .report-item .query-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .report-item .response {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+    .report-item .error-text { color: #f85149; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Copilot Chat</h1>
+    <div id="header-right"></div>
+  </header>
+
+  <!-- Login screen (shown when not authenticated) -->
+  <div id="login-screen" style="display:none;">
+    <p>Sign in with your GitHub account to start chatting with Copilot.</p>
+    <a href="/auth/login" class="btn btn-primary">Login with GitHub</a>
+  </div>
+
+  <!-- Chat UI (shown when authenticated) -->
+  <div id="tab-bar" class="tabs" style="display:none;">
+    <button class="tab-btn active" data-tab="chat">Chat</button>
+    <button class="tab-btn" data-tab="report">Report</button>
+  </div>
+
+  <div id="chat-container" style="display:none;"></div>
+  <div id="input-bar" style="display:none;">
+    <input type="text" id="msg-input" placeholder="Type a message…" autocomplete="off" />
+    <button class="btn btn-primary" id="send-btn">Send</button>
+  </div>
+
+  <!-- Report panel -->
+  <div id="report-panel">
+    <div class="report-form">
+      <label for="system-prompt">System Prompt</label>
+      <textarea id="system-prompt" rows="3" placeholder="e.g. You are a helpful assistant that answers concisely."></textarea>
+
+      <label>Queries</label>
+      <div id="query-list">
+        <div class="query-row">
+          <input type="text" class="query-input" placeholder="Enter a query…" />
+          <button class="btn-icon danger remove-query" title="Remove">&times;</button>
+        </div>
+      </div>
+      <button class="btn" id="add-query-btn">+ Add Query</button>
+
+      <div class="report-actions">
+        <button class="btn btn-primary" id="run-report-btn">Run Report</button>
+        <span id="report-status"></span>
+      </div>
+    </div>
+
+    <div id="report-results" class="report-results"></div>
+  </div>
+
+  <script>
+    const chatContainer = document.getElementById("chat-container");
+    const inputBar = document.getElementById("input-bar");
+    const loginScreen = document.getElementById("login-screen");
+    const headerRight = document.getElementById("header-right");
+    const msgInput = document.getElementById("msg-input");
+    const sendBtn = document.getElementById("send-btn");
+    const tabBar = document.getElementById("tab-bar");
+    const reportPanel = document.getElementById("report-panel");
+
+    // ── Tabs ────────────────────────────────────────────────────────
+    function switchTab(tab) {
+      document.querySelectorAll(".tab-btn").forEach(b => {
+        b.classList.toggle("active", b.dataset.tab === tab);
+      });
+      if (tab === "chat") {
+        chatContainer.style.display = "flex";
+        inputBar.style.display = "flex";
+        reportPanel.style.display = "none";
+        msgInput.focus();
+      } else {
+        chatContainer.style.display = "none";
+        inputBar.style.display = "none";
+        reportPanel.style.display = "flex";
+      }
+    }
+    tabBar.addEventListener("click", (e) => {
+      const btn = e.target.closest(".tab-btn");
+      if (btn) switchTab(btn.dataset.tab);
+    });
+
+    // ── Bootstrap ───────────────────────────────────────────────────
+    async function init() {
+      try {
+        const resp = await fetch("/api/me");
+        if (!resp.ok) throw new Error("not authed");
+        const user = await resp.json();
+        showChat(user);
+      } catch {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      loginScreen.style.display = "flex";
+      tabBar.style.display = "none";
+      chatContainer.style.display = "none";
+      inputBar.style.display = "none";
+      reportPanel.style.display = "none";
+      headerRight.innerHTML = "";
+    }
+
+    function showChat(user) {
+      loginScreen.style.display = "none";
+      tabBar.style.display = "flex";
+      switchTab("chat");
+
+      let avatar = "";
+      if (user.avatar_url) {
+        avatar = `<img src="${user.avatar_url}" alt="avatar" />`;
+      }
+      headerRight.innerHTML = `
+        <div class="user-info">
+          ${avatar}
+          <span>${user.login}</span>
+          <a href="/auth/logout" class="btn">Logout</a>
+        </div>
+      `;
+      msgInput.focus();
+    }
+
+    // ── Chat logic ──────────────────────────────────────────────────
+    function appendMessage(text, cls) {
+      const div = document.createElement("div");
+      div.className = `message ${cls}`;
+      div.textContent = text;
+      chatContainer.appendChild(div);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return div;
+    }
+
+    async function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+      msgInput.value = "";
+      appendMessage(text, "user");
+
+      const typing = document.createElement("div");
+      typing.className = "typing";
+      typing.textContent = "Copilot is thinking…";
+      chatContainer.appendChild(typing);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      sendBtn.disabled = true;
+      msgInput.disabled = true;
+
+      try {
+        const resp = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text }),
+        });
+        typing.remove();
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          appendMessage(`Error: ${err.detail || resp.statusText}`, "bot error");
+          return;
+        }
+        const data = await resp.json();
+        appendMessage(data.reply, "bot");
+      } catch (e) {
+        typing.remove();
+        appendMessage(`Network error: ${e.message}`, "bot error");
+      } finally {
+        sendBtn.disabled = false;
+        msgInput.disabled = false;
+        msgInput.focus();
+      }
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    msgInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+
+    // ── Report logic ────────────────────────────────────────────────
+    const queryList = document.getElementById("query-list");
+    const addQueryBtn = document.getElementById("add-query-btn");
+    const runReportBtn = document.getElementById("run-report-btn");
+    const reportStatus = document.getElementById("report-status");
+    const reportResults = document.getElementById("report-results");
+
+    function createQueryRow(value = "") {
+      const row = document.createElement("div");
+      row.className = "query-row";
+      row.innerHTML = `
+        <input type="text" class="query-input" placeholder="Enter a query…" value="${value.replace(/"/g, '&quot;')}" />
+        <button class="btn-icon danger remove-query" title="Remove">&times;</button>
+      `;
+      return row;
+    }
+
+    addQueryBtn.addEventListener("click", () => {
+      queryList.appendChild(createQueryRow());
+      const inputs = queryList.querySelectorAll(".query-input");
+      inputs[inputs.length - 1].focus();
+    });
+
+    queryList.addEventListener("click", (e) => {
+      const removeBtn = e.target.closest(".remove-query");
+      if (!removeBtn) return;
+      const rows = queryList.querySelectorAll(".query-row");
+      if (rows.length <= 1) return; // keep at least one row
+      removeBtn.closest(".query-row").remove();
+    });
+
+    function renderReport(data) {
+      reportResults.innerHTML = "";
+
+      // Summary
+      const summary = document.createElement("div");
+      summary.className = "report-summary";
+      summary.innerHTML = `
+        <span class="stat"><b>${data.total}</b> total</span>
+        <span class="stat"><b>${data.succeeded}</b> succeeded</span>
+        <span class="stat fail"><b>${data.failed}</b> failed</span>
+      `;
+      reportResults.appendChild(summary);
+
+      // Each result
+      data.results.forEach((r, i) => {
+        const item = document.createElement("div");
+        item.className = "report-item";
+        const queryLabel = document.createElement("div");
+        queryLabel.className = "query-label";
+        queryLabel.textContent = `Query ${i + 1}: ${r.query}`;
+        item.appendChild(queryLabel);
+
+        const resp = document.createElement("div");
+        if (r.error) {
+          resp.className = "response error-text";
+          resp.textContent = `Error: ${r.error}`;
+        } else {
+          resp.className = "response";
+          resp.textContent = r.response ?? "(no response)";
+        }
+        item.appendChild(resp);
+        reportResults.appendChild(item);
+      });
+    }
+
+    async function runReport() {
+      const systemPrompt = document.getElementById("system-prompt").value.trim();
+      if (!systemPrompt) {
+        reportStatus.textContent = "System prompt is required.";
+        return;
+      }
+      const queries = Array.from(queryList.querySelectorAll(".query-input"))
+        .map(inp => inp.value.trim())
+        .filter(q => q.length > 0);
+      if (queries.length === 0) {
+        reportStatus.textContent = "At least one query is required.";
+        return;
+      }
+
+      runReportBtn.disabled = true;
+      reportStatus.textContent = "Running report…";
+      reportResults.innerHTML = "";
+
+      try {
+        const resp = await fetch("/api/report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ queries, system_prompt: systemPrompt }),
+        });
+        if (!resp.ok) {
+          const err = await resp.json().catch(() => ({}));
+          reportStatus.textContent = `Error: ${err.detail || resp.statusText}`;
+          return;
+        }
+        const data = await resp.json();
+        reportStatus.textContent = "Report completed.";
+        renderReport(data);
+      } catch (e) {
+        reportStatus.textContent = `Network error: ${e.message}`;
+      } finally {
+        runReportBtn.disabled = false;
+      }
+    }
+
+    runReportBtn.addEventListener("click", runReport);
+
+    init();
+  </script>
+</body>
+</html>

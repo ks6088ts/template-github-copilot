@@ -60,8 +60,9 @@ jupyterlab: ## run Jupyter Lab
 # Docker
 # ---
 DOCKER_REPO_NAME ?= ks6088ts
-DOCKER_IMAGE_NAME ?= adhoc
-DOCKER_COMMAND ?=
+DOCKER_IMAGE_NAME_API ?= template-github-copilot-api
+DOCKER_IMAGE_NAME_COPILOT ?= template-github-copilot-copilot
+DOCKER_COMMAND ?= python scripts/api_server.py --help
 
 # Tools
 TOOLS_DIR ?= /usr/local/bin
@@ -70,27 +71,60 @@ TRIVY_VERSION ?= 0.58.1
 .PHONY: docker-build
 docker-build: ## build Docker image
 	docker build \
-		-t $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG) \
+		-f api.Dockerfile \
+		-t $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_API):$(GIT_TAG) \
+		--build-arg GIT_REVISION=$(GIT_REVISION) \
+		--build-arg GIT_TAG=$(GIT_TAG) \
+		.
+	docker build \
+		-f copilot.Dockerfile \
+		-t $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_COPILOT):$(GIT_TAG) \
 		--build-arg GIT_REVISION=$(GIT_REVISION) \
 		--build-arg GIT_TAG=$(GIT_TAG) \
 		.
 
 .PHONY: docker-run
 docker-run: ## run Docker container
-	docker run --rm $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG) $(DOCKER_COMMAND)
+	docker run --rm $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_API):$(GIT_TAG) $(DOCKER_COMMAND)
 
 .PHONY: docker-lint
 docker-lint: ## lint Dockerfile
-	docker run --rm -i hadolint/hadolint < Dockerfile
+	docker run --rm -i hadolint/hadolint < api.Dockerfile
+	docker run --rm -i hadolint/hadolint < copilot.Dockerfile
 
 .PHONY: docker-scan
 docker-scan: ## scan Docker image
 	@# https://aquasecurity.github.io/trivy/v0.18.3/installation/#install-script
 	@which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(TOOLS_DIR) v$(TRIVY_VERSION)
-	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
+	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_API):$(GIT_TAG)
+	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_COPILOT):$(GIT_TAG)
 
 .PHONY: ci-test-docker
 ci-test-docker: docker-lint docker-build docker-scan docker-run ## run CI test for Docker
+
+# ---
+# Docker Compose
+# ---
+
+.PHONY: compose-build
+compose-build: ## build Docker Compose services
+	docker compose build
+
+.PHONY: compose-up
+compose-up: ## start Docker Compose services
+	docker compose up --build
+
+.PHONY: compose-up-d
+compose-up-d: ## start Docker Compose services in background
+	docker compose up --build -d
+
+.PHONY: compose-down
+compose-down: ## stop Docker Compose services
+	docker compose down
+
+.PHONY: compose-logs
+compose-logs: ## show Docker Compose logs
+	docker compose logs -f
 
 # ---
 # Project
@@ -110,3 +144,7 @@ copilot: ## run GitHub Copilot CLI server
 .PHONY: copilot-app
 copilot-app: ## run application with GitHub Copilot SDK
 	uv run python scripts/chat.py chat-loop --verbose
+
+.PHONY: copilot-api
+copilot-api: ## run API server with GitHub Copilot SDK
+	uv run python scripts/api_server.py --verbose --reload

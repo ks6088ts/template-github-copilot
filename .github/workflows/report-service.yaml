@@ -17,7 +17,6 @@ on:
         description: "LLM provider authentication method"
         options:
           - copilot
-          - api_key
           - entra_id
         required: true
         default: copilot
@@ -32,7 +31,7 @@ on:
         default: gpt-5-mini
       byok_provider_type:
         type: choice
-        description: "BYOK provider type (used when auth_method is api_key or entra_id)"
+        description: "BYOK provider type (used when auth_method is entra_id)"
         options:
           - openai
           - azure
@@ -41,17 +40,17 @@ on:
         default: openai
       byok_base_url:
         type: string
-        description: "BYOK provider base URL (used when auth_method is api_key or entra_id)"
+        description: "BYOK provider base URL (used when auth_method is entra_id)"
         required: false
         default: "https://api.openai.com/v1/"
       byok_model:
         type: string
-        description: "Model identifier for the BYOK provider (used when auth_method is api_key or entra_id)"
+        description: "Model identifier for the BYOK provider (used when auth_method is entra_id)"
         required: false
         default: gpt-5
       byok_wire_api:
         type: choice
-        description: "Wire API format (used when auth_method is api_key or entra_id)"
+        description: "Wire API format (used when auth_method is entra_id)"
         options:
           - completions
           - responses
@@ -135,8 +134,6 @@ jobs:
         id: report
         shell: bash
         working-directory: src/python
-        env:
-          BYOK_API_KEY: ${{ secrets.BYOK_API_KEY }}
         run: |
           ARGS=(
             --verbose
@@ -153,7 +150,6 @@ jobs:
             ARGS+=(
               --byok-provider-type "${{ github.event.inputs.byok_provider_type }}"
               --byok-base-url "${{ github.event.inputs.byok_base_url }}"
-              --byok-api-key "$BYOK_API_KEY"
               --byok-model "${{ github.event.inputs.byok_model }}"
               --byok-wire-api "${{ github.event.inputs.byok_wire_api }}"
             )

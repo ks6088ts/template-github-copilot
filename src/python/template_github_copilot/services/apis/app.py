@@ -22,7 +22,14 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel, Field
 
-from template_github_copilot.settings.oauth import OAuthSettings, get_oauth_settings
+from template_github_copilot.core import (
+    create_copilot_client,
+    create_event_handler,
+    create_message_options,
+    create_session_config,
+)
+from template_github_copilot.services.reports import ReportOutput, run_parallel_chat
+from template_github_copilot.settings import OAuthSettings, get_oauth_settings
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +50,17 @@ class ChatResponse(BaseModel):
     """Response returned to the frontend."""
 
     reply: str = Field(..., description="Copilot's response text.")
+
+
+class ReportRequest(BaseModel):
+    """Incoming report request."""
+
+    queries: list[str] = Field(
+        ..., min_length=1, description="List of user queries to run in parallel."
+    )
+    system_prompt: str = Field(
+        ..., min_length=1, description="System prompt for Copilot sessions."
+    )
 
 
 class UserInfo(BaseModel):
@@ -251,20 +269,10 @@ def create_app(settings: OAuthSettings | None = None) -> FastAPI:
         if not github_token:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
-        from copilot import CopilotClient
-        from copilot.types import CopilotClientOptions
-
-        from template_github_copilot.core import (
-            create_event_handler,
-            create_message_options,
-            create_session_config,
-        )
-
         try:
-            client = CopilotClient(
-                options=CopilotClientOptions(
-                    github_token=github_token,
-                ),
+            client = create_copilot_client(
+                cli_url=settings.copilot_cli_url,
+                github_token=github_token,
             )
             await client.start()
 
@@ -281,6 +289,31 @@ def create_app(settings: OAuthSettings | None = None) -> FastAPI:
             return ChatResponse(reply=content or "(no response)")
         except Exception as e:
             logger.exception("Copilot chat failed")
+            raise HTTPException(status_code=500, detail=str(e)) from e
+
+    # ------------------------------------------------------------------
+    # Report endpoint
+    # ------------------------------------------------------------------
+
+    @app.post("/api/report", response_model=ReportOutput)
+    async def report(body: ReportRequest, request: Request):
+        """Run multiple queries in parallel and return a structured report."""
+        session = _get_session(request, settings.session_secret)
+        github_token: str | None = session.get("github_token")
+        if not github_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        try:
+            result = await run_parallel_chat(
+                cli_url=settings.copilot_cli_url,
+                queries=body.queries,
+                system_prompt=body.system_prompt,
+                writer=logger.debug,
+                github_token=github_token,
+            )
+            return result
+        except Exception as e:
+            logger.exception("Report generation failed")
             raise HTTPException(status_code=500, detail=str(e)) from e
 
     return app

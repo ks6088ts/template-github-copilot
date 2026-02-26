@@ -47,6 +47,7 @@ async def run_parallel_chat(
     writer: WriterFunc = _default_writer,
     provider: ProviderConfig | None = None,
     model: str | None = None,
+    github_token: str | None = None,
 ) -> ReportOutput:
     """Run multiple chat queries in parallel sessions and return structured results.
 
@@ -57,6 +58,8 @@ async def run_parallel_chat(
         writer: A callable for logging messages.
         provider: Optional ``ProviderConfig`` for BYOK providers.
         model: Optional model identifier (e.g. ``"gpt-4o"``).
+        github_token: Optional GitHub OAuth token. When provided, the client
+            authenticates via this token instead of ``cli_url``.
 
     Returns:
         A ``ReportOutput`` containing all results.
@@ -85,7 +88,7 @@ async def run_parallel_chat(
         except Exception as e:
             return ReportResult(query=query, error=str(e))
 
-    client = create_copilot_client(cli_url)
+    client = create_copilot_client(cli_url, github_token=github_token)
     await client.start()
 
     tasks = [_process_query(client, q) for q in queries]

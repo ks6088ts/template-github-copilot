@@ -12,10 +12,14 @@ from template_github_copilot.settings.oauth import get_oauth_settings
 
 app = typer.Typer(
     add_completion=False,
-    help="Copilot Chat API server with OAuth GitHub App authentication",
 )
 
 logger = get_logger(__name__)
+
+
+@app.callback()
+def callback():
+    """Copilot Chat API server with OAuth GitHub App authentication"""
 
 
 def set_verbose_logging(
@@ -37,6 +41,10 @@ def serve(
         int,
         typer.Option("--port", "-p", help="Bind port"),
     ] = 0,
+    copilot_cli_url: Annotated[
+        str,
+        typer.Option("--copilot-cli-url", "-c", help="Copilot CLI server URL"),
+    ] = "",
     reload: Annotated[
         bool,
         typer.Option("--reload", "-r", help="Enable auto-reload for development"),
@@ -54,6 +62,9 @@ def serve(
     # CLI flags override settings; fall back to env/dotenv values
     bind_host = host or settings.api_host
     bind_port = port or settings.api_port
+
+    if copilot_cli_url:
+        settings.copilot_cli_url = copilot_cli_url
 
     if not settings.github_client_id or not settings.github_client_secret:
         logger.warning(

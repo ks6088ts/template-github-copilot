@@ -120,18 +120,46 @@ def create_event_handler(
     return on_event
 
 
-def create_copilot_client(cli_url: str = "localhost:3000") -> CopilotClient:
+def create_copilot_client(
+    cli_url: str = "",
+    github_token: str | None = None,
+) -> CopilotClient:
     """Factory function that creates a CopilotClient.
 
+    The Copilot SDK does **not** allow ``cli_url`` and ``github_token`` to be
+    set simultaneously.  When ``cli_url`` is provided (non-empty) the client
+    connects to an *external* Copilot CLI server (which manages its own
+    authentication) – this is the mode used in Docker Compose.
+
+    When ``cli_url`` is empty and ``github_token`` is given, the SDK spawns a
+    *local* Copilot CLI subprocess authenticated with the token.
+
     Args:
-        cli_url: The URL of the Copilot CLI server.
+        cli_url: The URL of an external Copilot CLI server
+            (e.g. ``"copilot:3000"`` in Docker Compose or
+            ``"localhost:3000"`` for local development).
+        github_token: Optional GitHub OAuth token. Used only when
+            *cli_url* is empty.
 
     Returns:
         A configured ``CopilotClient`` instance.
     """
+    if cli_url:
+        return CopilotClient(
+            options=CopilotClientOptions(
+                cli_url=cli_url,
+            ),
+        )
+    if github_token:
+        return CopilotClient(
+            options=CopilotClientOptions(
+                github_token=github_token,
+                use_logged_in_user=False,
+            ),
+        )
     return CopilotClient(
         options=CopilotClientOptions(
-            cli_url=cli_url,
+            cli_url="localhost:3000",
         ),
     )
 

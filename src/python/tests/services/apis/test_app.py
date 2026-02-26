@@ -1,5 +1,6 @@
 """Tests for the FastAPI OAuth GitHub App chat application."""
 
+import logging
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -8,13 +9,17 @@ from fastapi.testclient import TestClient
 from template_github_copilot.services.apis.app import (
     ChatRequest,
     ChatResponse,
+    ReportRequest,
     UserInfo,
     _sessions,
     _sign,
     _verify,
     create_app,
 )
-from template_github_copilot.settings.oauth import OAuthSettings
+from template_github_copilot.services.reports import ReportOutput, ReportResult
+from template_github_copilot.settings import OAuthSettings
+
+logger = logging.getLogger("template_github_copilot.services.apis.app")
 
 
 @pytest.fixture
@@ -175,16 +180,19 @@ class TestChat:
         resp = client.post("/api/chat", json={"message": "hi"})
         assert resp.status_code == 401
 
-    @patch("copilot.CopilotClient")
-    @patch("template_github_copilot.core.create_message_options", return_value="opts")
-    @patch("template_github_copilot.core.create_event_handler")
-    @patch("template_github_copilot.core.create_session_config")
+    @patch("template_github_copilot.services.apis.app.create_copilot_client")
+    @patch(
+        "template_github_copilot.services.apis.app.create_message_options",
+        return_value="opts",
+    )
+    @patch("template_github_copilot.services.apis.app.create_event_handler")
+    @patch("template_github_copilot.services.apis.app.create_session_config")
     def test_chat_authenticated(
         self,
         mock_create_session_config,
         mock_create_event_handler,
         mock_create_message_options,
-        mock_copilot_client_cls,
+        mock_create_copilot_client,
         client: TestClient,
         settings: OAuthSettings,
     ):
@@ -205,9 +213,89 @@ class TestChat:
         mock_client = AsyncMock()
         mock_client.start = AsyncMock()
         mock_client.create_session = AsyncMock(return_value=mock_session)
-        mock_copilot_client_cls.return_value = mock_client
+        mock_create_copilot_client.return_value = mock_client
 
         resp = client.post("/api/chat", json={"message": "hi"})
 
         assert resp.status_code == 200
         assert resp.json()["reply"] == "Hello from Copilot!"
+
+
+class TestReport:
+    def test_report_unauthenticated(self, client: TestClient):
+        resp = client.post(
+            "/api/report",
+            json={"queries": ["q1"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 401
+
+    @patch("template_github_copilot.services.apis.app.run_parallel_chat")
+    def test_report_authenticated(
+        self,
+        mock_run_parallel_chat,
+        client: TestClient,
+        settings: OAuthSettings,
+    ):
+        """Verify report endpoint calls run_parallel_chat with the user's token."""
+        sid = "report-sid"
+        _sessions[sid] = {"github_token": "gho_report_token", "user_login": "dev"}
+        signed_cookie = _sign(sid, settings.session_secret)
+        client.cookies.set("session_id", signed_cookie)
+
+        mock_run_parallel_chat.return_value = ReportOutput(
+            system_prompt="Be helpful",
+            results=[
+                ReportResult(query="q1", response="answer1"),
+                ReportResult(query="q2", response="answer2"),
+            ],
+            total=2,
+            succeeded=2,
+            failed=0,
+        )
+
+        resp = client.post(
+            "/api/report",
+            json={"queries": ["q1", "q2"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["total"] == 2
+        assert data["succeeded"] == 2
+        assert data["failed"] == 0
+        assert len(data["results"]) == 2
+        assert data["results"][0]["query"] == "q1"
+        assert data["results"][0]["response"] == "answer1"
+
+        mock_run_parallel_chat.assert_called_once_with(
+            cli_url="localhost:3000",
+            queries=["q1", "q2"],
+            system_prompt="Be helpful",
+            writer=logger.debug,
+            github_token="gho_report_token",
+        )
+
+    @patch("template_github_copilot.services.apis.app.run_parallel_chat")
+    def test_report_failure(
+        self,
+        mock_run_parallel_chat,
+        client: TestClient,
+        settings: OAuthSettings,
+    ):
+        """Verify report endpoint returns 500 when run_parallel_chat raises."""
+        sid = "report-err-sid"
+        _sessions[sid] = {"github_token": "gho_err_token", "user_login": "dev"}
+        signed_cookie = _sign(sid, settings.session_secret)
+        client.cookies.set("session_id", signed_cookie)
+
+        mock_run_parallel_chat.side_effect = RuntimeError("boom")
+
+        resp = client.post(
+            "/api/report",
+            json={"queries": ["q1"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 500
+
+    def test_report_request_model(self):
+        req = ReportRequest(queries=["q1", "q2"], system_prompt="prompt")
+        assert req.queries == ["q1", "q2"]
+        assert req.system_prompt == "prompt"

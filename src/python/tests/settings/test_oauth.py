@@ -19,7 +19,7 @@ def test_oauth_settings_defaults(monkeypatch: pytest.MonkeyPatch):
     assert settings.github_client_secret == ""
     assert settings.api_host == "127.0.0.1"
     assert settings.api_port == 8000
-    assert settings.copilot_cli_url == "localhost:3000"
+    assert settings.copilot_cli_url == ""
     assert settings.session_secret == "change-me-in-production"
 
 

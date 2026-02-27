@@ -107,8 +107,11 @@ To adapt the platform for a new domain, you only need to change configuration â€
 Example: switching from product evaluation to clinical guideline review:
 
 ```bash
-export REPORT_SERVICE_SYSTEM_PROMPT="You are an expert clinical guideline reviewer."
-export REPORT_SERVICE_QUERIES="Evaluate evidence quality;Check recommendation consistency;Assess applicability"
+uv run python scripts/report_service.py generate \
+  --system-prompt "You are an expert clinical guideline reviewer." \
+  --queries "Evaluate evidence quality,Check recommendation consistency,Assess applicability" \
+  --account-url "https://<account>.blob.core.windows.net" \
+  --container-name "reports"
 ```
 
 ---
@@ -121,14 +124,24 @@ For local development and testing before deploying to GitHub Actions:
 cd src/python
 
 # Install dependencies
-make install
+make install-deps-dev
 
 # Set environment variables
-export COPILOT_GITHUB_TOKEN=$(gh copilot token)
+cp .env.template .env  # Edit with your settings
+export COPILOT_GITHUB_TOKEN="your-github-pat"
 
-# Run locally
-make chat    # Interactive chat
-make report  # Generate report
+# Start the Copilot CLI server
+make copilot
+
+# In another terminal: run interactive chat
+make copilot-app
+
+# Or: generate a report
+uv run python scripts/report_service.py generate \
+  --system-prompt "You are a product evaluator." \
+  --queries "Evaluate durability,Evaluate usability" \
+  --account-url "https://<account>.blob.core.windows.net" \
+  --container-name "reports"
 ```
 
 See [Getting Started](getting_started.md) for detailed local setup instructions.

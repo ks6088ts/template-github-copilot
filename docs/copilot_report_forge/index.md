@@ -59,17 +59,33 @@ No GPU provisioning, no model hosting, no long-lived secrets. The entire workflo
 
 ## Architecture Overview
 
-![Architecture Overview](https://github.com/user-attachments/assets/5d6cf058-7253-4601-b2d9-9c5fea9023da)
+```mermaid
+flowchart TB
+    subgraph Trigger
+        USER["User / Scheduler"]
+    end
 
-**Steps:**
+    subgraph Execution["Execution Environment"]
+        SDK["Copilot SDK"]
+        AGENTS["AI Agents"]
+        LLM["Hosted LLMs"]
+    end
 
-1. Developer accesses GitHub.com
-2. Developer triggers GitHub Actions in GitHub.com
-3. GitHub Actions connects to Microsoft Azure via OIDC
-4. Execute a report service built with the GitHub Copilot SDK
-5. Interact with agents in Microsoft Foundry if needed
-6. Store generated reports in a storage account
-7. Send notification messages to collaboration tools (e.g., Microsoft Teams, Slack)
+    subgraph Cloud["Azure"]
+        AUTH["Entra ID (OIDC)"]
+        STORAGE["Blob Storage"]
+        FOUNDRY["AI Foundry"]
+    end
+
+    USER --> SDK
+    SDK -- "Parallel queries" --> LLM
+    SDK -- "Tool calls" --> AGENTS
+    AGENTS --> FOUNDRY
+    SDK -- "Upload report" --> STORAGE
+    STORAGE -- "Secure URL" --> USER
+    USER -. "Passwordless auth" .-> AUTH
+    AUTH -. "Access token" .-> SDK
+```
 
 > For component-level details and data flows, see [Architecture](architecture.md).
 

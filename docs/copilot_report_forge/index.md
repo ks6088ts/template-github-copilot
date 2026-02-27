@@ -1,0 +1,165 @@
+# CopilotReportForge
+
+> **Navigation:** [README](../../README.md) > **CopilotReportForge (index)**
+
+**A platform that turns LLM queries into repeatable, auditable, multi-perspective reports — without managing any AI infrastructure.**
+
+---
+
+## The Problem in One Sentence
+
+Enterprises use LLMs through copy-paste chat sessions — producing unstructured, unreproducible, and ungoverned outputs that cannot be audited, scaled, or safely shared with stakeholders.
+
+> For a deeper analysis of the problem space, see [Problem & Solution](problem_and_solution.md).
+
+---
+
+## What CopilotReportForge Does
+
+CopilotReportForge converts ad-hoc LLM interactions into a **governed, automated pipeline**:
+
+1. **Define perspectives** — Assign system prompts as expert personas (e.g., "Quality Engineer", "Compliance Officer").
+2. **Submit evaluation queries** — Specify what to evaluate (e.g., "Assess durability", "Check regulatory compliance").
+3. **Execute in parallel** — All queries run concurrently against hosted LLMs, each under its assigned persona.
+4. **Produce structured results** — Outputs are collected into a typed JSON report with success/failure tracking.
+5. **Share securely** — Reports are uploaded to Azure Blob Storage with time-limited, revocable access URLs.
+
+No GPU provisioning, no model hosting, no long-lived secrets. The entire workflow runs in ephemeral sandbox environments with full audit trails.
+
+---
+
+## Architecture Overview
+
+```mermaid
+flowchart TB
+    subgraph Trigger
+        USER["User / Scheduler"]
+    end
+
+    subgraph Execution["Execution Environment"]
+        SDK["Copilot SDK"]
+        AGENTS["AI Agents"]
+        LLM["Hosted LLMs"]
+    end
+
+    subgraph Cloud["Azure"]
+        AUTH["Entra ID (OIDC)"]
+        STORAGE["Blob Storage"]
+        FOUNDRY["AI Foundry"]
+    end
+
+    USER --> SDK
+    SDK -- "Parallel queries" --> LLM
+    SDK -- "Tool calls" --> AGENTS
+    AGENTS --> FOUNDRY
+    SDK -- "Upload report" --> STORAGE
+    STORAGE -- "Secure URL" --> USER
+    USER -. "Passwordless auth" .-> AUTH
+    AUTH -. "Access token" .-> SDK
+```
+
+> For component-level details and data flows, see [Architecture](architecture.md).
+
+---
+
+## Key Capabilities
+
+| Capability | What It Means |
+|---|---|
+| **Parallel Multi-Persona Execution** | Run N queries concurrently, each with a different expert persona, and aggregate results into one report |
+| **Zero-Infrastructure AI** | Use hosted LLMs via the Copilot SDK — no model deployment or GPU management |
+| **Passwordless Security** | OIDC-based authentication between GitHub Actions and Azure — no stored API keys |
+| **Secure Artifact Sharing** | Reports shared via time-limited, revocable URLs — no public bucket exposure |
+| **Agentic Workflows** | Delegate domain-specific tasks to AI Foundry Agents that can reference stored documents |
+| **Infrastructure as Code** | All Azure resources, identities, and permissions managed via Terraform |
+| **Web UI** | Browser-based chat and report generation with GitHub OAuth login |
+| **Container Deployment** | Docker Compose support with images on GitHub Container Registry and Docker Hub |
+
+---
+
+## Cross-Industry Applicability
+
+The platform is **domain-agnostic by design**. By changing only the system prompt (persona) and queries (evaluation dimensions), the same pipeline serves entirely different industries:
+
+| Industry | Persona Example | Evaluation Dimensions |
+|---|---|---|
+| **Manufacturing** | Sensory panelist, Quality engineer | Texture, durability, regulatory compliance |
+| **Real Estate** | Layout evaluator, ADA compliance reviewer | Accessibility, traffic flow, space utilization |
+| **Healthcare** | Clinical pharmacist, Guideline reviewer | Drug interactions, dosage, contraindications |
+| **Finance** | Credit analyst, Compliance officer | Credit exposure, market risk, regulatory adherence |
+| **Education** | Curriculum designer, Assessment specialist | Learning objectives, rubric design, lesson plans |
+| **Creative** | Brand strategist, Cultural sensitivity reviewer | Inclusivity, brand alignment, market resonance |
+
+> The core insight: **system prompts are persona configuration, queries are evaluation dimensions.** Any expert judgment can be parallelized, structured, and audited at scale.
+
+---
+
+## Business Value
+
+| Dimension | Value |
+|---|---|
+| **Zero Infrastructure** | No GPU clusters or model hosting — pay-per-use via hosted LLMs and Azure AI Foundry |
+| **Minutes to Production** | Clone → configure → deploy in under an hour with Terraform + GitHub Actions |
+| **Enterprise Security** | Passwordless OIDC, RBAC-scoped access, time-bounded sharing URLs, zero long-lived secrets |
+| **Sandbox Execution** | Ephemeral, disposable environments — more secure than local execution, no credential leakage |
+| **Built-in Audit Trail** | Every execution is logged with who, what, when, and how long — no additional tooling required |
+| **Domain Agnostic** | Adapt to any industry by changing configuration parameters, not code |
+| **Regulated Industry Ready** | BYOK support, private endpoint compatibility, IaC-managed RBAC for air-gapped environments |
+
+---
+
+## Quick Start
+
+```shell
+# 1. Clone and install
+git clone https://github.com/ks6088ts/template-github-copilot.git
+cd template-github-copilot/src/python
+make install-deps-dev
+
+# 2. Configure environment
+cp .env.template .env  # Edit with your settings
+
+# 3. Start the Copilot CLI server
+export COPILOT_GITHUB_TOKEN="your-github-pat"
+make copilot
+
+# 4. Run the interactive chat (in another terminal)
+make copilot-app
+
+# 5. Generate a multi-perspective report
+uv run python scripts/report_service.py generate \
+  --system-prompt "You are a product evaluation specialist." \
+  --queries "Evaluate durability,Evaluate usability,Evaluate aesthetics" \
+  --account-url "https://<account>.blob.core.windows.net" \
+  --container-name "reports"
+```
+
+> For full setup instructions, see [Getting Started](getting_started.md).
+
+---
+
+## Documentation
+
+| Document | Description |
+|---|---|
+| [Problem & Solution](problem_and_solution.md) | Why this platform exists — the enterprise AI adoption gap and how the architecture addresses it |
+| [Architecture](architecture.md) | System design, execution model, security model, and extensibility |
+| [Getting Started](getting_started.md) | Prerequisites, local development setup, infrastructure provisioning, and CLI reference |
+| [Deployment](deployment.md) | Step-by-step deployment from local dev to production GitHub Actions workflows |
+| [GitHub OAuth App](github_oauth_app.md) | Setting up GitHub OAuth for the web UI authentication flow |
+| [Web UI Guide](web_ui_guide.md) | Walkthrough of the browser-based chat and report generation interface |
+| [Running Containers](container_local_run.md) | Running the platform via Docker Compose (local build, Docker Hub, or GHCR) |
+| [Responsible AI](responsible_ai.md) | Fairness, transparency, safety, privacy guidelines, and deployment checklist |
+| [References](references.md) | External links and further reading |
+
+## Infrastructure (Terraform Scenarios)
+
+| Scenario | Purpose |
+|---|---|
+| [Azure GitHub OIDC](../../infra/scenarios/azure_github_oidc/README.md) | Establish passwordless trust between GitHub Actions and Azure |
+| [GitHub Secrets](../../infra/scenarios/github_secrets/README.md) | Automate GitHub environment and secrets configuration |
+| [Azure Microsoft Foundry](../../infra/scenarios/azure_microsoft_foundry/README.md) | Deploy AI Foundry with model endpoints and storage |
+
+## License
+
+[MIT](../../LICENSE)

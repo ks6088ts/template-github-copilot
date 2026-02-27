@@ -1,104 +1,87 @@
-# Azure Microsoft Foundry Scenario
+# Azure Microsoft Foundry
 
 > **Navigation:** [README](../../../README.md) > [Getting Started](../../../docs/copilot_report_forge/getting_started.md) > Azure Microsoft Foundry
 
-This Terraform scenario deploys a Microsoft Foundry environment on Azure. It provisions an AI Hub with AI Services, creates a Foundry project, and configures OpenAI model deployments.
+---
+
+## Purpose
+
+This Terraform scenario deploys Azure AI Foundry infrastructure — the AI Hub, model endpoints, Storage Account, and optional AI Search index. This scenario is **optional**: you only need it if you want to use domain-specific AI agents that require access to reference data (documents, images, specifications).
+
+### When to Use This
+
+| Use Case | Need This Scenario? |
+|---|---|
+| Basic chat and report generation via Copilot SDK | No |
+| AI agents with access to domain documents | Yes |
+| Vector search over reference data | Yes |
+| Grounded evaluations using uploaded specifications | Yes |
+
+---
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    Internet((Internet))
-
     subgraph Azure["Azure Resource Group"]
-        Account["Microsoft Foundry Account<br/>(AI Services - S0)"]
+        Hub["AI Hub (AI Services)"]
         Project["Foundry Project"]
-        Deployments["Model Deployments<br/>- gpt-5.1<br/>- gpt-5<br/>- gpt-4o<br/>- text-embedding-3-large<br/>- text-embedding-3-small"]
+        Models["Model Deployments"]
+        Storage["Storage Account"]
+        Search["AI Search (optional)"]
     end
 
-    Internet -->|HTTPS| Account
-    Account --> Project
-    Account --> Deployments
+    Hub --> Project
+    Project --> Models
+    Hub --> Storage
+    Hub -.-> Search
 ```
 
-## What It Creates
+---
+
+## What Gets Created
 
 | Resource | Purpose |
 |---|---|
-| Resource Group | Container for all Microsoft Foundry resources |
-| Microsoft Foundry Account | Cognitive Services account (AI Services, S0 SKU) with AI Foundry capabilities |
-| Microsoft Foundry Project | Project workspace within the Foundry account |
-| Model Deployments | OpenAI model endpoints (configurable via `model_deployments` variable) |
+| AI Hub (AI Services) | Central management for AI capabilities |
+| Foundry Project | Workspace for agents and experiments |
+| Model Deployments | LLM endpoints (GPT-4o, GPT-4o-mini, embeddings) |
+| Storage Account | Reference data and agent artifacts |
+| AI Search (optional) | Vector/hybrid search over reference data |
 
-## Prerequisites
+---
 
-- Terraform CLI (>= 1.6.0)
-- Azure CLI installed and authenticated
-- Azure subscription with sufficient permissions
+## Usage
 
-## How to Use
-
-```shell
-# (Optional) Create backend.tf for remote state storage
-cat <<EOF > backend.tf
-terraform {
-  backend "azurerm" {
-    resource_group_name  = "YOUR_RESOURCE_GROUP_NAME"
-    storage_account_name = "YOUR_STORAGE_ACCOUNT_NAME"
-    container_name       = "YOUR_CONTAINER_NAME"
-    key                  = "azure_microsoft_foundry.template-github-copilot_dev.tfstate"
-  }
-}
-EOF
-
-# Log in to Azure
-az login
-
-# (Optional) Confirm the details for the currently logged-in user
-az ad signed-in-user show
-
-# Set environment variables
-export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
-
-# Initialize Terraform
+```bash
+cd infra/scenarios/azure_microsoft_foundry
 terraform init
-
-# Format check (matches CI)
-terraform fmt -check
-
-# Validate configuration
-terraform validate
-
-# Plan the deployment
-terraform plan
-
-# Apply the deployment (parallelism=1 required to avoid deployment conflicts)
-terraform apply -auto-approve -parallelism=1
-
-# Confirm the output
-terraform output
-
-# Destroy the deployment (when no longer needed)
-terraform destroy -auto-approve -parallelism=1
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
 
-> [!NOTE]
-> The `-parallelism=1` flag is required for `apply` and `destroy` to avoid conflicts when creating or removing model deployments sequentially.
+### Key Variables
 
-## Variables
+| Variable | Description | Default |
+|---|---|---|
+| `location` | Azure region | `eastus` |
+| `create_search` | Whether to deploy AI Search | `false` |
 
-| Variable | Type | Default | Description |
-|---|---|---|---|
-| `name` | `string` | `azuremicrosoftfoundry` | Base name for resources |
-| `location` | `string` | `eastus2` | Azure region |
-| `tags` | `map(string)` | *(see variables.tf)* | Tags applied to all resources |
-| `model_deployments` | `list(object)` | *(5 default models)* | Model deployment configurations |
-
-## Outputs
+### Outputs
 
 | Output | Description |
 |---|---|
-| `resource_group_name` | Created resource group name |
-| `microsoft_foundry_account_name` | Microsoft Foundry account name |
-| `microsoft_foundry_account_endpoint` | Microsoft Foundry account endpoint URL |
-| `microsoft_foundry_project_name` | Microsoft Foundry project name |
+| `resource_group_name` | Name of the created resource group |
+| `ai_services_endpoint` | Endpoint URL for AI Services |
+| `storage_account_name` | Name of the Storage Account |
+
+---
+
+## FAQ
+
+| Question | Answer |
+|---|---|
+| Is this required for basic usage? | No — basic chat and reports work with just the Copilot SDK. Deploy this only for AI Foundry Agents. |
+| What models are deployed? | GPT-4o, GPT-4o-mini, text-embedding-3-large, text-embedding-3-small by default |
+| Can I add more models? | Yes — add `azurerm_cognitive_deployment` resources in the Foundry module |
+| What about costs? | AI Services uses pay-per-use pricing. Storage and Search have their own pricing tiers. |

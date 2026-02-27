@@ -1,6 +1,6 @@
 # Architecture
 
-> **Navigation:** [README](../../README.md) > **Architecture**
+> **Navigation:** [CopilotReportForge](index.md) > **Architecture**
 >
 > **See also:** [Problem & Solution](problem_and_solution.md) · [Deployment](deployment.md) · [Responsible AI](responsible_ai.md)
 
@@ -8,502 +8,257 @@
 
 ## Design Philosophy
 
-CopilotReportForge is built on four architectural principles:
+CopilotReportForge is built on four principles that directly address the [problems identified in enterprise AI adoption](problem_and_solution.md):
 
-1. **Composability** — Every component (LLM query, Foundry Agent, Blob Storage, Slack) is independent and composable. Swap system prompts to change domains; swap tools to change capabilities.
-2. **Zero-Infrastructure AI** — The Copilot CLI serves as a runtime proxy to hosted LLMs. No GPU provisioning, no model management, no inference servers.
-3. **Security by Default** — OIDC federation, user-delegation SAS keys, and RBAC-scoped access eliminate long-lived secrets entirely.
-4. **Ephemeral & Auditable Execution** — All AI agent execution happens within GitHub Actions runners, providing sandboxed, disposable environments with built-in observability.
-
----
-
-## GitHub Actions as a Secure Execution Platform
-
-A distinguishing design choice of CopilotReportForge is that **all agent execution runs within GitHub Actions runners** rather than on developers' local machines. This provides several critical advantages:
-
-### Ephemeral Sandbox Environments
-
-GitHub Actions runners are **ephemeral** — each workflow execution spins up a fresh, isolated environment and discards it upon completion. This means:
-
-- **No persistent state leakage** — Secrets, intermediate files, and model outputs exist only for the duration of the run.
-- **Casual provisioning** — Creating a new execution environment is as simple as dispatching a workflow; no infrastructure setup or teardown required.
-- **Higher security than local execution** — Artifacts are produced in a sandboxed environment, eliminating the risk of credential exposure, malware interaction, or data leakage inherent in running AI agents on developer workstations.
-
-### Unified Execution Environment
-
-By centralizing execution on GitHub Actions, the platform ensures:
-
-- **No environment silos** — Every team member, every workflow, and every domain uses the same runner configuration, Python version, and dependency set. This prevents the "works on my machine" problem and eliminates environment drift across teams.
-- **No scattered development resources** — Compute, storage, and credentials are managed centrally through GitHub environments and Azure RBAC, avoiding duplication of setup effort across individual developers.
-
-### Built-in Observability
-
-GitHub Actions provides **out-of-the-box observability** without additional tooling:
-
-- **Who executed what, when, and for how long** — Every workflow run is logged with the triggering user, timestamp, duration, inputs, and outputs.
-- **Full execution logs** — Step-by-step logs are retained and searchable, providing an audit trail for every AI agent invocation.
-- **Usage metrics** — Billable minutes, runner utilization, and workflow frequency are tracked natively, enabling cost monitoring and capacity planning.
-- **Integration with GitHub audit log** — For organizations, all workflow activity is captured in the enterprise audit log for compliance and governance purposes.
-
-### Entra ID–Based RBAC & IaC-Driven Operations
-
-Security and operational efficiency are further reinforced through:
-
-- **Entra ID authentication** — All Azure resource access is gated by Microsoft Entra ID, enabling fine-grained RBAC (Role-Based Access Control) that ensures each workflow has only the minimum permissions required.
-- **IaC-managed identities and roles** — Service principals, federated identity credentials, and RBAC role assignments are provisioned via Terraform from GitHub Actions (`azure_github_oidc` scenario). This eliminates manual Azure portal operations and reduces operational overhead — role changes are code-reviewed, version-controlled, and applied through the standard CI/CD pipeline.
+| Principle | What It Means |
+|---|---|
+| **Composability** | Every building block (LLM query, AI agent, storage, notification) is independent. Swap a system prompt to change domains; add a tool to add capabilities. |
+| **Zero-Infrastructure AI** | Consume hosted LLMs through the Copilot SDK. No GPU provisioning, no model management, no inference servers. |
+| **Security by Default** | OIDC federation, scoped RBAC, time-limited sharing URLs, and ephemeral execution environments. No long-lived secrets anywhere. |
+| **Auditable Execution** | Every run is recorded with full input/output context, execution metadata, and provenance — by default, not by configuration. |
 
 ---
 
-## High-Level Architecture
+## Execution Model: Why GitHub Actions?
+
+A key architectural decision is that **all AI agent execution runs within GitHub Actions runners** rather than on developers' local machines. This choice solves three problems simultaneously:
+
+### Ephemeral Isolation
+
+Each workflow execution spins up a fresh, sandboxed environment and discards it upon completion. Secrets, intermediate files, and model outputs exist only for the duration of the run. This is fundamentally more secure than running AI agents on developer workstations, where credentials can leak through shell history, file system artifacts, or malware.
+
+### Environment Consistency
+
+Every team member, every workflow, and every domain uses the same runner configuration. This eliminates "works on my machine" issues, prevents environment drift across teams, and ensures that AI evaluation results are reproducible regardless of who triggers them.
+
+### Built-in Governance
+
+GitHub Actions natively records who executed what, when, for how long, and with what inputs/outputs. Full execution logs are retained and searchable. For organizations, all workflow activity is captured in the enterprise audit log — providing compliance-ready audit trails without any additional tooling.
+
+---
+
+## System Architecture
 
 ```mermaid
 flowchart TB
-    subgraph "GitHub"
-        USER["Developer / Scheduler / API Client"]
-        GA["GitHub Actions<br/>Workflow Runner"]
-        GH_OIDC["GitHub OIDC Provider"]
-        GH_SECRETS["GitHub Environment Secrets"]
+    subgraph Trigger["Trigger Layer"]
+        USER["User / Scheduler / API"]
     end
 
-    subgraph "Azure"
-        ENTRA["Microsoft Entra ID<br/>(Federated Identity)"]
-        BLOB["Azure Blob Storage<br/>(Reports / Images / Documents)"]
-        FOUNDRY["Microsoft Foundry<br/>(AI Hub + AI Services)"]
-        RG["Azure Resource Group"]
+    subgraph Runtime["Execution Runtime (GitHub Actions Runner)"]
+        SDK["Copilot SDK Client"]
+        TOOLS["AI Agent Tools"]
     end
 
-    subgraph "AI Execution Runtime (within GitHub Actions Runner)"
-        CLI_SERVER["Copilot CLI Server<br/>(localhost:3000)"]
-        SDK["GitHub Copilot SDK<br/>(Python Client)"]
-        REPORT_SVC["report_service.py<br/>(Orchestrator)"]
-        TOOLS["Custom Tools<br/>(list_foundry_agents, call_foundry_agent)"]
+    subgraph AI["AI Layer"]
+        LLM["Hosted LLMs"]
+        FOUNDRY["AI Foundry Agents"]
     end
 
-    subgraph "LLM Backend"
-        LLM["Hosted LLM<br/>(GPT-5-mini / GPT-5 / Claude)"]
+    subgraph Azure["Azure Services"]
+        AUTH["Entra ID"]
+        STORAGE["Blob Storage"]
     end
 
-    USER -- "workflow_dispatch / API / schedule<br/>(queries, system_prompt, model)" --> GA
-    GA -- "Load secrets" --> GH_SECRETS
-    GA -- "1. Request OIDC JWT" --> GH_OIDC
-    GH_OIDC -- "2. Return JWT" --> GA
-    GA -- "3. Exchange JWT for Azure token" --> ENTRA
-    ENTRA -- "4. Access token" --> GA
-
-    GA -- "Start copilot serve" --> CLI_SERVER
-    GA -- "Run report_service.py" --> REPORT_SVC
-    REPORT_SVC -- "create_copilot_client()" --> SDK
-    SDK -- "N parallel sessions<br/>(asyncio.gather)" --> CLI_SERVER
-    SDK -- "Tool calls" --> TOOLS
-    TOOLS -- "Agent invocation" --> FOUNDRY
-    CLI_SERVER -- "Forward to model" --> LLM
-    LLM -- "Responses" --> CLI_SERVER
-    CLI_SERVER -- "Session events +<br/>final response" --> SDK
-    SDK -- "ReportOutput JSON" --> REPORT_SVC
-
-    REPORT_SVC -- "upload_blob()" --> BLOB
-    REPORT_SVC -- "generate_sas_url()" --> BLOB
-    BLOB -- "SAS URL" --> REPORT_SVC
-    REPORT_SVC -- "GITHUB_OUTPUT" --> GA
-    GA -- "Display SAS URL" --> USER
-
-    GA -. "Terraform apply<br/>(azure_microsoft_foundry)" .-> RG
-    RG -. "Contains" .-> FOUNDRY
-    RG -. "Contains" .-> BLOB
+    USER --> SDK
+    SDK -- "Parallel queries" --> LLM
+    SDK -- "Tool delegation" --> TOOLS
+    TOOLS --> FOUNDRY
+    FOUNDRY -. "Reference data" .-> STORAGE
+    SDK -- "Upload report" --> STORAGE
+    STORAGE -- "Secure URL" --> USER
+    USER -. "OIDC auth" .-> AUTH
+    AUTH -. "Scoped token" .-> SDK
 ```
+
+### Component Responsibilities
+
+| Component | Role |
+|---|---|
+| **Copilot SDK Client** | Manages LLM sessions, sends queries in parallel, handles tool calls, aggregates results |
+| **Hosted LLMs** | Provide text generation capabilities (GPT-4o-mini, GPT-4o, Claude) — no self-hosting required |
+| **AI Foundry Agents** | Domain-specific AI personas with access to reference data (documents, images, specifications) |
+| **Entra ID** | Issues short-lived access tokens via OIDC federation — no stored credentials |
+| **Blob Storage** | Stores reports and reference data; generates time-limited sharing URLs |
+| **GitHub Actions** | Provides ephemeral execution, OIDC authentication, and audit logging |
 
 ---
 
-## Component Details
-
-### 1. GitHub Actions Workflows
-
-| Workflow | Trigger | Purpose |
-|---|---|---|
-| `test.yaml` | Push / PR to `main` | Lint, format check, unit tests |
-| `docker.yaml` | Push / PR to `main` | Docker image build, lint, scan |
-| `infra.yaml` | Push to `main`, weekly, manual | Terraform lint, validate, plan |
-| `github-copilot-cli.yaml` | Manual dispatch | Run a single Copilot CLI prompt |
-| `github-copilot-sdk.yaml` | Manual dispatch | Run Copilot SDK chat app with tool-calling support |
-| `report-service.yaml` | Manual dispatch | Parallel queries → JSON report → Blob Storage → SAS URL |
-| `ghcr-release.yaml` | Tag push (`v*`) | Build and publish Docker images to GitHub Container Registry |
-| `docker-release.yaml` | Tag push (`v*`) | Build and publish Docker images to Docker Hub |
-
-### 2. Copilot CLI Server
-
-The Copilot CLI (`copilot serve`) runs as a local HTTP server on `localhost:3000` within the GitHub Actions runner. It:
-
-- Authenticates with GitHub using `COPILOT_GITHUB_TOKEN`
-- Routes requests to the selected LLM model (GPT-5-mini, GPT-5, Claude)
-- Handles rate limiting and retries transparently
-- Exposes a local API consumed by the Python SDK client
-
-### 3. Package Structure
-
-The Python package follows a layered architecture with clear separation of concerns:
-
-```
-template_github_copilot/
-├── core.py                    # Copilot SDK wrappers (client, session, events)
-├── loggers.py                 # Logging utilities
-├── providers.py               # LLM provider factory (Copilot, API Key, Entra ID)
-├── internals/                 # Azure service integrations
-│   ├── agents.py              # Azure AI Foundry agent CRUD + run
-│   └── azure_blob_storages.py # Azure Blob Storage client
-├── services/                  # Business logic layer
-│   ├── __init__.py            # Re-exports (ChatResult, ReportOutput, etc.)
-│   ├── chat.py                # Chat Pydantic models (ChatResult, ChatParallelOutput)
-│   └── reports.py             # Report generation (ReportResult, ReportOutput, run_parallel_chat)
-├── settings/                  # Configuration (pydantic-settings from .env)
-│   ├── __init__.py            # Re-exports all settings + factory functions
-│   ├── azure_blob_storage.py  # AzureBlobStorageSettings
-│   ├── byok.py                # ByokSettings (BYOK provider type, URL, key, model, wire API)
-│   ├── microsoft_foundry.py   # MicrosoftFoundrySettings
-│   ├── oauth.py               # OAuthSettings (GitHub OAuth App, session, server host/port)
-│   └── project.py             # Settings (name, log level)
-└── tools/                     # Copilot custom tools (@define_tool)
-    ├── __init__.py             # get_custom_tools() registry
-    └── foundry_agent.py        # list_foundry_agents, call_foundry_agent
-
-scripts/
-├── api_server.py              # Typer CLI to launch the FastAPI server
-├── ...
-
-services/apis/                 # FastAPI web application (OAuth + chat + report)
-├── __init__.py                # Re-exports create_app, OAuthSettings
-├── app.py                     # FastAPI app factory, OAuth flow, chat/report endpoints
-└── templates/
-    └── index.html             # HTML chat + report frontend
-```
-
-| Layer | Responsibility |
-|---|---|
-| `core` | Copilot SDK session lifecycle (client, config, events, permissions) |
-| `providers` | Unified LLM provider factory — supports default Copilot, static API key, and Entra ID bearer-token authentication |
-| `internals` | Direct integrations with Azure services (Blob Storage, AI Foundry agents) |
-| `services` | Business logic and data models for chat and report workflows |
-| `settings` | Environment-based configuration via `pydantic-settings` |
-| `settings/oauth` | GitHub OAuth App and API server configuration |
-| `services/apis` | FastAPI web application with OAuth login, chat, and report endpoints |
-| `tools` | Custom tools registered with the Copilot SDK for tool-calling |
-
-### 4. Python SDK Client (`core.py`)
-
-The core module provides factory functions for creating Copilot sessions with tool-calling capabilities:
-
-```
-CopilotClient → SessionConfig (+ tools, system_message) → Session → send_and_wait() → Response
-```
-
-| Function / Type | Responsibility |
-|---|---|
-| `create_copilot_client()` | Instantiate and configure the SDK client |
-| `create_session_config()` | Build session config with system message, custom tools, permissions |
-| `create_event_handler()` | Factory for session event callbacks (turn start, tool execution, progress, errors) |
-| `create_message_options()` | Wrap a user prompt into SDK-compatible `MessageOptions` |
-| `approve_all()` | Default permission handler (replace with restrictive policy in production) |
-| `write_status()` | Write a colored status message using a writer function |
-| `WriterFunc` | Type alias (`Callable[[str], Any]`) for pluggable output writers |
-
-**Key extensibility point:** `create_session_config()` accepts a `tools` parameter populated by `get_custom_tools()`, which currently registers `list_foundry_agents` and `call_foundry_agent`. Adding new tools automatically extends the Copilot session's capabilities.
-
-### 4a. LLM Provider Factory (`providers.py`)
-
-The `providers` module provides a unified interface for selecting the LLM backend authentication method, enabling **Bring Your Own Key (BYOK)** scenarios alongside the default Copilot backend:
-
-| Component | Responsibility |
-|---|---|
-| `AuthMethod` | Enum (`copilot`, `api_key`, `entra_id`) selecting the authentication strategy |
-| `ProviderResult` | Frozen dataclass returning the `ProviderConfig` (if any) and target `model` name |
-| `create_provider()` | Main factory — returns a `ProviderResult` based on the chosen `AuthMethod` |
-| `register_provider()` | Plugin point — register custom provider builders for new auth methods |
-| `_build_api_key_provider()` | Internal builder for static API key authentication |
-| `_build_entra_id_provider()` | Internal builder for Azure Entra ID bearer-token authentication via `DefaultAzureCredential` |
-
-```
-create_provider(AuthMethod.API_KEY) → ProviderResult(provider=ProviderConfig(...), model="gpt-5")
-create_provider(AuthMethod.ENTRA_ID) → ProviderResult(provider=ProviderConfig(..., bearer_token=...), model="gpt-5")
-create_provider(AuthMethod.COPILOT) → ProviderResult(provider=None, model=None)  # default backend
-```
-
-This factory is consumed by `scripts/report_service.py`, `scripts/byok.py`, and `scripts/chat.py` to support multiple LLM backends without code changes — only the `--auth-method` flag or `AuthMethod` enum value needs to change.
-
-### 5. Report Service (`services/reports.py` + `scripts/report_service.py`)
-
-The report generation pipeline is the primary orchestration layer:
+## Core Data Flow: Report Generation
 
 ```mermaid
-flowchart TD
-    INPUT["Input:<br/>system_prompt + queries + storage config"] --> PARSE["Parse queries<br/>(comma-separated → list)"]
-    PARSE --> PARALLEL["Parallel Execution<br/>(asyncio.gather)"]
+sequenceDiagram
+    participant User
+    participant Runtime as Execution Runtime
+    participant LLM as Hosted LLMs
+    participant Storage as Blob Storage
 
-    subgraph "Per Query (async)"
-        PARALLEL --> SESSION["Create Copilot Session<br/>with system_prompt + tools"]
-        SESSION --> SEND["send_and_wait(query)"]
-        SEND --> RESULT["ReportResult<br/>{query, response, error}"]
+    User->>Runtime: Submit (persona + queries)
+
+    par Parallel Execution
+        Runtime->>LLM: Query 1
+        LLM-->>Runtime: Response 1
+    and
+        Runtime->>LLM: Query N
+        LLM-->>Runtime: Response N
     end
 
-    RESULT --> AGGREGATE["Aggregate Results<br/>ReportOutput<br/>{results, total, succeeded, failed}"]
-    AGGREGATE --> SERIALIZE["Serialize to JSON<br/>(model_dump_json)"]
-    SERIALIZE --> UPLOAD["Upload to Azure Blob Storage<br/>(report_timestamp.json)"]
-    UPLOAD --> SAS["Generate SAS URL<br/>(user delegation key, time-limited)"]
-    SAS --> OUTPUT["Output SAS URL<br/>→ GITHUB_OUTPUT + stdout"]
-
-    style INPUT fill:#e1f5fe
-    style OUTPUT fill:#e8f5e9
+    Runtime->>Runtime: Aggregate results (success/failure)
+    Runtime->>Storage: Upload report (JSON)
+    Storage-->>Runtime: Secure URL
+    Runtime-->>User: Return secure URL
 ```
 
-**Steps:**
+**Key properties of this flow:**
+- Each query executes in an **independent session** — no conversational cross-contamination between personas.
+- Results are **typed and validated** — the output schema tracks total queries, successes, and failures.
+- The report is **immutable** once uploaded — providing a point-in-time record of the evaluation.
 
-1. **Parse** — Comma-separated queries → `list[str]`
-2. **Execute** — `run_parallel_chat()` sends all queries concurrently via `asyncio.gather`, each in its own session with the configured system prompt
-3. **Aggregate** — Results collected into `ReportOutput` (Pydantic model with `succeeded`/`failed` counters)
-4. **Upload** — JSON serialized and uploaded to Azure Blob Storage
-5. **Share** — User delegation SAS URL generated with configurable expiry
+---
 
-**Cross-industry note:** By changing only the `system_prompt` and `queries` parameters, this same pipeline produces product evaluations, clinical summaries, risk assessments, or creative briefs — no code changes needed.
+## Agentic Data Flow: Domain-Specific Evaluation
 
-### 6. Azure Blob Storage Client (`internals/azure_blob_storages.py`)
+For evaluations that require access to reference data (floor plans, product specs, clinical guidelines), the platform integrates AI Foundry Agents:
 
-Wraps the `azure-storage-blob` SDK with:
+```mermaid
+sequenceDiagram
+    participant User
+    participant SDK as Copilot Session
+    participant Agent as Domain Agent
+    participant Data as Reference Data
 
-- `DefaultAzureCredential` for OIDC-based auth (no account keys)
-- Container management (create, list)
-- Blob CRUD operations (upload, download, list, delete, exists)
-- **User delegation key–based SAS URL generation** — time-bounded, revocable, scoped to individual blobs
+    User->>SDK: Submit domain-specific query
+    SDK->>SDK: Determine tool delegation
+    SDK->>Agent: Invoke domain agent
+    Agent->>Data: Access reference documents
+    Data-->>Agent: Document content
+    Agent-->>SDK: Structured evaluation
+    SDK-->>User: Agent-enriched report
+```
 
-The Blob Storage layer also serves as a **reference data store** for Foundry Agents. Floor plans, product images, brand guidelines, or any document can be uploaded and referenced by agents during evaluation workflows.
+The Copilot session autonomously decides when to delegate to a Foundry Agent based on the query context. This enables **multi-agent orchestration** within a single session — the user submits a high-level query, and the system routes to the appropriate domain specialist.
 
-### 7. Microsoft Foundry Agents (`internals/agents.py` + `tools/foundry_agent.py`)
+---
 
-For agentic AI workflows, the platform integrates Azure AI Foundry through two mechanisms:
+## Authentication Model
 
-**Direct CLI (`scripts/agents.py`):**
+```mermaid
+sequenceDiagram
+    participant Runner as GitHub Actions
+    participant OIDC as GitHub OIDC Provider
+    participant Entra as Microsoft Entra ID
+    participant Azure as Azure Resources
 
-- Create agents with custom instructions and model configurations
-- List, inspect, and delete agents
-- Run agents in conversational threads with multi-turn support
-- Uses `PromptAgentDefinition` for declarative agent setup
+    Runner->>OIDC: Request short-lived JWT
+    OIDC-->>Runner: Signed JWT
+    Runner->>Entra: Exchange JWT for Azure token
+    Entra-->>Runner: Scoped access token
+    Runner->>Azure: Access resources (least privilege)
+```
 
-**Copilot Tool Integration (`tools/foundry_agent.py`):**
+### Why OIDC Federation?
 
-- `list_foundry_agents` — Discover available agents at runtime
-- `call_foundry_agent` — Invoke a named agent with a user message and optional conversation context
+Traditional CI/CD authentication stores long-lived API keys as repository secrets. These keys are difficult to rotate, easy to leak, and grant broad access. OIDC federation eliminates this pattern entirely:
 
-When registered as Copilot tools, these enable **agentic delegation**: the Copilot session can autonomously decide which Foundry Agent to invoke based on the user's query, enabling multi-agent orchestration within a single session.
+- **No stored secrets for Azure access** — Tokens are issued per workflow run and expire within minutes.
+- **Least-privilege scoping** — Each token is scoped to specific RBAC roles (see below).
+- **Zero rotation overhead** — There are no credentials to rotate.
 
-### 8. BYOK CLI (`scripts/byok.py`)
+### RBAC Roles
 
-A dedicated CLI for **Bring Your Own Key** workflows, providing both API-key and Entra ID authentication variants:
+| Role | Purpose |
+|---|---|
+| Contributor | Manage Azure resources via Terraform |
+| Storage Blob Data Contributor | Read/write report and reference data |
+| Storage Blob Delegator | Generate user delegation keys for secure sharing URLs |
+| Cognitive Services OpenAI User | Access hosted model endpoints |
 
-| Command | Auth Method | Description |
-|---|---|---|
-| `chat-api-key` | API Key | Send a single prompt using a static API key |
-| `chat-loop-api-key` | API Key | Interactive chat REPL with API key auth |
-| `chat-parallel-api-key` | API Key | Parallel prompts with API key auth |
-| `chat-entra-id` | Entra ID | Send a single prompt using Azure Entra ID bearer token |
-| `chat-loop-entra-id` | Entra ID | Interactive chat REPL with Entra ID auth |
-| `chat-parallel-entra-id` | Entra ID | Parallel prompts with Entra ID auth |
+---
 
-This script mirrors the interface of `scripts/chat.py` but uses `providers.create_provider()` to configure a BYOK backend instead of the default Copilot backend.
+## Infrastructure Architecture
 
-### 9. Slack Notification (`scripts/slacks.py`)
-
-A lightweight CLI for sending results to Slack via incoming webhooks — enabling real-time notification when reports are generated or agents complete tasks.
-
-### 10. Copilot Chat API Server (`services/apis/` + `scripts/api_server.py`)
-
-A FastAPI web application that authenticates users via a **GitHub OAuth App** and proxies chat and report requests to the Copilot SDK on behalf of each logged-in user.
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/` | `GET` | HTML chat + report frontend |
-| `/auth/login` | `GET` | Start GitHub OAuth flow |
-| `/auth/callback` | `GET` | OAuth callback (exchanges code for token) |
-| `/auth/logout` | `GET` | Clear session |
-| `/api/me` | `GET` | Current user info |
-| `/api/chat` | `POST` | Send a message to Copilot (body: `ChatRequest`) |
-| `/api/report` | `POST` | Run parallel queries and return structured report (body: `ReportRequest`) |
-
-The server uses signed-cookie sessions and stores GitHub OAuth tokens per user. Configuration is managed via `OAuthSettings` in `settings/oauth.py`.
-
-> **Detailed setup instructions:** See [GitHub OAuth App Setup](github_oauth_app.md).
-
-### 11. Terraform Infrastructure
+All infrastructure is managed as code via Terraform, organized into reusable modules and deployment scenarios.
 
 ```mermaid
 flowchart LR
-    subgraph "Modules"
-        RG["resource_group"]
-        SP["azure_github_oidc<br/>(Entra ID + OIDC)"]
-        GH["github_secrets<br/>(Environment + Secrets)"]
-        MF["microsoft_foundry<br/>(AI Hub + Services)"]
-        ST["storage<br/>(Storage Account + Queue)"]
-        RS["random_string"]
-        SEARCH["search<br/>(Azure AI Search)"]
+    subgraph Scenarios["Deployment Scenarios"]
+        S1["OIDC Setup"]
+        S2["GitHub Secrets"]
+        S3["AI Foundry"]
     end
 
-    subgraph "Scenarios"
-        S1["azure_github_oidc"]
-        S2["github_secrets"]
-        S3["azure_microsoft_foundry"]
+    S1 -- "Outputs credentials" --> S2
+    S2 -- "Enables workflows" --> S3
+
+    subgraph Provisions["What Gets Created"]
+        P1["Identity + Trust + RBAC"]
+        P2["GitHub Environment + Secrets"]
+        P3["AI Hub + Models + Storage"]
     end
 
-    S1 --> SP
-    S2 --> GH
-    S3 --> RG
-    S3 --> MF
-    S3 --> RS
-    S3 --> ST
-    S3 -."conditional<br/>(deploy_search=true)".-> SEARCH
+    S1 --> P1
+    S2 --> P2
+    S3 --> P3
 ```
 
----
-
-## Data Flow: Report Generation
-
-```mermaid
-sequenceDiagram
-    participant User as User / GitHub Actions
-    participant RS as report_service.py
-    participant Core as core.py / reports.py
-    participant CS as Copilot CLI Server
-    participant LLM as LLM Model
-    participant ABS as Azure Blob Storage
-
-    User->>RS: Dispatch (queries, system_prompt, storage config)
-    RS->>RS: Parse comma-separated queries
-    RS->>Core: run_parallel_chat(queries, system_prompt)
-    Core->>CS: CopilotClient.start()
-
-    par Parallel Query Execution
-        Core->>CS: Session 1: send_and_wait(query_1)
-        CS->>LLM: query_1
-        LLM-->>CS: response_1
-        CS-->>Core: ReportResult(query_1, response_1)
-    and
-        Core->>CS: Session N: send_and_wait(query_N)
-        CS->>LLM: query_N
-        LLM-->>CS: response_N
-        CS-->>Core: ReportResult(query_N, response_N)
-    end
-
-    Core-->>RS: ReportOutput (results, total, succeeded, failed)
-    RS->>ABS: upload_blob(report.json)
-    RS->>ABS: generate_sas_url(blob_name, expiry)
-    ABS-->>RS: SAS URL
-    RS->>User: Output SAS URL
-```
-
----
-
-## Data Flow: Agentic Evaluation (Cross-Industry)
-
-This flow illustrates how the platform supports domain-specific evaluation workflows — such as real estate layout assessment, product sensory evaluation, or clinical document review — by combining Copilot sessions with Foundry Agent tool calls.
-
-```mermaid
-sequenceDiagram
-    participant User as User / Scheduler
-    participant GA as GitHub Actions
-    participant SDK as Copilot SDK Session
-    participant Tool as call_foundry_agent Tool
-    participant Agent as Foundry Agent<br/>(Domain Specialist)
-    participant Blob as Azure Blob Storage<br/>(Reference Data)
-
-    User->>GA: Dispatch with domain-specific prompt + queries
-    GA->>SDK: Create session with system_prompt + tools
-    SDK->>SDK: send_and_wait("Evaluate layout plan A")
-
-    Note over SDK,Tool: Copilot decides to invoke Foundry Agent
-    SDK->>Tool: call_foundry_agent(agent="layout-reviewer", message="...")
-    Tool->>Agent: Forward to domain-specific agent
-    Agent->>Blob: Reference floor plan image / data
-    Blob-->>Agent: Document content
-    Agent-->>Tool: Structured evaluation response
-    Tool-->>SDK: Agent result integrated into session
-
-    SDK-->>GA: Final ReportOutput with agent-enriched responses
-    GA->>Blob: Upload evaluation report
-    GA->>User: SAS URL for stakeholder review
-```
-
----
-
-## Authentication Flow
-
-```mermaid
-sequenceDiagram
-    participant GA as GitHub Actions
-    participant GH as GitHub OIDC Provider
-    participant AAD as Microsoft Entra ID
-    participant AZ as Azure Resources
-
-    GA->>GH: 1. Request OIDC token (audience: api://AzureADTokenExchange)
-    GH-->>GA: 2. Return signed JWT (sub: repo:org/repo:ref:refs/heads/main)
-    GA->>AAD: 3. Exchange JWT for Azure access token (federated credential)
-    AAD-->>GA: 4. Return Azure access token (scoped to RBAC roles)
-    GA->>AZ: 5. Access resources (Blob Storage, Resource Manager, AI Foundry)
-```
-
-### RBAC Roles Assigned
-
-| Role | Scope | Purpose |
+| Scenario | Purpose | Key Resources |
 |---|---|---|
-| Contributor | Subscription | Manage Azure resources via Terraform |
-| Storage Blob Data Contributor | Subscription | Read/write blob data (reports, reference documents) |
-| Storage Blob Delegator | Subscription | Generate user delegation keys for SAS URLs |
-| Cognitive Services OpenAI User | Subscription | Access OpenAI models deployed in AI Foundry |
+| `azure_github_oidc` | Establish passwordless trust between GitHub and Azure | Entra ID app, service principal, federated credential, RBAC roles |
+| `github_secrets` | Automate GitHub environment configuration | GitHub environment, encrypted secrets |
+| `azure_microsoft_foundry` | Deploy AI capabilities and storage | AI Hub, model deployments, Storage Account, optional AI Search |
+
+> Scenarios must be deployed in order: OIDC → Secrets → Foundry. See [Deployment](deployment.md) for step-by-step instructions.
 
 ---
 
-## Extensibility Points
+## Application Architecture
 
-| Extension | How | Example |
+The platform provides three interfaces for interacting with the AI execution pipeline:
+
+### CLI Tools
+
+Command-line interfaces for chat, report generation, agent management, storage operations, and notifications. All CLIs follow the same pattern: configure via environment variables, execute via typed commands.
+
+### Web Application
+
+A browser-based interface with GitHub OAuth login, interactive chat, and a parallel report generation panel. Users authenticate with their GitHub identity, and the application makes Copilot requests on their behalf.
+
+### GitHub Actions Workflows
+
+Automated workflows triggered by schedule, manual dispatch, or API call. These are the primary production execution path, providing ephemeral environments with full audit trails.
+
+| Interface | Best For |
+|---|---|
+| CLI | Local development, scripting, automation |
+| Web UI | Interactive exploration, ad-hoc evaluations |
+| GitHub Actions | Production execution, scheduled reports, governed workflows |
+
+---
+
+## LLM Provider Model
+
+The platform supports multiple LLM backend configurations through a unified provider interface:
+
+| Mode | Authentication | Use Case |
 |---|---|---|
-| **New AI persona** | Change `system_prompt` parameter | `"You are a real estate appraiser specializing in commercial properties."` |
-| **New evaluation dimension** | Add entries to `queries` | `"Assess fire safety compliance,Assess ADA accessibility"` |
-| **New Foundry Agent** | `scripts/agents.py create` + register in tool list | Domain-specific agent with custom instructions |
-| **New Copilot tool** | Implement with `@define_tool` + add to `get_custom_tools()` | Web scraper, database lookup, calculation engine |
-| **New output channel** | Post-process `ReportOutput` | Slack webhook, email, dashboard API, PowerBI |
-| **New data source** | Upload to Blob Storage + reference from Agent | Floor plans, product specs, clinical data, financial models |
+| **Copilot** (default) | GitHub token via Copilot CLI | Standard usage — access hosted models without API key management |
+| **API Key** | Static API key | Direct model API access when Copilot is not available |
+| **Entra ID** | Azure Entra ID bearer token | Enterprise deployments with private endpoints and managed identity |
+
+Switching between modes requires changing a configuration parameter, not code. This enables deployment across environments with different security requirements — from open-internet development to air-gapped corporate networks.
 
 ---
 
-## Test Structure
+## Extensibility
 
-Tests reside in `src/python/tests/`, mirroring the package layout:
+The architecture is designed for extension at four levels:
 
-```
-tests/
-├── test_core.py                      # 27 tests — Copilot SDK wrappers
-├── test_loggers.py                   # 6 tests — Logger configuration
-├── test_providers.py                 # 9 tests — LLM provider factory
-├── internals/
-│   ├── test_agents.py                # 16 tests — Foundry agent CRUD & run
-│   └── test_azure_blob_storages.py   # 16 tests — Blob Storage client
-├── services/
-│   ├── test_chat.py                  # Chat model tests (placeholder)
-│   ├── test_reports.py               # 5 tests — Parallel report generation
-│   └── apis/
-│       └── test_app.py               # 19 tests — FastAPI app (OAuth, chat, report endpoints)
-├── settings/
-│   ├── test_azure_blob_storage.py    # 3 tests — BlobStorage settings
-│   ├── test_byok.py                  # 3 tests — BYOK settings
-│   ├── test_microsoft_foundry.py     # 3 tests — Foundry settings
-│   ├── test_oauth.py                 # 3 tests — OAuth settings
-│   └── test_project.py               # 3 tests — Project settings
-└── tools/
-    └── test_foundry_agent.py         # 9 tests — Copilot custom tools
-```
-
-pytest is configured in `pyproject.toml` with coverage reporting, `tests/` as the test path, and `.` as the Python path:
-
-```toml
-[tool.pytest.ini_options]
-addopts = "-ra --cov"
-testpaths = ["tests"]
-pythonpath = ['.']
-```
+| Extension Point | How to Extend | Example |
+|---|---|---|
+| **New domain** | Change system prompt and queries | Adapt from product evaluation to clinical guideline review |
+| **New AI capability** | Add a Copilot tool | Web scraper, database lookup, calculation engine |
+| **New AI agent** | Create a Foundry Agent with domain instructions | Specialized real estate appraiser with access to floor plan data |
+| **New output channel** | Post-process the report JSON | Send to Slack, email, dashboard, or PowerBI |
 
 ---
 
@@ -512,14 +267,13 @@ pythonpath = ['.']
 | Layer | Technology |
 |---|---|
 | Language | Python 3.13+ |
-| Package Manager | uv |
-| CLI Framework | Typer |
-| Data Validation | Pydantic |
 | AI SDK | GitHub Copilot SDK, Azure AI Projects SDK |
-| Cloud Storage | Azure Blob Storage (azure-storage-blob) |
-| Authentication | Azure Identity (DefaultAzureCredential, OIDC) |
-| Infrastructure | Terraform 1.6+ |
+| Web Framework | FastAPI |
+| Data Validation | Pydantic |
+| CLI Framework | Typer |
+| Cloud Storage | Azure Blob Storage |
+| Authentication | Azure Identity (OIDC, DefaultAzureCredential) |
+| Infrastructure | Terraform |
 | CI/CD | GitHub Actions |
-| Notifications | Slack Incoming Webhooks (httpx) |
-| Linting | Ruff, ty, Pyrefly, actionlint, TFLint, Trivy |
-| Testing | pytest, pytest-cov |
+| Containerization | Docker, Docker Compose |
+| Testing | pytest |

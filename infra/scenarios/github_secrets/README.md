@@ -4,130 +4,83 @@
 >
 > **Previous step:** [Azure GitHub OIDC](../azure_github_oidc/README.md)
 
-This Terraform scenario creates and manages GitHub repository environment secrets using the GitHub provider. It sets up secrets for a specified GitHub repository environment, which can be used in GitHub Actions workflows.
+---
+
+## Purpose
+
+This Terraform scenario automates the creation of GitHub repository environments and encrypted secrets. It takes the OIDC outputs from the previous step and injects them — along with runtime secrets — into a GitHub environment that workflows can reference.
+
+### Why Automate Secrets?
+
+Manually configuring GitHub environments is error-prone and difficult to audit. By managing secrets through Terraform:
+- Secret values are sourced from variables, not copy-pasted from UIs.
+- The configuration is version-controlled (secret *names* and *structure*, not values).
+- Environments can be reproduced consistently across repositories.
+
+---
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    subgraph Terraform["Terraform"]
-        TF["GitHub Provider"]
-    end
-
-    subgraph GitHub["GitHub Repository"]
-        ENV["Environment<br/>e.g. dev"]
-        SEC["Environment Secrets<br/>- ARM_CLIENT_ID<br/>- ARM_SUBSCRIPTION_ID<br/>- ARM_TENANT_ID<br/>- ARM_USE_OIDC<br/>- COPILOT_GITHUB_TOKEN<br/>- SLACK_WEBHOOK_URL"]
-        GA["GitHub Actions<br/>Workflow"]
-    end
-
-    TF -->|"Create/Update"| ENV
-    TF -->|"Manage"| SEC
-    GA -->|"Read Secrets"| SEC
+    TF["Terraform"] -- "GitHub Provider" --> ENV["GitHub Environment"]
+    ENV --> SEC["Encrypted Secrets"]
+    SEC --> GA["GitHub Actions Workflows"]
 ```
 
-## Prerequisites
+---
 
-- Terraform CLI (>= 1.6.0)
-- GitHub account with repository admin access
-- A GitHub Personal Access Token (PAT) with `repo` and `admin:org` scopes (or fine-grained token with environment secrets permission)
-- Outputs from the [Azure GitHub OIDC](../azure_github_oidc/README.md) scenario (Step 1)
+## What Gets Created
 
-## How to Use
+| Resource | Purpose |
+|---|---|
+| GitHub Environment | Named environment (e.g., `dev`) with protection rules |
+| Environment Secrets | Encrypted secrets accessible only to workflows in this environment |
 
-```shell
-# (Optional) Create backend.tf for remote state storage
-cat <<EOF > backend.tf
-terraform {
-  backend "azurerm" {
-    resource_group_name  = "YOUR_RESOURCE_GROUP_NAME"
-    storage_account_name = "YOUR_STORAGE_ACCOUNT_NAME"
-    container_name       = "YOUR_CONTAINER_NAME"
-    key                  = "github_secrets.template-github-copilot_dev.tfstate"
-  }
-}
-EOF
+### Secrets Configured
 
-# Set environment variables if Azure backend is used
-export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+| Secret | Source |
+|---|---|
+| `ARM_CLIENT_ID` | From OIDC scenario output |
+| `ARM_SUBSCRIPTION_ID` | From OIDC scenario output |
+| `ARM_TENANT_ID` | From OIDC scenario output |
+| `ARM_USE_OIDC` | Always `true` |
+| `COPILOT_GITHUB_TOKEN` | User-provided |
+| `SLACK_WEBHOOK_URL` | User-provided |
 
-# Log in to Azure (required for Azure backend)
-az login
+---
 
-# (Optional) Confirm the details for the currently logged-in user
-az ad signed-in-user show
+## Usage
 
-# --- Gather values from Step 1 (azure_github_oidc) ---
-APPLICATION_NAME="template-github-copilot_dev"
-APPLICATION_ID=$(az ad sp list --display-name "$APPLICATION_NAME" --query "[0].appId" --output tsv)
-SUBSCRIPTION_ID=$(az account show --query id --output tsv)
-TENANT_ID=$(az account show --query tenantId --output tsv)
+```bash
+cd infra/scenarios/github_secrets
 
-# --- GitHub authentication ---
-# Set GITHUB_TOKEN for the GitHub Terraform provider
-export GITHUB_TOKEN="YOUR_GITHUB_PAT"
-
-# COPILOT_GITHUB_TOKEN is a separate PAT used by Copilot CLI in GitHub Actions
-COPILOT_GITHUB_TOKEN="YOUR_COPILOT_GITHUB_TOKEN"
-
-# SLACK_WEBHOOK_URL is the Slack incoming webhook URL for notifications. e.g. https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
-SLACK_WEBHOOK_URL="YOUR_SLACK_WEBHOOK_URL"
-
-cat <<EOF > terraform.tfvars
-github_owner = "ks6088ts"
-repository_name = "template-github-copilot"
-environment_name = "dev"
-actions_environment_secrets = [
-  {
-    name  = "ARM_CLIENT_ID"
-    value = "$APPLICATION_ID"
-  },
-  {
-    name  = "ARM_SUBSCRIPTION_ID"
-    value = "$SUBSCRIPTION_ID"
-  },
-  {
-    name  = "ARM_TENANT_ID"
-    value = "$TENANT_ID"
-  },
-  {
-    name  = "ARM_USE_OIDC"
-    value = "true"
-  },
-  {
-    name  = "COPILOT_GITHUB_TOKEN"
-    value = "$COPILOT_GITHUB_TOKEN"
-  },
-  {
-    name  = "SLACK_WEBHOOK_URL"
-    value = "$SLACK_WEBHOOK_URL"
-  }
-]
-EOF
-
-# Initialize Terraform
+# Edit terraform.tfvars with your values
 terraform init
-
-# Format check (matches CI)
-terraform fmt -check
-
-# Validate configuration
-terraform validate
-
-# Plan the deployment
-terraform plan
-
-# Apply the deployment
-terraform apply -auto-approve
-
-# Confirm the output
-terraform output
-
-# Destroy the deployment (when no longer needed)
-terraform destroy -auto-approve
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
 
-## Outputs
+### Required Variables
 
-| Output                               | Description                                       |
-| ------------------------------------ | ------------------------------------------------- |
-| `github_repository_environment_name` | Name of the created GitHub repository environment |
+| Variable | Description |
+|---|---|
+| `github_token` | GitHub PAT with `repo` and `environment` scopes |
+| `github_owner` | Repository owner (user or organization) |
+| `github_repository_name` | Repository name |
+| `environment_name` | GitHub environment name (e.g., `dev`) |
+| `arm_client_id` | From OIDC scenario output |
+| `arm_subscription_id` | From OIDC scenario output |
+| `arm_tenant_id` | From OIDC scenario output |
+| `copilot_github_token` | Copilot authentication token |
+| `slack_webhook_url` | Slack webhook for notifications |
+
+---
+
+## FAQ
+
+| Question | Answer |
+|---|---|
+| Where does `github_token` come from? | Generate a GitHub PAT at Settings → Developer Settings → Personal Access Tokens |
+| Can I add more secrets? | Yes — add variables and `github_actions_environment_secret` resources in `main.tf` |
+| Are secret values stored in state? | Yes — use encrypted remote state (Azure Storage backend) in production |

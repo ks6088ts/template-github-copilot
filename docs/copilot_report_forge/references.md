@@ -1,6 +1,6 @@
 # References
 
-> **Navigation:** [README](../../README.md) > **References**
+> **Navigation:** [CopilotReportForge](index.md) > **References**
 >
 > **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md)
 

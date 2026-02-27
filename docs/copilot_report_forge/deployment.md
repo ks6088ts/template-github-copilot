@@ -1,305 +1,158 @@
 # Deployment
 
-> **Navigation:** [README](../../README.md) > **Deployment**
+> **Navigation:** [CopilotReportForge](index.md) > **Deployment**
 >
-> **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md) · [GitHub OAuth App](github_oauth_app.md) · [Running Containers](container_local_run.md) · [Problem & Solution](problem_and_solution.md)
+> **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md)
+
+---
+
+## Overview
+
+CopilotReportForge is deployed through a combination of **Terraform** (for Azure and GitHub infrastructure) and **GitHub Actions** (for AI workflow execution). The deployment creates a fully automated pipeline where GitHub Actions workflows authenticate to Azure via OIDC, execute AI evaluations, and store results in Azure Blob Storage.
 
 ---
 
 ## Prerequisites
 
-### Required Tools
-
-| Tool | Version | Installation |
-|---|---|---|
-| Python | >= 3.13 | [python.org](https://www.python.org/downloads/) |
-| Node.js | >= 22.12.0 | [nodejs.org](https://nodejs.org/) |
-| [uv](https://docs.astral.sh/uv/) | latest | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| Terraform | >= 1.6.0 | [terraform.io](https://developer.hashicorp.com/terraform/install) |
-| Azure CLI (`az`) | latest | [Install Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) |
-| GitHub CLI (`gh`) | latest | [cli.github.com](https://cli.github.com/) |
-| GitHub Copilot CLI | latest | `curl -fsSL https://gh.io/copilot-install \| bash` |
-
-### Required Accounts & Permissions
-
-| Requirement | Details |
+| Requirement | Purpose |
 |---|---|
-| Azure Subscription | With permissions to create Entra ID applications and RBAC role assignments |
-| GitHub Repository | With Actions enabled and ability to create environments and secrets |
-| GitHub Copilot License | Personal or organization license with CLI and SDK access |
-| `COPILOT_GITHUB_TOKEN` | GitHub PAT with Copilot scope (for local dev and GitHub Actions) |
-
----
-
-## Local Development Setup
-
-### 1. Clone the Repository
-
-```shell
-git clone https://github.com/ks6088ts/template-github-copilot.git
-cd template-github-copilot
-```
-
-### 2. Install Python Dependencies
-
-```shell
-cd src/python
-make install-deps-dev
-```
-
-This uses `uv sync --all-groups` to install all production and dev dependencies, and sets up `pre-commit` hooks.
-
-### 3. Configure Environment
-
-```shell
-cp .env.template .env
-```
-
-Edit `.env` with your settings:
-
-```shell
-# Project Settings
-PROJECT_NAME=adhoc
-PROJECT_LOG_LEVEL=INFO
-
-# Azure Blob Storage (required for report service)
-AZURE_BLOB_STORAGE_ACCOUNT_URL=https://<account>.blob.core.windows.net
-AZURE_BLOB_STORAGE_CONTAINER_NAME=adhoc
-
-# Microsoft Foundry (required for agent commands)
-MICROSOFT_FOUNDRY_PROJECT_ENDPOINT=https://<endpoint>.services.ai.azure.com/api/projects/<project>
-
-# BYOK Settings (for Bring Your Own Key workflows)
-BYOK_PROVIDER_TYPE=openai
-BYOK_BASE_URL=https://<your-resource>.openai.azure.com/openai/v1/
-BYOK_API_KEY=<your-api-key>
-BYOK_MODEL=gpt-5
-BYOK_WIRE_API=responses
-
-# OAuth GitHub App Settings (for API server — see github_oauth_app.md)
-GITHUB_CLIENT_ID=Ov23liXXXXXXXXXXXXXX
-GITHUB_CLIENT_SECRET=<your-secret>
-SESSION_SECRET=<random-string>
-API_HOST=127.0.0.1
-API_PORT=8000
-COPILOT_CLI_URL=localhost:3000
-```
-
-### 4. Verify Setup
-
-```shell
-# Run CI tests (format check + lint + tests)
-make ci-test
-```
-
-### 5. Start Copilot CLI Server
-
-```shell
-export COPILOT_GITHUB_TOKEN="your-github-pat"
-make copilot
-```
-
-This starts the Copilot CLI server on `localhost:3000`.
-
-### 6. Run the Chat App
-
-In a separate terminal:
-
-```shell
-cd src/python
-make copilot-app
-```
+| Azure subscription | Host AI services, storage, and identity |
+| GitHub repository | Host code, Actions workflows, and environments |
+| Terraform 1.0+ | Provision infrastructure |
+| Azure CLI (`az`) | Authenticate Terraform with Azure |
+| GitHub CLI (`gh`) | Configure GitHub environments and secrets |
 
 ---
 
 ## Infrastructure Deployment
 
-Infrastructure deployment follows a three-step process. Each step must be completed before the next.
+### Deployment Sequence
+
+The three Terraform scenarios must be deployed in order because each depends on the outputs of the previous step:
 
 ```mermaid
-flowchart TD
-    A["Step 1: Azure GitHub OIDC"] --> B["Step 2: GitHub Secrets"]
-    B --> C["Step 3: Azure Microsoft Foundry<br/>(optional — for agent workflows)"]
-    C --> D["Platform Ready"]
-
-    style D fill:#9f9,stroke:#333
+flowchart LR
+    A["1. OIDC Federation"] -->|client_id, tenant_id| B["2. GitHub Secrets"]
+    B -->|environment configured| C["3. AI Foundry"]
 ```
 
-### Step 1: Azure Service Principal with OIDC
+### Step 1: OIDC Federation (`azure_github_oidc`)
 
-Creates the Azure identity that GitHub Actions will use for passwordless authentication.
+Creates a trust relationship between your GitHub repository and Azure. After this step, GitHub Actions can authenticate to Azure without stored credentials.
 
-```shell
+```bash
 cd infra/scenarios/azure_github_oidc
-
-# Login to Azure
-az login
-
-# Initialize Terraform
 terraform init
-
-# Review the plan
-terraform plan -var="github_repository_name=template-github-copilot" \
-               -var="github_repository_owner=ks6088ts"
-
-# Apply
-terraform apply -var="github_repository_name=template-github-copilot" \
-                -var="github_repository_owner=ks6088ts"
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
 
-**Outputs:** `ARM_CLIENT_ID`, `ARM_SUBSCRIPTION_ID`, `ARM_TENANT_ID`
+**Key outputs:** `client_id`, `tenant_id`, `subscription_id`
 
-**RBAC Role Assignments:**
+### Step 2: GitHub Secrets (`github_secrets`)
 
-| Role | Purpose |
-|---|---|
-| Contributor | Manage Azure resources via Terraform |
-| Storage Blob Data Contributor | Read/write blob data |
-| Storage Blob Delegator | Generate user delegation keys for SAS URLs |
-| Cognitive Services OpenAI User | Access OpenAI models deployed in AI Foundry |
+Takes the OIDC outputs and injects them as encrypted environment secrets in your GitHub repository. Also configures runtime secrets like the Copilot token and Slack webhook URL.
 
-> See [azure_github_oidc/README.md](../../infra/scenarios/azure_github_oidc/README.md) for full variable reference.
-
-### Step 2: Register GitHub Secrets
-
-Stores the Azure credentials and Copilot token in the GitHub repository environment.
-
-```shell
+```bash
 cd infra/scenarios/github_secrets
-
-# Copy and edit tfvars
-cp terraform.tfvars.example terraform.tfvars
-# Edit terraform.tfvars with the outputs from Step 1
-
-# Login to GitHub
-export GITHUB_TOKEN="your-github-pat"
-
-# Initialize and apply
+# Edit terraform.tfvars with your values
 terraform init
-terraform plan
-terraform apply
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
 
-**Creates:** GitHub environment `dev` with secrets for OIDC auth and Copilot access.
+### Step 3: AI Foundry (`azure_microsoft_foundry`)
 
-> See [github_secrets/README.md](../../infra/scenarios/github_secrets/README.md) for full variable reference.
+Deploys the Azure AI Hub, model endpoints, Storage Account, and optional AI Search index. This step is **optional** — you only need it if you want domain-specific AI agents with reference data access.
 
-### Step 3: Azure Microsoft Foundry (Optional)
-
-Deploy Microsoft Foundry for AI agent capabilities — required for Foundry Agent workflows such as domain-specific evaluation, layout assessment, and multi-agent orchestration.
-
-```shell
+```bash
 cd infra/scenarios/azure_microsoft_foundry
-
-# Initialize and apply
 terraform init
-terraform plan
-terraform apply
+terraform plan -out=tfplan
+terraform apply tfplan
 ```
-
-**Creates:** Resource group, AI Foundry account, project, model deployments, and Storage Account (with HNS and queue). Optionally creates an Azure AI Search service when `deploy_search = true`.
-
-| Variable | Default | Description |
-|---|---|---|
-| `storage_account_tier` | `Standard` | Storage account tier (`Standard` or `Premium`) |
-| `storage_account_replication_type` | `LRS` | Replication type (LRS, GRS, RAGRS, ZRS, GZRS, RAGZRS) |
-| `deploy_search` | `false` | Whether to deploy Azure AI Search |
-| `search_sku` | `free` | AI Search pricing tier |
-| `search_replica_count` | `1` | AI Search replica count (1–12) |
-| `search_partition_count` | `1` | AI Search partition count (1, 2, 3, 4, 6, or 12) |
-
-> See [azure_microsoft_foundry/README.md](../../infra/scenarios/azure_microsoft_foundry/README.md) for full variable reference.
 
 ---
 
-## GitHub Actions Deployment
+## GitHub Actions Workflows
 
-Once infrastructure is provisioned and secrets are registered, GitHub Actions workflows are ready to use.
+Once infrastructure is deployed, AI evaluations run as GitHub Actions workflows. These can be triggered by:
 
-### Running Workflows
+| Trigger | Example |
+|---|---|
+| **Manual dispatch** | Click "Run workflow" in the Actions tab |
+| **Schedule** | Cron expression for recurring evaluations |
+| **Push/PR** | Run evaluations as part of CI/CD |
+| **API call** | Programmatic triggering from external systems |
 
-All dispatch-able workflows are triggered via **`workflow_dispatch`** from the GitHub Actions UI:
+### Workflow Execution
 
-1. Navigate to **Actions** tab in the repository
-2. Select the desired workflow
-3. Click **Run workflow**
-4. Fill in the input parameters
-5. Click **Run workflow** to start
-
-### Available Workflows
-
-| Workflow | Purpose | Required Secrets |
-|---|---|---|
-| `github-copilot-cli.yaml` | Run a single Copilot CLI prompt | `COPILOT_GITHUB_TOKEN` |
-| `github-copilot-sdk.yaml` | Run Copilot SDK chat app with tool-calling | `COPILOT_GITHUB_TOKEN` |
-| `report-service.yaml` | Generate report → upload to Blob Storage | `COPILOT_GITHUB_TOKEN`, Azure OIDC secrets |
-| `ghcr-release.yaml` | Publish Docker images to GitHub Container Registry | Automatic (`GITHUB_TOKEN`) |
-| `docker-release.yaml` | Publish Docker images to Docker Hub | `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` |
-
-### Report Service Workflow Inputs
-
-| Input | Required | Default | Description |
-|---|---|---|---|
-| `system_prompt` | Yes | `"You are a helpful assistant."` | System prompt (persona) for the assistant |
-| `queries` | Yes | — | Comma-separated queries (evaluation dimensions) |
-| `auth_method` | Yes | `copilot` | LLM provider authentication method (`copilot`, `entra_id`) |
-| `model` | No | `gpt-5-mini` | LLM model selection (used when `auth_method` is `copilot`) |
-| `byok_provider_type` | No | `openai` | BYOK provider type (`openai`, `azure`, `anthropic`; used when `auth_method` is `entra_id`) |
-| `byok_base_url` | No | `https://api.openai.com/v1/` | BYOK provider base URL (used when `auth_method` is `entra_id`) |
-| `byok_model` | No | `gpt-5` | Model identifier for the BYOK provider (used when `auth_method` is `entra_id`) |
-| `byok_wire_api` | No | `responses` | Wire API format (`completions`, `responses`; used when `auth_method` is `entra_id`) |
-| `azure_blob_storage_account_url` | Yes | — | Storage account URL |
-| `azure_blob_storage_container_name` | Yes | — | Container name |
-| `sas_expiry_hours` | No | `1` | SAS URL expiry in hours |
-| `microsoft_foundry_project_endpoint` | No | — | Microsoft Foundry project endpoint URL |
-| `save_artifacts` | No | `false` | Whether to save artifacts as workflow outputs |
-| `retention_days` | No | `1` | Number of days to retain artifacts |
-
-**Domain adaptation tip:** Change `system_prompt` to a domain-specific persona (e.g., "You are a real estate layout evaluator") and `queries` to evaluation dimensions (e.g., "Assess accessibility,Assess traffic flow") to repurpose the workflow for any industry.
+Each workflow run:
+1. Authenticates to Azure via OIDC (no credentials stored)
+2. Executes parallel LLM queries using the Copilot SDK
+3. Aggregates results into a structured report
+4. Uploads the report to Azure Blob Storage
+5. Optionally notifies via Slack
 
 ---
 
-## Verifying the Deployment
+## Domain Adaptation
 
-### 1. Check CI Workflows
+To adapt the platform for a new domain, you only need to change configuration — no code changes required:
 
-Push a commit or open a PR to `main` and verify that `test.yaml` and `docker.yaml` pass.
+1. **Update system prompt** — Define the AI persona for your domain
+2. **Update queries** — Define the evaluation criteria
+3. **Deploy AI agent** (optional) — Create a Foundry Agent with domain-specific reference data
 
-### 2. Check Infrastructure CI
+Example: switching from product evaluation to clinical guideline review:
 
-Trigger the `infra.yaml` workflow manually or wait for the weekly schedule. Verify that all Terraform lint, validate, and plan steps succeed.
-
-### 3. Run a Test Report
-
-Trigger `report-service.yaml` with a simple query:
-
-- **system_prompt:** `"You are a product evaluation specialist."`
-- **queries:** `"Evaluate product durability,Evaluate usability"`
-- **azure_blob_storage_account_url:** Your storage account URL
-- **azure_blob_storage_container_name:** Your container name
-
-Verify that the workflow outputs a SAS URL and the report JSON is accessible.
-
-### 4. Test Foundry Agents (Optional)
-
-If Step 3 infrastructure was deployed:
-
-```shell
-# Create and run a test agent
-uv run python scripts/agents.py create --name "test-agent" --instructions "You are a helpful assistant."
-uv run python scripts/agents.py run --agent-name "test-agent" --prompt "Hello, can you help me?"
-uv run python scripts/agents.py delete --agent-name "test-agent"
+```bash
+export REPORT_SERVICE_SYSTEM_PROMPT="You are an expert clinical guideline reviewer."
+export REPORT_SERVICE_QUERIES="Evaluate evidence quality;Check recommendation consistency;Assess applicability"
 ```
+
+---
+
+## Local Development Setup
+
+For local development and testing before deploying to GitHub Actions:
+
+```bash
+cd src/python
+
+# Install dependencies
+make install
+
+# Set environment variables
+export COPILOT_GITHUB_TOKEN=$(gh copilot token)
+
+# Run locally
+make chat    # Interactive chat
+make report  # Generate report
+```
+
+See [Getting Started](getting_started.md) for detailed local setup instructions.
+
+---
+
+## Verification
+
+| Check | How to Verify |
+|---|---|
+| OIDC trust established | GitHub Actions workflow authenticates without secrets |
+| Secrets configured | GitHub environment shows all expected secrets |
+| AI models deployed | Azure AI Hub shows model endpoints |
+| Report generation works | Workflow completes and outputs a blob URL |
+| Notifications work | Slack channel receives the report summary |
 
 ---
 
 ## Troubleshooting
 
-| Issue | Cause | Resolution |
+| Issue | Likely Cause | Resolution |
 |---|---|---|
-| `OIDC token request failed` | Federated credential not configured or environment mismatch | Verify `azure_github_oidc` Terraform output and GitHub environment name |
-| `Copilot CLI server not starting` | Invalid `COPILOT_GITHUB_TOKEN` | Verify PAT has Copilot scope; regenerate if expired |
-| `Blob upload 403 Forbidden` | Missing RBAC role assignment | Ensure `Storage Blob Data Contributor` role is assigned to the service principal |
-| `SAS URL returns 403` | Missing delegator role or expired SAS | Ensure `Storage Blob Delegator` role is assigned; check expiry hours |
-| `Terraform state lock` | Concurrent Terraform runs | Wait for the other run to complete, or force-unlock with `terraform force-unlock <ID>` |
-| `Agent creation fails` | Foundry endpoint not configured | Set `MICROSOFT_FOUNDRY_PROJECT_ENDPOINT` in `.env` or pass `--endpoint` flag |
+| OIDC authentication fails | Federated credential mismatch | Verify `subject` claim matches branch/environment |
+| Terraform state conflict | Multiple users applying simultaneously | Use remote state backend (Azure Storage) |
+| Model endpoint unavailable | Model not yet deployed or quota exceeded | Check AI Hub deployments and subscription quotas |
+| Blob upload permission denied | Missing RBAC role | Ensure `Storage Blob Data Contributor` role is assigned |
+| Workflow times out | Too many parallel queries | Reduce query count or increase timeout |

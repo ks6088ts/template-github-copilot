@@ -1,238 +1,124 @@
 # Web UI Guide
 
-> **Navigation:** [README](../../README.md) > **Web UI Guide**
+> **Navigation:** [CopilotReportForge](index.md) > **Web UI Guide**
 >
-> **See also:** [Getting Started](getting_started.md) · [GitHub OAuth App Setup](github_oauth_app.md) · [Architecture](architecture.md) · [API Reference](#api-endpoints)
-
----
-
-CopilotReportForge ships with a built-in web UI that provides an interactive chat interface and a parallel report generation panel — all powered by the GitHub Copilot SDK. This guide walks you through every screen and feature of the web application.
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Login Screen](#login-screen)
-- [Chat Interface](#chat-interface)
-- [Report Panel](#report-panel)
-- [Theme Toggle](#theme-toggle)
-- [API Documentation (Swagger UI)](#api-documentation-swagger-ui)
-- [API Endpoints](#api-endpoints)
+> **See also:** [Getting Started](getting_started.md) · [GitHub OAuth App Setup](github_oauth_app.md)
 
 ---
 
 ## Overview
 
-The web UI is a single-page application served by a FastAPI backend at `http://127.0.0.1:8000/`. It provides two main features:
+CopilotReportForge includes a browser-based interface for interactive AI chat and parallel report generation. The Web UI is powered by the same Copilot SDK used in CLI and GitHub Actions workflows, providing a consistent experience across all interfaces.
+
+### Key Features
 
 | Feature | Description |
 |---|---|
-| **Chat** | Interactive one-on-one conversation with GitHub Copilot, authenticated via your GitHub account |
-| **Report** | Run multiple queries in parallel with a shared system prompt and receive a structured report |
-
-The UI is built with plain HTML/CSS/JavaScript (no framework dependencies) and supports both light and dark themes with automatic system preference detection.
+| **GitHub OAuth Login** | Authenticate with your GitHub identity — no API keys needed |
+| **Interactive Chat** | Real-time conversational interface with hosted LLMs |
+| **Report Panel** | Configure and execute parallel multi-query evaluations |
+| **Theme Toggle** | Switch between light and dark themes |
+| **Swagger UI** | Built-in API documentation at `/docs` |
 
 ---
 
 ## Login Screen
 
-When you first visit the application, you are presented with the login screen. Authentication is handled through the GitHub OAuth App flow — no API keys or tokens need to be managed manually.
+When you open the application, you see a login page with a **"Sign in with GitHub"** button. Clicking it initiates the GitHub OAuth flow (see [GitHub OAuth App Setup](github_oauth_app.md)).
 
 ![Login Screen](images/01_login_screen.png)
 
-**How to sign in:**
-
-1. Click the **"Sign in with GitHub"** button
-2. You will be redirected to GitHub's authorization page
-3. Review and approve the requested permissions (the `copilot` scope)
-4. GitHub redirects you back to the application
-5. Your session is stored in a signed, HTTP-only cookie
-
-> **Note:** You need an active [GitHub Copilot](https://github.com/features/copilot) subscription to use the chat and report features.
-
-The login screen also supports dark mode:
-
-![Login Screen (Dark Mode)](images/02_login_screen_dark.png)
+After successful authentication, you are redirected to the chat interface.
 
 ---
 
 ## Chat Interface
 
-After signing in, the application displays the **Chat** tab by default. This tab provides a familiar chat interface for conversing with GitHub Copilot.
+The chat interface provides a conversational experience with hosted LLMs.
 
-![Chat Interface](images/05_chat_ui.png)
+![Chat Screen](images/05_chat_ui.png)
 
-### Features
+| Element | Description |
+|---|---|
+| **Message input** | Type your prompt and press Enter or click Send |
+| **Conversation history** | Messages are displayed in chronological order |
+| **Model indicator** | Shows which LLM model is being used |
+| **Clear button** | Reset the conversation |
 
-- **Real-time messaging** — Type a message in the input field and press **Enter** or click **Send**. The assistant's response appears in the conversation thread.
-- **Typing indicator** — A "Thinking…" animation is displayed while waiting for the Copilot response.
-- **Copy to clipboard** — Hover over any assistant reply to reveal a **Copy** button for quick clipboard access.
-- **Session persistence** — Your authentication session lasts for 1 hour (configurable via `SESSION_SECRET` and cookie settings).
-- **User info** — Your GitHub username (and avatar, if available) is displayed in the header along with a **Logout** button.
-
-### How It Works (Under the Hood)
-
-1. Your message is sent via `POST /api/chat` with the request body `{"message": "..."}`.
-2. The server retrieves your GitHub OAuth token from the session.
-3. A `CopilotClient` is instantiated with your token and connected to the Copilot CLI server.
-4. The Copilot response is returned as `{"reply": "..."}`.
+Each message creates an independent Copilot SDK session. Responses are streamed in real time.
 
 ---
 
 ## Report Panel
 
-The **Report** tab enables you to run multiple queries in parallel, each evaluated under a shared system prompt. This is ideal for multi-perspective evaluations, batch analysis, and structured report generation.
+The report panel enables parallel execution of multiple LLM queries with a configurable system prompt.
 
-### Configuring a Report
+![Report Panel](images/06_report_form.png)
 
-![Report Form](images/06_report_form.png)
+### How to Use
 
-1. **System Prompt** — Define the persona or instruction set for all queries (e.g., *"You are a senior software engineer. Evaluate the following aspects..."*).
-2. **Queries** — Add one or more evaluation queries. Click **"+ Add Query"** to add additional rows, or click the **×** button to remove a query.
-3. **Run Report** — Click the **"Run Report"** button to execute all queries in parallel.
+1. **Set the system prompt** — Define the AI persona (e.g., "You are a senior architect reviewing system designs")
+2. **Enter queries** — One per line, each will execute in a separate LLM session
+3. **Click Generate** — All queries execute in parallel
+4. **Review results** — Each query shows its response and success/failure status
 
-### Viewing Results
+### Report Output
 
-![Report Results](images/07_report_results.png)
-
-Once the report completes, the results are displayed below the form:
-
-- **Summary bar** — Shows the total number of queries, how many succeeded, and how many failed.
-- **Individual results** — Each query is displayed with its label and the corresponding response. Failed queries show an error message in red.
-- **Copy support** — Each result item has a **Copy** button for quick clipboard access.
-
-### How It Works (Under the Hood)
-
-1. The frontend sends a `POST /api/report` request with:
-   ```json
-   {
-     "queries": ["Query 1", "Query 2", "Query 3"],
-     "system_prompt": "You are a ..."
-   }
-   ```
-2. The server creates parallel Copilot sessions via `asyncio.gather`, each with the shared system prompt.
-3. Results are aggregated into a structured `ReportOutput` object:
-   ```json
-   {
-     "results": [
-       {"query": "Query 1", "response": "...", "error": null},
-       {"query": "Query 2", "response": "...", "error": null}
-     ],
-     "total": 2,
-     "succeeded": 2,
-     "failed": 0
-   }
-   ```
+The generated report includes:
+- Total number of queries executed
+- Per-query results with success/failure indicators
+- Aggregated summary
+- Option to download as JSON
 
 ---
 
 ## Theme Toggle
 
-The application includes a light/dark theme toggle accessible from the header. Click the moon/sun icon to switch between themes.
+Click the theme toggle button (sun/moon icon) in the navigation bar to switch between light and dark modes. The preference is saved in your browser's local storage.
 
-| Theme | Description |
+---
+
+## API Documentation
+
+The application includes auto-generated API documentation accessible at:
+
+| URL | Interface |
 |---|---|
-| **Light** (default) | Clean white background with GitHub-inspired styling |
-| **Dark** | Dark background optimized for low-light environments |
+| `/docs` | Swagger UI — interactive API explorer |
+| `/redoc` | ReDoc — alternative API documentation |
 
-- The theme choice is persisted in `localStorage` and applies immediately.
-- If no preference is saved, the app follows the system's color scheme preference automatically.
+### Key API Endpoints
 
----
-
-## API Documentation (Swagger UI)
-
-The FastAPI backend provides auto-generated interactive API documentation at `/docs` (Swagger UI) and `/redoc` (ReDoc).
-
-![Swagger UI](images/03_swagger_ui.png)
-
-Access it at: `http://127.0.0.1:8000/docs`
-
-The Swagger UI allows you to:
-
-- Browse all available endpoints and their request/response schemas
-- View the data models (`ChatRequest`, `ChatResponse`, `ReportRequest`, `ReportOutput`, etc.)
-- Try out API calls directly from the browser (though authentication is session-based)
-
-![Chat Endpoint Detail](images/04_swagger_chat_endpoint.png)
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Login page |
+| `GET` | `/auth/login` | Initiate GitHub OAuth flow |
+| `GET` | `/auth/callback` | OAuth callback handler |
+| `POST` | `/chat` | Send a chat message |
+| `POST` | `/report` | Generate a parallel report |
+| `GET` | `/health` | Health check |
 
 ---
 
-## API Endpoints
+## Running the Web UI
 
-| Method | Path | Auth Required | Description |
-|---|---|---|---|
-| `GET` | `/` | No | Serve the HTML chat frontend |
-| `GET` | `/auth/login` | No | Initiate GitHub OAuth authorization flow |
-| `GET` | `/auth/callback` | No | Handle the OAuth callback from GitHub |
-| `GET` | `/auth/logout` | No | Clear the session and redirect to login |
-| `GET` | `/api/me` | Yes | Return the current authenticated user's info |
-| `POST` | `/api/chat` | Yes | Send a message to Copilot and receive a reply |
-| `POST` | `/api/report` | Yes | Run parallel queries and return a structured report |
-| `GET` | `/docs` | No | Interactive Swagger UI documentation |
-| `GET` | `/redoc` | No | Alternative ReDoc documentation |
+### Local Development
 
-### Chat Request/Response
-
-**Request:**
-```json
-POST /api/chat
-Content-Type: application/json
-
-{
-  "message": "What is GitHub Copilot?"
-}
+```bash
+cd src/python
+export OAUTH_GITHUB_CLIENT_ID="your-client-id"
+export OAUTH_GITHUB_CLIENT_SECRET="your-client-secret"
+export OAUTH_REDIRECT_URI="http://localhost:8000/auth/callback"
+make api-server
 ```
 
-**Response:**
-```json
-{
-  "reply": "GitHub Copilot is an AI-powered code assistant..."
-}
+Then open `http://localhost:8000`.
+
+### Docker
+
+```bash
+cd src/python
+docker compose up --build
 ```
 
-### Report Request/Response
-
-**Request:**
-```json
-POST /api/report
-Content-Type: application/json
-
-{
-  "queries": [
-    "Evaluate code quality",
-    "Assess security practices"
-  ],
-  "system_prompt": "You are a senior software engineer."
-}
-```
-
-**Response:**
-```json
-{
-  "system_prompt": "You are a senior software engineer.",
-  "results": [
-    {
-      "query": "Evaluate code quality",
-      "response": "The codebase demonstrates strong engineering practices...",
-      "error": null
-    },
-    {
-      "query": "Assess security practices",
-      "response": "The application follows security best practices...",
-      "error": null
-    }
-  ],
-  "total": 2,
-  "succeeded": 2,
-  "failed": 0
-}
-```
-
----
-
-## Next Steps
-
-- **Set up the OAuth App:** Follow the [GitHub OAuth App Setup](github_oauth_app.md) guide to configure authentication.
-- **Run with containers:** See [Running Containers Locally](container_local_run.md) for Docker-based deployment.
-- **Understand the architecture:** Read the [Architecture](architecture.md) document for a deep dive into the system design.
-- **Deploy to production:** Check the [Deployment](deployment.md) guide for production deployment instructions.
+See [Running Containers Locally](container_local_run.md) for detailed container usage.

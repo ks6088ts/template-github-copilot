@@ -1,8 +1,8 @@
 [![test](https://github.com/ks6088ts/template-github-copilot/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/test.yaml?query=branch%3Amain)
 [![docker](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker.yaml?query=branch%3Amain)
 [![infra](https://github.com/ks6088ts/template-github-copilot/actions/workflows/infra.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/infra.yaml?query=branch%3Amain)
-[![ghcr-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml?query=branch%3Amain)
-[![docker-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml?query=branch%3Amain)
+[![ghcr-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml)
+[![docker-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml)
 
 # CopilotReportForge
 

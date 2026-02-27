@@ -237,7 +237,7 @@ def chat_entra_id(
     """Send a single prompt using BYOK with Entra ID (DefaultAzureCredential) bearer token."""
     set_verbose_logging(verbose)
 
-    result = create_provider(AuthMethod.ENTRA_ID)
+    result = create_provider(AuthMethod.FOUNDRY_ENTRA_ID)
 
     async def main():
         client = create_copilot_client(cli_url)
@@ -290,7 +290,7 @@ def chat_loop_entra_id(
         await client.start()
 
         # Obtain a fresh bearer token for the session
-        result = create_provider(AuthMethod.ENTRA_ID)
+        result = create_provider(AuthMethod.FOUNDRY_ENTRA_ID)
         session = await client.create_session(
             create_session_config(
                 model=result.model,
@@ -350,7 +350,7 @@ def chat_parallel_entra_id(
     """
     set_verbose_logging(verbose)
 
-    result = create_provider(AuthMethod.ENTRA_ID)
+    result = create_provider(AuthMethod.FOUNDRY_ENTRA_ID)
 
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:

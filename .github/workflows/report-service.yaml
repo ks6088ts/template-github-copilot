@@ -16,13 +16,13 @@ on:
         type: choice
         description: "LLM provider authentication method"
         options:
-          - copilot
-          - entra_id
+          - github_copilot
+          - foundry_entra_id
         required: true
-        default: copilot
+        default: github_copilot
       model:
         type: choice
-        description: "Specify the model to use for Copilot CLI server (used when auth_method is copilot)"
+        description: "Specify the model to use for Copilot CLI server (used when auth_method is github_copilot)"
         options:
           - gpt-5-mini
           - claude-sonnet-4.6
@@ -32,7 +32,7 @@ on:
         default: gpt-5-mini
       byok_provider_type:
         type: choice
-        description: "BYOK provider type (used when auth_method is entra_id)"
+        description: "BYOK provider type (used when auth_method is foundry_entra_id)"
         options:
           - openai
           - azure
@@ -41,17 +41,17 @@ on:
         default: openai
       byok_base_url:
         type: string
-        description: "BYOK provider base URL (used when auth_method is entra_id)"
+        description: "BYOK provider base URL (used when auth_method is foundry_entra_id)"
         required: false
         default: "https://api.openai.com/v1/"
       byok_model:
         type: string
-        description: "Model identifier for the BYOK provider (used when auth_method is entra_id)"
+        description: "Model identifier for the BYOK provider (used when auth_method is foundry_entra_id)"
         required: false
         default: gpt-5
       byok_wire_api:
         type: choice
-        description: "Wire API format (used when auth_method is entra_id)"
+        description: "Wire API format (used when auth_method is foundry_entra_id)"
         options:
           - completions
           - responses
@@ -166,7 +166,7 @@ jobs:
             --auth-method "${{ github.event.inputs.auth_method }}"
           )
 
-          if [[ "${{ github.event.inputs.auth_method }}" != "copilot" ]]; then
+          if [[ "${{ github.event.inputs.auth_method }}" != "github_copilot" ]]; then
             ARGS+=(
               --byok-provider-type "${{ github.event.inputs.byok_provider_type }}"
               --byok-base-url "${{ github.event.inputs.byok_base_url }}"

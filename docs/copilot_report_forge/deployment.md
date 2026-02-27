@@ -149,6 +149,15 @@ terraform apply -var="github_repository_name=template-github-copilot" \
 
 **Outputs:** `ARM_CLIENT_ID`, `ARM_SUBSCRIPTION_ID`, `ARM_TENANT_ID`
 
+**RBAC Role Assignments:**
+
+| Role | Purpose |
+|---|---|
+| Contributor | Manage Azure resources via Terraform |
+| Storage Blob Data Contributor | Read/write blob data |
+| Storage Blob Delegator | Generate user delegation keys for SAS URLs |
+| Cognitive Services OpenAI User | Access OpenAI models deployed in AI Foundry |
+
 > See [azure_github_oidc/README.md](../../infra/scenarios/azure_github_oidc/README.md) for full variable reference.
 
 ### Step 2: Register GitHub Secrets
@@ -188,7 +197,16 @@ terraform plan
 terraform apply
 ```
 
-**Creates:** Resource group, AI Foundry account, project, and model deployments.
+**Creates:** Resource group, AI Foundry account, project, model deployments, and Storage Account (with HNS and queue). Optionally creates an Azure AI Search service when `deploy_search = true`.
+
+| Variable | Default | Description |
+|---|---|---|
+| `storage_account_tier` | `Standard` | Storage account tier (`Standard` or `Premium`) |
+| `storage_account_replication_type` | `LRS` | Replication type (LRS, GRS, RAGRS, ZRS, GZRS, RAGZRS) |
+| `deploy_search` | `false` | Whether to deploy Azure AI Search |
+| `search_sku` | `free` | AI Search pricing tier |
+| `search_replica_count` | `1` | AI Search replica count (1–12) |
+| `search_partition_count` | `1` | AI Search partition count (1, 2, 3, 4, 6, or 12) |
 
 > See [azure_microsoft_foundry/README.md](../../infra/scenarios/azure_microsoft_foundry/README.md) for full variable reference.
 

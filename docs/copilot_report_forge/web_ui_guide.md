@@ -209,6 +209,7 @@ Content-Type: application/json
 **Response:**
 ```json
 {
+  "system_prompt": "You are a senior software engineer.",
   "results": [
     {
       "query": "Evaluate code quality",

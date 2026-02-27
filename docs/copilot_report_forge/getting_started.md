@@ -96,6 +96,7 @@ Creates an Azure Service Principal with federated identity credentials, enabling
 | Role Assignment (Contributor) | Manage Azure resources |
 | Role Assignment (Storage Blob Data Contributor) | Read/write blob data |
 | Role Assignment (Storage Blob Delegator) | Generate user delegation keys for SAS URLs |
+| Role Assignment (Cognitive Services OpenAI User) | Access OpenAI models deployed in AI Foundry |
 
 > **Detailed setup instructions:** See [azure_github_oidc/README.md](../../infra/scenarios/azure_github_oidc/README.md)
 
@@ -117,6 +118,18 @@ Deploys a Microsoft Foundry environment on Azure for agentic AI workflows. Provi
 | Microsoft Foundry Account (AI Services) | Cognitive Services account with AI Foundry capabilities |
 | Microsoft Foundry Project | Project workspace within the Foundry account |
 | Model Deployments | OpenAI model deployments (configurable via `model_deployments` variable) |
+| Storage Account | Azure Storage Account (with HNS enabled and queue) for artifact storage |
+| Azure AI Search (optional) | AI Search service for vector/hybrid search (deploy via `deploy_search = true`) |
+
+**Default model deployments:**
+
+| Model | Version | SKU | Capacity |
+|---|---|---|---|
+| `gpt-5.1` | `2025-11-13` | GlobalStandard | 450 |
+| `gpt-5` | `2025-08-07` | GlobalStandard | 450 |
+| `gpt-4o` | `2024-11-20` | GlobalStandard | 450 |
+| `text-embedding-3-large` | `1` | GlobalStandard | 450 |
+| `text-embedding-3-small` | `1` | GlobalStandard | 450 |
 
 > **Detailed setup instructions:** See [azure_microsoft_foundry/README.md](../../infra/scenarios/azure_microsoft_foundry/README.md)
 

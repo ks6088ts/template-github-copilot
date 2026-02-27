@@ -24,10 +24,15 @@ cd src/python
 cat <<EOF > .env
 COPILOT_GITHUB_TOKEN=<your-copilot-github-token>
 COPILOT_MODEL=gpt-5-mini
+
+# OAuth GitHub App Settings (required for the web UI login flow)
+GITHUB_CLIENT_ID=<your-oauth-app-client-id>
+GITHUB_CLIENT_SECRET=<your-oauth-app-client-secret>
+SESSION_SECRET=<random-string>
 EOF
 ```
 
-> Include any additional environment variables required by the api service in the `.env` file.
+> Include any additional environment variables required by the api service in the `.env` file. See the [GitHub OAuth App Setup](github_oauth_app.md) guide for creating the OAuth App and generating these values.
 
 ## 3. Start with Docker Compose (Local Build)
 

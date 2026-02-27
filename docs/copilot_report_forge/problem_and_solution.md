@@ -59,7 +59,7 @@ GitHub Actions authenticates to Azure via OpenID Connect (OIDC) federated identi
 
 - An Entra ID application and service principal
 - A federated identity credential trusting the GitHub OIDC provider
-- RBAC role assignments (Contributor, Storage Blob Data Contributor, Storage Blob Delegator)
+- RBAC role assignments (Contributor, Storage Blob Data Contributor, Storage Blob Delegator, Cognitive Services OpenAI User)
 
 ### Structured Output with Secure Sharing
 
@@ -85,9 +85,9 @@ All Azure and GitHub resources are managed via Terraform:
 
 | Scenario | What It Provisions |
 |---|---|
-| `azure_github_oidc` | Entra ID app, service principal, federated credential, RBAC roles |
+| `azure_github_oidc` | Entra ID app, service principal, federated credential, RBAC roles (including Cognitive Services OpenAI User) |
 | `github_secrets` | GitHub environment with ARM_CLIENT_ID, ARM_SUBSCRIPTION_ID, ARM_TENANT_ID, ARM_USE_OIDC, COPILOT_GITHUB_TOKEN |
-| `azure_microsoft_foundry` | Resource group, AI Foundry account, project, model deployments |
+| `azure_microsoft_foundry` | Resource group, AI Foundry account, project, model deployments, Storage Account (with HNS + queue), and optionally Azure AI Search |
 
 ### Ephemeral Sandbox Execution on GitHub Actions
 

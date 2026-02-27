@@ -338,9 +338,9 @@ flowchart LR
         SP["azure_github_oidc<br/>(Entra ID + OIDC)"]
         GH["github_secrets<br/>(Environment + Secrets)"]
         MF["microsoft_foundry<br/>(AI Hub + Services)"]
-        ST["storage"]
+        ST["storage<br/>(Storage Account + Queue)"]
         RS["random_string"]
-        SEARCH["search"]
+        SEARCH["search<br/>(Azure AI Search)"]
     end
 
     subgraph "Scenarios"
@@ -354,6 +354,8 @@ flowchart LR
     S3 --> RG
     S3 --> MF
     S3 --> RS
+    S3 --> ST
+    S3 -."conditional<br/>(deploy_search=true)".-> SEARCH
 ```
 
 ---
@@ -450,6 +452,7 @@ sequenceDiagram
 | Contributor | Subscription | Manage Azure resources via Terraform |
 | Storage Blob Data Contributor | Subscription | Read/write blob data (reports, reference documents) |
 | Storage Blob Delegator | Subscription | Generate user delegation keys for SAS URLs |
+| Cognitive Services OpenAI User | Subscription | Access OpenAI models deployed in AI Foundry |
 
 ---
 
@@ -480,12 +483,15 @@ tests/
 │   └── test_azure_blob_storages.py   # 16 tests — Blob Storage client
 ├── services/
 │   ├── test_chat.py                  # Chat model tests (placeholder)
-│   └── test_reports.py              # 5 tests — Parallel report generation
+│   ├── test_reports.py               # 5 tests — Parallel report generation
+│   └── apis/
+│       └── test_app.py               # 19 tests — FastAPI app (OAuth, chat, report endpoints)
 ├── settings/
 │   ├── test_azure_blob_storage.py    # 3 tests — BlobStorage settings
 │   ├── test_byok.py                  # 3 tests — BYOK settings
 │   ├── test_microsoft_foundry.py     # 3 tests — Foundry settings
-│   └── test_project.py              # 3 tests — Project settings
+│   ├── test_oauth.py                 # 3 tests — OAuth settings
+│   └── test_project.py               # 3 tests — Project settings
 └── tools/
     └── test_foundry_agent.py         # 9 tests — Copilot custom tools
 ```

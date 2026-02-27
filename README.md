@@ -81,9 +81,11 @@ flowchart TB
 | **Foundry Agent Integration** | Create, list, and invoke domain-specific AI agents on Azure AI Foundry — with tool-calling support via the Copilot SDK |
 | **Passwordless OIDC Auth** | GitHub Actions ↔ Azure authentication with zero stored secrets; federated identity credentials via Entra ID |
 | **Secure Artifact Sharing** | JSON reports uploaded to Azure Blob Storage with user-delegation-key SAS URLs (no account keys) |
-| **Infrastructure as Code** | Terraform modules for OIDC setup, GitHub secrets, Microsoft Foundry (AI Hub + model deployments) |
+| **Infrastructure as Code** | Terraform modules for OIDC setup, GitHub secrets, Microsoft Foundry (AI Hub + model deployments), Storage Account, and optional Azure AI Search |
 | **Extensible CLI Tooling** | Typer-based CLIs for chat, reports, Blob Storage, Foundry agents, and Slack notifications |
 | **Multi-Persona AI Queries** | System prompts are first-class parameters — swap personas per query for multi-perspective analysis |
+| **Web UI with GitHub OAuth** | FastAPI-based web application with GitHub OAuth login, interactive chat, and parallel report generation panel |
+| **Container Deployment** | Docker Compose support with pre-built images published to GitHub Container Registry and Docker Hub |
 
 ---
 
@@ -206,6 +208,7 @@ uv run python scripts/agents.py run --agent-name "quality-reviewer" \
 | [Deployment](docs/copilot_report_forge/deployment.md) | Prerequisites, environment setup, and step-by-step deployment instructions |
 | [Responsible AI](docs/copilot_report_forge/responsible_ai.md) | Fairness, transparency, safety, privacy, and deployment checklist |
 | [GitHub OAuth App](docs/copilot_report_forge/github_oauth_app.md) | Setting up GitHub OAuth App for the Copilot Chat API server |
+| [Web UI Guide](docs/copilot_report_forge/web_ui_guide.md) | Interactive chat interface and parallel report generation panel walkthrough |
 | [Running Containers Locally](docs/copilot_report_forge/container_local_run.md) | Running copilot and api services via Docker Compose and GitHub Packages |
 | [References](docs/copilot_report_forge/references.md) | External links and resources |
 

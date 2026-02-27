@@ -2,7 +2,36 @@
 
 > **Navigation:** [README](../../README.md) > **CopilotReportForge (index)**
 
-**A platform that turns LLM queries into repeatable, auditable, multi-perspective reports — without managing any AI infrastructure.**
+**A platform that turns LLM queries into repeatable, auditable, multi-perspective reports -- without managing any AI infrastructure.**
+
+---
+
+## Core Concept
+
+CopilotReportForge is built on one central idea: **automated report generation through multi-persona parallel agent execution.**
+
+By combining multiple AI personas, parallel processing, and fully automated pipelines, the platform transforms ad-hoc LLM interactions into governed, repeatable, and auditable workflows -- without managing any AI infrastructure.
+
+### Pillar 1: Multi-Persona Parallel Execution
+
+1. Define a single topic (prompt) -- for example, "Evaluate the new wireless headphones"
+2. Define multiple personas (quality engineer, consumer researcher, regulatory specialist, etc.) as system prompts
+3. Launch all personas as AI agents in parallel using `asyncio.gather`, with each agent producing structured JSON output from its specialized perspective
+4. Aggregate all agent results into one `ReportOutput` (Pydantic model)
+
+Personas are **configuration, not code**. By simply swapping system prompts, you can switch from a food industry evaluation panel to a financial risk committee to an architectural compliance review -- without changing the code.
+
+### Pillar 2: 24/7 Autonomous Operation
+
+The entire pipeline runs via GitHub Actions schedule (cron), `workflow_dispatch`, or API triggers:
+
+- Reports can be continuously generated on different topics without human intervention
+- The system operates 24 hours a day, regardless of time zone
+- Generated reports are stored in Azure Blob Storage and shared to Teams/Slack via SAS URL
+
+### Pillar 3: Domain Agnostic
+
+The persona + parallel execution model can be applied to any industry. See [Cross-Industry Applicability](#cross-industry-applicability) for eight representative use cases.
 
 ---
 
@@ -89,6 +118,8 @@ The platform is **domain-agnostic by design**. By changing only the system promp
 | **Finance** | Credit analyst, Compliance officer | Credit exposure, market risk, regulatory adherence |
 | **Education** | Curriculum designer, Assessment specialist | Learning objectives, rubric design, lesson plans |
 | **Creative** | Brand strategist, Cultural sensitivity reviewer | Inclusivity, brand alignment, market resonance |
+| **Legal** | Contract analyst, Regulatory compliance officer | Clause analysis, risk assessment, jurisdictional review |
+| **Retail** | Merchandising analyst, Customer experience reviewer | Product placement, pricing strategy, customer satisfaction |
 
 > The core insight: **system prompts are persona configuration, queries are evaluation dimensions.** Any expert judgment can be parallelized, structured, and audited at scale.
 

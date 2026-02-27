@@ -52,7 +52,7 @@ The persona + parallel execution model can be applied to any industry. The table
 
 ## Architecture Overview
 
-![Architecture Overview](https://github.com/user-attachments/assets/71d893b0-99f6-4b14-aca6-c4ec1bb965ee)
+![Architecture Overview](https://github.com/user-attachments/assets/5d6cf058-7253-4601-b2d9-9c5fea9023da)
 
 **Steps:**
 

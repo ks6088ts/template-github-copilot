@@ -20,9 +20,9 @@ from template_github_copilot.providers import (
 
 def test_auth_method_values():
     """AuthMethod should expose the expected string values."""
-    assert AuthMethod.COPILOT == "copilot"
+    assert AuthMethod.GITHUB_COPILOT == "github_copilot"
     assert AuthMethod.API_KEY == "api_key"
-    assert AuthMethod.ENTRA_ID == "entra_id"
+    assert AuthMethod.FOUNDRY_ENTRA_ID == "foundry_entra_id"
 
 
 # ---------------------------------------------------------------------------
@@ -49,15 +49,15 @@ def test_provider_result_frozen():
 # ---------------------------------------------------------------------------
 
 
-def test_create_provider_copilot():
-    """COPILOT auth should return empty ProviderResult."""
-    result = create_provider(AuthMethod.COPILOT)
+def test_create_provider_github_copilot():
+    """GITHUB_COPILOT auth should return empty ProviderResult."""
+    result = create_provider(AuthMethod.GITHUB_COPILOT)
     assert result.provider is None
     assert result.model is None
 
 
-def test_create_provider_default_is_copilot():
-    """Default auth method should be COPILOT."""
+def test_create_provider_default_is_github_copilot():
+    """Default auth method should be GITHUB_COPILOT."""
     result = create_provider()
     assert result.provider is None
     assert result.model is None
@@ -91,12 +91,12 @@ def test_create_provider_api_key(monkeypatch: pytest.MonkeyPatch):
 
 
 # ---------------------------------------------------------------------------
-# create_provider – ENTRA_ID
+# create_provider – FOUNDRY_ENTRA_ID
 # ---------------------------------------------------------------------------
 
 
-def test_create_provider_entra_id(monkeypatch: pytest.MonkeyPatch):
-    """ENTRA_ID auth should build a ProviderConfig with bearer_token."""
+def test_create_provider_foundry_entra_id(monkeypatch: pytest.MonkeyPatch):
+    """FOUNDRY_ENTRA_ID auth should build a ProviderConfig with bearer_token."""
     monkeypatch.setenv("BYOK_PROVIDER_TYPE", "azure")
     monkeypatch.setenv("BYOK_BASE_URL", "https://azure.example.com/")
     monkeypatch.setenv("BYOK_API_KEY", "unused")
@@ -114,7 +114,7 @@ def test_create_provider_entra_id(monkeypatch: pytest.MonkeyPatch):
         "azure.identity.DefaultAzureCredential",
         return_value=mock_credential,
     ):
-        result = create_provider(AuthMethod.ENTRA_ID)
+        result = create_provider(AuthMethod.FOUNDRY_ENTRA_ID)
 
     assert result.model == "gpt-5"
     assert result.provider is not None

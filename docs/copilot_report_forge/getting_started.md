@@ -36,32 +36,50 @@ For a deeper look at the problems this solves and why the architecture is design
 git clone https://github.com/ks6088ts/template-github-copilot.git
 cd template-github-copilot/src/python
 
-# Install dependencies
-make install
+# Install dependencies (includes dev tools)
+make install-deps-dev
 ```
 
-### 2. Authenticate with GitHub Copilot
+### 2. Configure Environment
 
 ```bash
-# Start Copilot authentication and set the token
-export COPILOT_GITHUB_TOKEN=$(gh copilot token)
+cp .env.template .env  # Edit with your settings
 ```
 
-### 3. Run Your First Chat
+### 3. Authenticate with GitHub Copilot
 
 ```bash
-make chat
+# Set your GitHub PAT with Copilot scope
+export COPILOT_GITHUB_TOKEN="your-github-pat"
 ```
 
-This sends a prompt to a hosted LLM via the Copilot SDK and prints the response.
-
-### 4. Generate a Report
+### 4. Start the Copilot CLI Server
 
 ```bash
-make report
+make copilot
 ```
 
-The platform executes all configured queries in parallel, aggregates the results, and outputs a structured JSON report.
+This starts the Copilot CLI server on port 3000.
+
+### 5. Run Your First Chat (in another terminal)
+
+```bash
+make copilot-app
+```
+
+This launches an interactive chat loop with a hosted LLM via the Copilot SDK.
+
+### 6. Generate a Report
+
+```bash
+uv run python scripts/report_service.py generate \
+  --system-prompt "You are a product evaluation specialist." \
+  --queries "Evaluate durability,Evaluate usability,Evaluate aesthetics" \
+  --account-url "https://<account>.blob.core.windows.net" \
+  --container-name "reports"
+```
+
+The platform executes all queries in parallel (comma-separated), aggregates the results, and uploads a structured JSON report to Azure Blob Storage.
 
 ---
 
@@ -111,27 +129,42 @@ See [Azure Microsoft Foundry README](../../infra/scenarios/azure_microsoft_found
 
 ## CLI Reference
 
-All CLI tools are invoked via `make` targets from `src/python/`. Each tool reads its configuration from environment variables.
+All tools are invoked from `src/python/`.
+
+### Make Targets
 
 | Command | What It Does |
 |---|---|
-| `make chat` | Interactive chat with a hosted LLM |
-| `make report` | Parallel multi-query report generation |
-| `make agent` | Agentic workflow with AI Foundry tools |
-| `make blob` | Upload/download blobs to Azure Storage |
-| `make byok` | Chat using Bring-Your-Own-Key (API key or Entra ID) |
-| `make slack` | Post a message to Slack via webhook |
+| `make copilot` | Start the Copilot CLI server (port 3000) |
+| `make copilot-app` | Interactive chat loop with Copilot SDK |
+| `make copilot-api` | Start the web API server with Copilot SDK |
+| `make compose-up` | Start all services via Docker Compose |
+| `make compose-down` | Stop Docker Compose services |
+| `make compose-logs` | Show Docker Compose logs |
+
+### Script Commands
+
+| Script | What It Does |
+|---|---|
+| `uv run python scripts/chat.py chat-loop` | Interactive chat with a hosted LLM |
+| `uv run python scripts/report_service.py generate` | Parallel multi-query report generation |
+| `uv run python scripts/agents.py` | Agentic workflow with AI Foundry tools |
+| `uv run python scripts/blob.py` | Upload/download blobs to Azure Storage |
+| `uv run python scripts/byok.py` | Chat using Bring-Your-Own-Key |
+| `uv run python scripts/slacks.py` | Post a message to Slack via webhook |
 
 ### Example: Multi-Persona Evaluation
 
 ```bash
-export COPILOT_GITHUB_TOKEN=$(gh copilot token)
-export REPORT_SERVICE_SYSTEM_PROMPT="You are a senior product evaluator."
-export REPORT_SERVICE_QUERIES="Evaluate usability;Evaluate accessibility;Evaluate performance"
-make report
+export COPILOT_GITHUB_TOKEN="your-github-pat"
+uv run python scripts/report_service.py generate \
+  --system-prompt "You are a senior product evaluator." \
+  --queries "Evaluate usability,Evaluate accessibility,Evaluate performance" \
+  --account-url "https://<account>.blob.core.windows.net" \
+  --container-name "reports"
 ```
 
-Each semicolon-separated query runs in an independent LLM session. Results are aggregated into a single report with per-query success/failure tracking.
+Each comma-separated query runs in an independent LLM session. Results are aggregated into a single report with per-query success/failure tracking.
 
 ---
 
@@ -143,24 +176,36 @@ All configuration is done through environment variables. The platform uses struc
 
 | Variable | Purpose |
 |---|---|
-| `COPILOT_GITHUB_TOKEN` | Authentication token for Copilot SDK |
-| `REPORT_SERVICE_SYSTEM_PROMPT` | System prompt defining the AI persona |
-| `REPORT_SERVICE_QUERIES` | Semicolon-separated list of queries to execute |
-| `REPORT_SERVICE_MODEL` | LLM model to use (e.g. `gpt-4o`) |
-| `AZURE_STORAGE_ACCOUNT_NAME` | Azure Storage account for report upload |
-| `AZURE_STORAGE_CONTAINER_NAME` | Blob container name |
-| `SLACK_WEBHOOK_URL` | Slack webhook for notifications |
+| `PROJECT_NAME` | Project name (used for logging and blob path prefix) |
+| `PROJECT_LOG_LEVEL` | Log level (`INFO`, `DEBUG`, etc.) |
+| `COPILOT_GITHUB_TOKEN` | GitHub PAT with Copilot scope |
+| `COPILOT_MODEL` | Model used by the Copilot CLI server (e.g. `gpt-5-mini`) |
+| `COPILOT_CLI_URL` | Copilot CLI server URL (leave empty to spawn subprocess) |
+| `AZURE_BLOB_STORAGE_ACCOUNT_URL` | Azure Blob Storage account URL |
+| `AZURE_BLOB_STORAGE_CONTAINER_NAME` | Blob container name |
+| `MICROSOFT_FOUNDRY_PROJECT_ENDPOINT` | Microsoft Foundry project endpoint URL |
+
+### OAuth Settings (Web UI)
+
+| Variable | Purpose |
+|---|---|
+| `GITHUB_CLIENT_ID` | GitHub OAuth App client ID |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret |
+| `SESSION_SECRET` | Random secret for cookie signing |
+| `API_HOST` | Web server host (default: `127.0.0.1`) |
+| `API_PORT` | Web server port (default: `8000`) |
 
 ### Provider Configuration (BYOK)
 
 | Variable | Purpose |
 |---|---|
-| `BYOK_PROVIDER` | Provider type: `copilot`, `api_key`, or `azure_entra_id` |
-| `BYOK_API_KEY` | API key (when using `api_key` provider) |
-| `BYOK_AZURE_ENDPOINT` | Azure endpoint URL (when using `azure_entra_id` provider) |
-| `BYOK_MODEL` | Model name to use |
+| `BYOK_PROVIDER_TYPE` | Provider type: `openai`, `azure`, or `anthropic` |
+| `BYOK_BASE_URL` | Base URL for the model endpoint |
+| `BYOK_API_KEY` | API key for the provider |
+| `BYOK_MODEL` | Model name to use (e.g. `gpt-5`) |
+| `BYOK_WIRE_API` | Wire API format: `completions` or `responses` |
 
-For a complete list, see the settings files in the source code.
+For a complete list, see the settings files in `template_github_copilot/settings/`.
 
 ---
 
@@ -171,7 +216,7 @@ CopilotReportForge includes a browser-based UI for interactive use. See [Web UI 
 To start the web server locally:
 
 ```bash
-make api-server
+make copilot-api
 ```
 
 Then open `http://localhost:8000` in your browser. The web application provides:

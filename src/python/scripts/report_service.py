@@ -46,7 +46,7 @@ def _generate_report(
     cli_url: str,
     queries: list[str],
     system_prompt: str,
-    auth_method: AuthMethod = AuthMethod.COPILOT,
+    auth_method: AuthMethod = AuthMethod.GITHUB_COPILOT,
     byok_settings: ByokSettings | None = None,
 ) -> ReportOutput:
     """Run parallel chat queries and return the aggregated report."""
@@ -155,9 +155,9 @@ def generate(
         typer.Option(
             "--auth-method",
             "-m",
-            help="LLM provider authentication method (copilot, api_key, entra_id)",
+            help="LLM provider authentication method (github_copilot, api_key, foundry_entra_id)",
         ),
-    ] = AuthMethod.COPILOT,
+    ] = AuthMethod.GITHUB_COPILOT,
     byok_provider_type: Annotated[
         Literal["openai", "azure", "anthropic"],
         typer.Option(
@@ -213,7 +213,7 @@ def generate(
 
     try:
         byok_settings: ByokSettings | None = None
-        if auth_method in (AuthMethod.API_KEY, AuthMethod.ENTRA_ID):
+        if auth_method in (AuthMethod.API_KEY, AuthMethod.FOUNDRY_ENTRA_ID):
             byok_settings = ByokSettings(
                 byok_provider_type=byok_provider_type,
                 byok_base_url=byok_base_url,

@@ -106,10 +106,10 @@ The application includes auto-generated API documentation accessible at:
 
 ```bash
 cd src/python
-export OAUTH_GITHUB_CLIENT_ID="your-client-id"
-export OAUTH_GITHUB_CLIENT_SECRET="your-client-secret"
-export OAUTH_REDIRECT_URI="http://localhost:8000/auth/callback"
-make api-server
+export GITHUB_CLIENT_ID="your-client-id"
+export GITHUB_CLIENT_SECRET="your-client-secret"
+export SESSION_SECRET="a-random-secret-string"
+make copilot-api
 ```
 
 Then open `http://localhost:8000`.

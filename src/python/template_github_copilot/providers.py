@@ -6,10 +6,10 @@ to specify *which* authentication method to use, rather than building
 
 Supported authentication methods
 --------------------------------
-* **copilot** – Default GitHub Copilot backend (no ``ProviderConfig`` needed).
+* **github_copilot** – Default GitHub Copilot backend (no ``ProviderConfig`` needed).
 * **api_key** – Static API key read from ``ByokSettings``.
-* **entra_id** – Short-lived Azure Entra ID bearer token obtained via
-  ``DefaultAzureCredential``.
+* **foundry_entra_id** – Microsoft Foundry OpenAI API authenticated via
+  Azure Entra ID (``DefaultAzureCredential``).
 
 Usage
 -----
@@ -42,9 +42,9 @@ COGNITIVE_SERVICES_SCOPE = "https://cognitiveservices.azure.com/.default"
 class AuthMethod(StrEnum):
     """Supported LLM provider authentication methods."""
 
-    COPILOT = "copilot"
+    GITHUB_COPILOT = "github_copilot"
     API_KEY = "api_key"
-    ENTRA_ID = "entra_id"
+    FOUNDRY_ENTRA_ID = "foundry_entra_id"
 
 
 @dataclass(frozen=True)
@@ -84,7 +84,7 @@ def _build_api_key_provider(
 def _build_entra_id_provider(
     byok_settings: "ByokSettings | None" = None,
 ) -> ProviderResult:
-    """Build a :class:`ProviderResult` using an Azure Entra ID bearer token."""
+    """Build a :class:`ProviderResult` using a Microsoft Foundry Entra ID bearer token."""
     from azure.identity import DefaultAzureCredential
 
     if byok_settings is None:
@@ -110,12 +110,12 @@ def _build_entra_id_provider(
 
 _PROVIDER_BUILDERS: dict[AuthMethod, Callable[..., ProviderResult]] = {
     AuthMethod.API_KEY: _build_api_key_provider,
-    AuthMethod.ENTRA_ID: _build_entra_id_provider,
+    AuthMethod.FOUNDRY_ENTRA_ID: _build_entra_id_provider,
 }
 
 
 def create_provider(
-    auth_method: AuthMethod = AuthMethod.COPILOT,
+    auth_method: AuthMethod = AuthMethod.GITHUB_COPILOT,
     byok_settings: "ByokSettings | None" = None,
 ) -> ProviderResult:
     """Create an LLM provider configuration for the given authentication method.
@@ -133,7 +133,7 @@ def create_provider(
     Raises:
         ValueError: If *auth_method* is not a recognised :class:`AuthMethod`.
     """
-    if auth_method == AuthMethod.COPILOT:
+    if auth_method == AuthMethod.GITHUB_COPILOT:
         return ProviderResult()
 
     builder = _PROVIDER_BUILDERS.get(auth_method)

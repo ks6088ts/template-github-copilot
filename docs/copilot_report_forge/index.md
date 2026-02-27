@@ -2,7 +2,7 @@
 
 > **Navigation:** [README](../../README.md) > **CopilotReportForge (index)**
 
-**A platform that turns LLM queries into repeatable, auditable, multi-perspective reports -- without managing any AI infrastructure.**
+CopilotReportForge is an open-source platform that transforms ad-hoc LLM interactions into governed, repeatable, and auditable report-generation pipelines. Users define expert personas as system prompts and evaluation queries as input; the platform executes all personas in parallel via the GitHub Copilot SDK and aggregates the results into structured JSON reports. Reports are uploaded to Azure Blob Storage and shared through time-limited, revocable URLs. The entire workflow runs in ephemeral GitHub Actions environments with passwordless OIDC authentication — no GPU provisioning, no model hosting, and no long-lived secrets. By treating personas as configuration rather than code, the same pipeline adapts to any industry — from manufacturing quality panels to financial risk committees — without code changes. Infrastructure is fully managed via Terraform, and a browser-based Web UI with GitHub OAuth login is included for interactive use.
 
 ---
 

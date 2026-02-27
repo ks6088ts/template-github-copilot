@@ -81,7 +81,7 @@ def chat(
 ):
     set_verbose_logging(verbose)
 
-    result = create_provider(AuthMethod.COPILOT)
+    result = create_provider(AuthMethod.GITHUB_COPILOT)
 
     async def main():
         client = create_copilot_client(cli_url)
@@ -125,7 +125,7 @@ def chat_loop(
     """Interactive chat loop with Copilot."""
     set_verbose_logging(verbose)
 
-    result = create_provider(AuthMethod.COPILOT)
+    result = create_provider(AuthMethod.GITHUB_COPILOT)
 
     async def main():
         client = create_copilot_client(cli_url)
@@ -189,7 +189,7 @@ def chat_parallel(
     """Send multiple prompts to Copilot in parallel (separate sessions) and output structured JSON."""
     set_verbose_logging(verbose)
 
-    result = create_provider(AuthMethod.COPILOT)
+    result = create_provider(AuthMethod.GITHUB_COPILOT)
 
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:

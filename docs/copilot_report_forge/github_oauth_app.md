@@ -63,21 +63,23 @@ Set the following environment variables before starting the server:
 
 | Variable | Value |
 |---|---|
-| `OAUTH_GITHUB_CLIENT_ID` | Your OAuth App's Client ID |
-| `OAUTH_GITHUB_CLIENT_SECRET` | Your OAuth App's Client Secret |
-| `OAUTH_REDIRECT_URI` | `http://localhost:8000/auth/callback` |
+| `GITHUB_CLIENT_ID` | Your OAuth App's Client ID |
+| `GITHUB_CLIENT_SECRET` | Your OAuth App's Client Secret |
+| `SESSION_SECRET` | A random secret string for cookie signing |
 
 ```bash
-export OAUTH_GITHUB_CLIENT_ID="your-client-id"
-export OAUTH_GITHUB_CLIENT_SECRET="your-client-secret"
-export OAUTH_REDIRECT_URI="http://localhost:8000/auth/callback"
+export GITHUB_CLIENT_ID="your-client-id"
+export GITHUB_CLIENT_SECRET="your-client-secret"
+export SESSION_SECRET="a-random-secret-string"
 ```
+
+Alternatively, add these to your `.env` file (see `.env.template`).
 
 ### Step 3: Start the Server
 
 ```bash
 cd src/python
-make api-server
+make copilot-api
 ```
 
 The server starts at `http://localhost:8000`.
@@ -93,15 +95,14 @@ The server starts at `http://localhost:8000`.
 
 ## Production Configuration
 
-For production deployments, update these values:
+For production deployments, update the OAuth App settings in GitHub Developer Settings:
 
 | Setting | Development | Production |
 |---|---|---|
 | Homepage URL | `http://localhost:8000` | `https://your-domain.com` |
 | Callback URL | `http://localhost:8000/auth/callback` | `https://your-domain.com/auth/callback` |
-| `OAUTH_REDIRECT_URI` | `http://localhost:8000/auth/callback` | `https://your-domain.com/auth/callback` |
 
-> **Important:** The callback URL in the OAuth App settings must exactly match the `OAUTH_REDIRECT_URI` environment variable.
+> **Important:** The callback URL in the OAuth App settings must match the URL where the server is running.
 
 ---
 
@@ -109,7 +110,7 @@ For production deployments, update these values:
 
 | Issue | Cause | Resolution |
 |---|---|---|
-| "redirect_uri mismatch" error | Callback URL doesn't match | Ensure `OAUTH_REDIRECT_URI` exactly matches the callback URL in GitHub OAuth App settings |
+| "redirect_uri mismatch" error | Callback URL doesn't match | Ensure the callback URL in GitHub OAuth App settings matches the server's actual URL |
 | "Bad credentials" error | Invalid or expired client secret | Regenerate the client secret in GitHub Developer Settings |
 | Login redirects to blank page | Server not running or wrong port | Verify the server is running at the expected URL |
 | "access_denied" error | User declined authorization | User must approve the OAuth consent screen |

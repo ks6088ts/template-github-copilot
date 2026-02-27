@@ -1,20 +1,21 @@
 # Running Containers Locally
 
-This guide explains how to run the copilot and api services locally using container images published to GitHub Packages (ghcr.io).
+This guide explains how to run the copilot and api services locally using Docker Compose. Three methods are available depending on your image source:
+
+| Method | Compose File | Image Source |
+|--------|--------------|---------------|
+| Local Build | `compose.yaml` | Built from source |
+| Docker Hub | `compose.docker.yaml` | `docker.io` |
+| GitHub Packages | `compose.docker.yaml` | `ghcr.io` |
 
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- A GitHub Personal Access Token (PAT) with the `read:packages` scope
 - A Copilot GitHub Token (`COPILOT_GITHUB_TOKEN`)
+- (For GitHub Packages) GitHub Personal Access Token (PAT) with the `read:packages` scope
+- (For Docker Hub) A Docker Hub account
 
-## 1. Log in to GitHub Container Registry
-
-```bash
-echo "$GITHUB_PAT" | docker login ghcr.io -u <your-github-username> --password-stdin
-```
-
-## 2. Set Up Environment Variables
+## 1. Set Up Environment Variables
 
 Create a `.env` file under `src/python/` with the required environment variables.
 
@@ -34,58 +35,48 @@ EOF
 
 > Include any additional environment variables required by the api service in the `.env` file. See the [GitHub OAuth App Setup](github_oauth_app.md) guide for creating the OAuth App and generating these values.
 
-## 3. Start with Docker Compose (Local Build)
+## 2. Start with Docker Compose
 
-To build from source and start the services:
+### Option A: Local Build
+
+Build images from source and start the services. Uses `compose.yaml`.
 
 ```bash
 cd src/python
 docker compose up --build
 ```
 
-## 4. Start with Docker Compose (GitHub Packages Images)
+### Option B: Docker Hub Images
 
-To pull and run pre-built images from GitHub Packages, create a `compose.ghcr.yaml` file under `src/python/`:
-
-```yaml
-services:
-  copilot:
-    image: ghcr.io/ks6088ts/template-github-copilot-copilot:latest
-    environment:
-      - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}
-      - COPILOT_MODEL=${COPILOT_MODEL:-gpt-5-mini}
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: ["CMD-SHELL", "node -e \"const c=require('net').createConnection(3000,'127.0.0.1',()=>{c.end();process.exit(0)});c.on('error',()=>process.exit(1))\""]
-      interval: 5s
-      timeout: 10s
-      retries: 10
-      start_period: 10s
-
-  api:
-    image: ghcr.io/ks6088ts/template-github-copilot-api:latest
-    env_file:
-      - .env
-    environment:
-      - COPILOT_CLI_URL=copilot:3000
-      - API_HOST=0.0.0.0
-      - API_PORT=8000
-    ports:
-      - "8000:8000"
-    depends_on:
-      copilot:
-        condition: service_healthy
-```
-
-Then start the services:
+Pull and run pre-built images from Docker Hub. Uses `compose.docker.yaml`.
 
 ```bash
 cd src/python
-docker compose -f compose.ghcr.yaml up
+
+# Log in to Docker Hub (required for private images)
+docker login -u <your-dockerhub-username>
+
+# Start the services
+docker compose -f compose.docker.yaml up
 ```
 
-## 5. Verify
+> `compose.docker.yaml` uses `docker.io` as the default registry.
+
+### Option C: GitHub Packages (ghcr.io) Images
+
+Pull and run pre-built images from GitHub Container Registry. Uses the same `compose.docker.yaml` with the `CONTAINER_REGISTRY` environment variable set to `ghcr.io`.
+
+```bash
+cd src/python
+
+# Log in to GitHub Container Registry
+echo "$GITHUB_PAT" | docker login ghcr.io -u <your-github-username> --password-stdin
+
+# Start the services with CONTAINER_REGISTRY override
+CONTAINER_REGISTRY=ghcr.io docker compose -f compose.docker.yaml up
+```
+
+## 3. Verify
 
 Once the services are running, verify by accessing the API docs:
 
@@ -93,24 +84,24 @@ Once the services are running, verify by accessing the API docs:
 curl http://localhost:8000/docs
 ```
 
-## 6. Stop
+## 4. Stop
 
 ```bash
+# For local build
 docker compose down
-# or
-docker compose -f compose.ghcr.yaml down
+
+# For Docker Hub / GitHub Packages
+docker compose -f compose.docker.yaml down
 ```
 
 ## Specifying Image Versions
 
-You can pin a specific version instead of `latest`:
+By default, `compose.docker.yaml` uses the `latest` tag. You can pin a specific version by editing the compose file or using environment variables.
 
-```yaml
-image: ghcr.io/ks6088ts/template-github-copilot-copilot:1.0.0
-image: ghcr.io/ks6088ts/template-github-copilot-api:1.0.0
-```
+Available tags can be found on:
 
-Available tags can be found on [GitHub Packages](https://github.com/ks6088ts/template-github-copilot/pkgs).
+- [GitHub Packages](https://github.com/ks6088ts/template-github-copilot/pkgs)
+- [Docker Hub](https://hub.docker.com/u/ks6088ts)
 
 ## Publishing Images to Registries
 

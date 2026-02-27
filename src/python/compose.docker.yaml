@@ -1,0 +1,28 @@
+services:
+  copilot:
+    image: ${CONTAINER_REGISTRY:-docker.io}/ks6088ts/template-github-copilot-copilot:latest
+    environment:
+      - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}
+      - COPILOT_MODEL=${COPILOT_MODEL:-gpt-5-mini}
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const c=require('net').createConnection(3000,'127.0.0.1',()=>{c.end();process.exit(0)});c.on('error',()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 10s
+
+  api:
+    image: ${CONTAINER_REGISTRY:-docker.io}/ks6088ts/template-github-copilot-api:latest
+    env_file:
+      - .env
+    environment:
+      - COPILOT_CLI_URL=copilot:3000
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      copilot:
+        condition: service_healthy

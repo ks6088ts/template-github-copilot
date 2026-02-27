@@ -59,7 +59,7 @@ echo $GITHUB_PAT | docker login ghcr.io -u YOUR_USERNAME --password-stdin
 
 # Pull and run
 cd src/python
-DOCKER_REGISTRY=ghcr.io docker compose -f compose.docker.yaml up
+CONTAINER_REGISTRY=ghcr.io docker compose -f compose.docker.yaml up
 ```
 
 ---
@@ -68,7 +68,7 @@ DOCKER_REGISTRY=ghcr.io docker compose -f compose.docker.yaml up
 
 | Service | Port | Description |
 |---|---|---|
-| `copilot` | — | CLI-based Copilot interaction |
+| `copilot` | `3000` | Copilot CLI server |
 | `api` | `8000` | Web application with chat and report UI |
 
 ---

@@ -247,17 +247,73 @@ The platform supports multiple LLM backend configurations through a unified prov
 
 Switching between modes requires changing a configuration parameter, not code. This enables deployment across environments with different security requirements — from open-internet development to air-gapped corporate networks.
 
+### Provider Extensibility
+
+The provider system is implemented in `template_github_copilot/providers.py` with three components:
+
+- **`AuthMethod` enum** — Defines available authentication methods: `GITHUB_COPILOT`, `API_KEY`, `FOUNDRY_ENTRA_ID`.
+- **`create_provider()` factory** — Returns a `ProviderResult` containing the `CopilotClient` instance, LLM configuration, and custom tools, based on the selected `AuthMethod`.
+- **`register_provider()` hook** — Allows adding custom provider builders without modifying the core code. Register a callable that accepts the same arguments and returns a `ProviderResult`.
+
+```python
+from template_github_copilot.providers import register_provider, ProviderResult
+
+def my_custom_provider(cli_url, verbose, **kwargs) -> ProviderResult:
+    # Build your custom CopilotClient / config here
+    ...
+
+register_provider("my_custom_auth", my_custom_provider)
+```
+
+---
+
+## Custom Copilot Tools
+
+The platform supports custom tools that extend the Copilot SDK session with additional capabilities. Tools are defined in `template_github_copilot/tools/` and automatically registered when a Copilot session is created.
+
+### Built-in Tools
+
+| Tool | Description | Input |
+|---|---|---|
+| `list_foundry_agents` | List all available agents on Microsoft Foundry | `endpoint` (optional; defaults to env) |
+| `call_foundry_agent` | Call a named Foundry agent with a user message | `agent_name`, `user_message`, `conversation_id` (optional), `endpoint` (optional) |
+
+### Adding a Custom Tool
+
+1. Create a new file in `template_github_copilot/tools/` (e.g., `my_tool.py`).
+2. Define a Pydantic input model and implement the tool function using the `@define_tool` decorator from `copilot.tools`.
+3. Export the tool in `template_github_copilot/tools/__init__.py` via `get_custom_tools()`.
+
+```python
+from copilot.tools import define_tool
+from pydantic import BaseModel, Field
+
+class MyToolInput(BaseModel):
+    query: str = Field(description="The query to process")
+
+@define_tool(
+    name="my_tool",
+    description="Description visible to the LLM",
+    input_schema=MyToolInput,
+)
+async def my_tool(input: MyToolInput) -> str:
+    return f"Processed: {input.query}"
+```
+
+The Copilot SDK session will automatically discover the tool and invoke it when the LLM determines it is relevant to the user's query.
+
 ---
 
 ## Extensibility
 
-The architecture is designed for extension at four levels:
+The architecture is designed for extension at five levels:
 
 | Extension Point | How to Extend | Example |
 |---|---|---|
 | **New domain** | Change system prompt and queries | Adapt from product evaluation to clinical guideline review |
-| **New AI capability** | Add a Copilot tool | Web scraper, database lookup, calculation engine |
+| **New AI capability** | Add a Copilot tool in `tools/` | Web scraper, database lookup, calculation engine |
 | **New AI agent** | Create a Foundry Agent with domain instructions | Specialized real estate appraiser with access to floor plan data |
+| **New LLM provider** | Register via `register_provider()` | Custom model endpoint with proprietary auth |
 | **New output channel** | Post-process the report JSON | Send to Slack, email, dashboard, or PowerBI |
 
 ---

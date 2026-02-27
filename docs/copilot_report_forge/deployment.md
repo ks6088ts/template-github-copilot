@@ -36,6 +36,13 @@ flowchart LR
     B -->|environment configured| C["3. AI Foundry"]
 ```
 
+An additional standalone scenario is available for deploying the application to Azure Container Apps:
+
+```mermaid
+flowchart LR
+    D["4. Container Apps (standalone)"]
+```
+
 ### Step 1: OIDC Federation (`azure_github_oidc`)
 
 Creates a trust relationship between your GitHub repository and Azure. After this step, GitHub Actions can authenticate to Azure without stored credentials.
@@ -71,6 +78,22 @@ terraform init
 terraform plan -out=tfplan
 terraform apply tfplan
 ```
+
+### Step 4 (Standalone): Container Apps (`azure_container_apps`)
+
+Deploys a monolith container (Copilot CLI + API server in a single image) as an Azure Container App, equivalent to running the `monolith` service from `compose.docker.yaml` in the cloud. The container uses supervisord to manage both processes internally. This step is **independent** of the other three scenarios.
+
+```bash
+cd infra/scenarios/azure_container_apps
+export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+terraform init
+terraform plan -out=tfplan
+terraform apply tfplan
+```
+
+**Key outputs:** `app_url`, `app_fqdn`
+
+See [azure_container_apps/README.md](../../infra/scenarios/azure_container_apps/README.md) for full configuration details including environment variables.
 
 ---
 

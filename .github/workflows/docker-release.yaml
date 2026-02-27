@@ -17,6 +17,9 @@ jobs:
           - image: api
             dockerfile: src/python/api.Dockerfile
             context: src/python
+          - image: monolith
+            dockerfile: src/python/Dockerfile
+            context: src/python
     steps:
       - name: Check out the repo
         uses: actions/checkout@v6

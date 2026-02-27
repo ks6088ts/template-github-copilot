@@ -85,11 +85,12 @@ The platform executes all queries in parallel (comma-separated), aggregates the 
 
 ## Infrastructure Setup
 
-CopilotReportForge uses three Terraform scenarios, deployed in sequence. Each scenario builds on the outputs of the previous one.
+CopilotReportForge uses three Terraform scenarios, deployed in sequence. Each scenario builds on the outputs of the previous one. A fourth standalone scenario deploys the application to Azure Container Apps.
 
 ```mermaid
 flowchart LR
     A["1. OIDC Setup"] --> B["2. GitHub Secrets"] --> C["3. AI Foundry"]
+    D["4. Container Apps (standalone)"]
 ```
 
 ### Step 1: OIDC Federation
@@ -124,6 +125,18 @@ terraform init && terraform apply
 ```
 
 See [Azure Microsoft Foundry README](../../infra/scenarios/azure_microsoft_foundry/README.md) for details.
+
+### Step 4: Container Apps (Standalone)
+
+Deploys a monolith container (Copilot CLI + API server in a single image) as an Azure Container App, equivalent to running the `monolith` service from `compose.docker.yaml` in the cloud. This step is **independent** of the other three scenarios.
+
+```bash
+cd infra/scenarios/azure_container_apps
+export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+terraform init && terraform apply
+```
+
+See [Azure Container Apps README](../../infra/scenarios/azure_container_apps/README.md) for details.
 
 ---
 

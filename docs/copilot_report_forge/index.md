@@ -190,6 +190,7 @@ uv run python scripts/report_service.py generate \
 | [Azure GitHub OIDC](../../infra/scenarios/azure_github_oidc/README.md) | Establish passwordless trust between GitHub Actions and Azure |
 | [GitHub Secrets](../../infra/scenarios/github_secrets/README.md) | Automate GitHub environment and secrets configuration |
 | [Azure Microsoft Foundry](../../infra/scenarios/azure_microsoft_foundry/README.md) | Deploy AI Foundry with model endpoints and storage |
+| [Azure Container Apps](../../infra/scenarios/azure_container_apps/README.md) | Deploy monolith service (Copilot CLI + API) as Azure Container App (standalone) |
 
 ## License
 

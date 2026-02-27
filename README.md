@@ -30,7 +30,7 @@ Personas are **configuration, not code**. By simply swapping system prompts, you
 The entire pipeline runs via GitHub Actions schedule (cron), `workflow_dispatch`, or API triggers:
 
 - Reports can be continuously generated on different topics without human intervention
-- The system operates 24 hours a day, regardless of time zone, improving accuracy with each iteration
+- The system operates 24 hours a day, regardless of time zone
 - Generated reports are stored in Azure Blob Storage and shared to Teams/Slack via SAS URL
 
 ### Pillar 3: Domain Agnostic

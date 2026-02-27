@@ -94,6 +94,24 @@ Each workflow run:
 4. Uploads the report to Azure Blob Storage
 5. Optionally notifies via Slack
 
+### `report-service` Workflow
+
+The main report generation workflow (`report-service.yaml`) is triggered via **manual dispatch** (`workflow_dispatch`). Infrastructure-related settings (storage account, BYOK config, etc.) are read from **GitHub environment secrets** — only task-specific inputs are required at runtime:
+
+| Input | Type | Description |
+|---|---|---|
+| `system_prompt` | string | System prompt defining the AI persona |
+| `queries` | string | Comma-separated evaluation queries |
+| `auth_method` | choice | `github_copilot` or `foundry_entra_id` |
+| `model` | choice | Model for Copilot CLI (e.g. `gpt-5-mini`) |
+| `sas_expiry_hours` | number | Hours until the report download URL expires |
+| `save_artifacts` | boolean | Whether to save workflow artifacts |
+| `retention_days` | number | Days to retain artifacts |
+
+The following values are sourced from **environment secrets** (configured via the `github_secrets` Terraform scenario) and do not need to be provided at runtime:
+
+`ARM_CLIENT_ID`, `ARM_SUBSCRIPTION_ID`, `ARM_TENANT_ID`, `COPILOT_GITHUB_TOKEN`, `SLACK_WEBHOOK_URL`, `AZURE_BLOB_STORAGE_ACCOUNT_URL`, `AZURE_BLOB_STORAGE_CONTAINER_NAME`, `MICROSOFT_FOUNDRY_PROJECT_ENDPOINT`, `BYOK_PROVIDER_TYPE`, `BYOK_BASE_URL`, `BYOK_API_KEY`, `BYOK_MODEL`, `BYOK_WIRE_API`
+
 ---
 
 ## Domain Adaptation

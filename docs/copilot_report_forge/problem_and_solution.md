@@ -83,7 +83,7 @@ The platform turns LLM interactions into a **defined pipeline**: system prompt (
 
 ### Zero-Infrastructure Model Access → Solves Problem 2
 
-The Copilot SDK serves as a programmatic interface to hosted LLMs. No model deployment, no GPU management, no inference server maintenance. The platform supports multiple model backends (GPT-5-mini, GPT-5, Claude) through configuration, not infrastructure.
+The Copilot SDK serves as a programmatic interface to hosted LLMs. No model deployment, no GPU management, no inference server maintenance. The platform supports multiple model backends (GPT-5-mini, GPT-5, Claude Sonnet/Opus 4.6) through configuration, not infrastructure.
 
 For organizations that require private model endpoints, the BYOK (Bring Your Own Key) mode routes requests to custom endpoints — including Azure OpenAI with private networking — while maintaining the same programmatic interface.
 

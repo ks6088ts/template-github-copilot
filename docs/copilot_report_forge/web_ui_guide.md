@@ -13,6 +13,7 @@ CopilotReportForge includes a browser-based interface for interactive AI chat an
 ### Web UI Architecture
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart TB
     subgraph Browser["Browser (Single Page)"]
         LOGIN["Login Screen"]
@@ -70,6 +71,7 @@ When you open the application, you see a login page with a **"Sign in with GitHu
 ### GitHub OAuth Authentication Flow
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant Browser
     participant Server as FastAPI Server
@@ -121,6 +123,7 @@ Each message creates an independent Copilot SDK session. Responses are streamed 
 ### Chat Communication Flow
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant Browser
     participant Server as FastAPI Server
@@ -170,6 +173,7 @@ The generated report includes:
 ### Report Generation Flow
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant Browser
     participant Server as FastAPI Server
@@ -226,6 +230,8 @@ The application includes auto-generated API documentation accessible at:
 | `GET` | `/api/me` | Return authenticated user info (login, avatar) |
 | `POST` | `/api/chat` | Send a chat message |
 | `POST` | `/api/report` | Generate a parallel report |
+| `POST` | `/api/report/generate` | Generate a report, upload to Azure Blob Storage, and return a SAS URL |
+| `POST` | `/api/report/upload` | Upload an existing report to Azure Blob Storage and return a SAS URL |
 
 ---
 

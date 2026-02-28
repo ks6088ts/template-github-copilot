@@ -60,6 +60,7 @@ No GPU provisioning, no model hosting, no long-lived secrets. The entire workflo
 ## Architecture Overview
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart TB
     subgraph Trigger
         USER["User / Scheduler"]

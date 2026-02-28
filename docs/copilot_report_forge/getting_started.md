@@ -88,6 +88,7 @@ The platform executes all queries in parallel (comma-separated), aggregates the 
 CopilotReportForge uses three Terraform scenarios, deployed in sequence. Each scenario builds on the outputs of the previous one. A fourth standalone scenario deploys the application to Azure Container Apps.
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     A["1. OIDC Setup"] --> B["2. GitHub Secrets"] --> C["3. AI Foundry"]
     D["4. Container Apps (standalone)"]
@@ -196,14 +197,18 @@ All tools are invoked from `src/python/`.
 | Script | What It Does |
 |---|---|
 | `uv run python scripts/chat.py chat-loop` | Interactive chat with a hosted LLM |
+| `uv run python scripts/chat.py chat --prompt "Hello"` | Single-prompt chat with a hosted LLM |
+| `uv run python scripts/chat.py chat-parallel -p "Q1" -p "Q2"` | Send multiple prompts in parallel sessions |
 | `uv run python scripts/report_service.py generate` | Parallel multi-query report generation |
-| `uv run python scripts/agents.py` | Agentic workflow with AI Foundry tools |
+| `uv run python scripts/agents.py list` | List AI Foundry agents |
+| `uv run python scripts/agents.py run` | Run an AI Foundry agent with a query |
 | `uv run python scripts/api_server.py serve` | Start the Copilot Chat API server (FastAPI + OAuth) |
 | `uv run python scripts/blob.py list-blobs` | List blobs in Azure Blob Storage |
 | `uv run python scripts/blob.py upload-blob` | Upload a string as a blob to Azure Blob Storage |
 | `uv run python scripts/blob.py generate-sas-url` | Generate a SAS URL for a blob |
-| `uv run python scripts/byok.py` | Chat using Bring-Your-Own-Key |
-| `uv run python scripts/slacks.py` | Post a message to Slack via webhook |
+| `uv run python scripts/byok.py chat-loop-api-key` | Interactive chat using Bring-Your-Own-Key (API key) |
+| `uv run python scripts/byok.py chat-loop-entra-id` | Interactive chat using Bring-Your-Own-Key (Entra ID) |
+| `uv run python scripts/slacks.py send` | Post a message to Slack via webhook |
 
 ### Example: Multi-Persona Evaluation
 

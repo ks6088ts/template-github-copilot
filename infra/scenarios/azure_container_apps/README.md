@@ -11,6 +11,11 @@ This scenario creates:
 - **Log Analytics Workspace** (optional): For Container Apps Environment monitoring
 - **Container Apps Environment**: Managed environment for running container apps
 - **Monolith Container App**: Runs the Copilot CLI and API server in a single container (externally accessible, port 8000). Uses [supervisord](http://supervisord.org/) internally to manage both the Copilot CLI (port 3000) and the API server (port 8000) processes.
+- **Role Assignments**: Grants the Container App's system-assigned managed identity the following roles at subscription scope:
+  - Contributor
+  - Storage Blob Data Contributor
+  - Storage Blob Delegator
+  - Cognitive Services OpenAI User
 
 ## Prerequisites
 
@@ -22,6 +27,7 @@ This scenario creates:
 ## Architecture
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     User(["🌐 Internet"])
 
@@ -39,13 +45,17 @@ flowchart LR
         LAW["📊 Log Analytics\n(optional)"]
     end
 
+    RBAC["🔐 Role Assignments\nContributor\nStorage Blob Data Contributor\nStorage Blob Delegator\nCognitive Services OpenAI User"]
+
     User -- "HTTPS :8000" --> API
     CAE -. "logs & metrics" .-> LAW
+    Mono -. "managed identity" .-> RBAC
 
-    style RG fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
-    style CAE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    style Mono fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style LAW fill:#f3e5f5,stroke:#7b1fa2,stroke-dasharray: 5 5
+    style RG fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style CAE fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0
+    style Mono fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style LAW fill:#553c9a,stroke:#b794f4,stroke-dasharray: 5 5,color:#e2e8f0
+    style RBAC fill:#9c4221,stroke:#f6ad55,stroke-dasharray: 5 5,color:#e2e8f0
 ```
 
 ## How to use
@@ -87,7 +97,7 @@ terraform destroy -auto-approve
 | `location` | Azure region for resources | `string` | `"japaneast"` | no |
 | `tags` | Tags to apply to resources | `map(string)` | See variables.tf | no |
 | `enable_log_analytics` | Whether to create a Log Analytics Workspace | `bool` | `false` | no |
-| `container_image` | Docker image for the monolith service (API + Copilot CLI) | `string` | `"docker.io/ks6088ts/template-github-copilot:latest"` | no |
+| `container_image` | Docker image for the monolith service (API + Copilot CLI) | `string` | `"docker.io/ks6088ts/template-github-copilot-monolith:latest"` | no |
 | `environment_variables` | Environment variables for the monolith container (non-sensitive) | `map(string)` | `{}` | no |
 | `secret_environment_variables` | Sensitive environment variables for the monolith container (stored as secrets) | `map(string)` | `{}` | no |
 
@@ -97,6 +107,12 @@ terraform destroy -auto-approve
 |------|-------------|
 | `resource_group_name` | Name of the resource group |
 | `container_app_environment_id` | ID of the Container Apps Environment |
+| `container_app_environment_name` | Name of the Container Apps Environment |
+| `app_id` | ID of the Monolith Container App |
+| `app_name` | Name of the Monolith Container App |
+| `app_fqdn` | FQDN of the Monolith Container App |
+| `app_url` | Full URL to access the Monolith Container App |
+| `identity_principal_id` | Principal ID of the Monolith Container App's system-assigned managed identity |
 | `container_app_environment_name` | Name of the Container Apps Environment |
 | `app_id` | ID of the Monolith Container App |
 | `app_name` | Name of the Monolith Container App |

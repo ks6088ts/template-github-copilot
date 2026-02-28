@@ -31,6 +31,7 @@ CopilotReportForge is deployed through a combination of **Terraform** (for Azure
 The three Terraform scenarios must be deployed in order because each depends on the outputs of the previous step:
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     A["1. OIDC Federation"] -->|client_id, tenant_id| B["2. GitHub Secrets"]
     B -->|environment configured| C["3. AI Foundry"]
@@ -39,6 +40,7 @@ flowchart LR
 An additional standalone scenario is available for deploying the application to Azure Container Apps:
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     D["4. Container Apps (standalone)"]
 ```
@@ -143,7 +145,7 @@ The main report generation workflow (`report-service.yaml`) is triggered via **m
 | `system_prompt` | string | System prompt defining the AI persona |
 | `queries` | string | Comma-separated evaluation queries |
 | `auth_method` | choice | `github_copilot` or `foundry_entra_id` |
-| `model` | choice | Model for Copilot CLI (e.g. `gpt-5-mini`) |
+| `model` | choice | Model for Copilot CLI (`gpt-5-mini`, `claude-sonnet-4.6`, `claude-opus-4.6`, `claude-opus-4.6-fast`) |
 | `sas_expiry_hours` | number | Hours until the report download URL expires |
 | `save_artifacts` | boolean | Whether to save workflow artifacts |
 | `retention_days` | number | Days to retain artifacts |

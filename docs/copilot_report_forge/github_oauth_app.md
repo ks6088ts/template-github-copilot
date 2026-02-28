@@ -20,6 +20,7 @@ By authenticating via GitHub OAuth:
 ## Authentication Flow
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant User as Browser
     participant App as CopilotReportForge

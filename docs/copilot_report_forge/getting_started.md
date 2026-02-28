@@ -146,12 +146,48 @@ All tools are invoked from `src/python/`.
 
 ### Make Targets
 
+#### Project
+
 | Command | What It Does |
 |---|---|
 | `make copilot` | Start the Copilot CLI server (port 3000) |
 | `make copilot-app` | Interactive chat loop with Copilot SDK |
 | `make copilot-api` | Start the web API server with Copilot SDK |
-| `make compose-up` | Start all services via Docker Compose |
+
+#### Development
+
+| Command | What It Does |
+|---|---|
+| `make help` | Show all available Make targets with descriptions |
+| `make info` | Show current Git revision and tag |
+| `make install-deps-dev` | Install all dependencies including dev tools |
+| `make install-deps` | Install production dependencies only |
+| `make format-check` | Check code formatting (ruff) |
+| `make format` | Auto-format code (ruff) |
+| `make fix` | Apply auto-fixes (format + lint fixes) |
+| `make lint` | Run all linters (ruff, ty, pyrefly, actionlint) |
+| `make test` | Run unit tests with pytest |
+| `make ci-test` | Full CI pipeline: install, format-check, lint, test |
+| `make update` | Update all package versions in `uv.lock` |
+| `make jupyterlab` | Launch Jupyter Lab for interactive development |
+
+#### Docker
+
+| Command | What It Does |
+|---|---|
+| `make docker-build` | Build all Docker images (monolith, api, copilot) |
+| `make docker-run` | Run the monolith Docker container |
+| `make docker-lint` | Lint all Dockerfiles with hadolint |
+| `make docker-scan` | Scan Docker images for vulnerabilities (trivy) |
+| `make ci-test-docker` | Full Docker CI: lint, build, scan, run |
+
+#### Docker Compose
+
+| Command | What It Does |
+|---|---|
+| `make compose-build` | Build Docker Compose services |
+| `make compose-up` | Start all services via Docker Compose (foreground) |
+| `make compose-up-d` | Start all services via Docker Compose (background) |
 | `make compose-down` | Stop Docker Compose services |
 | `make compose-logs` | Show Docker Compose logs |
 
@@ -162,7 +198,10 @@ All tools are invoked from `src/python/`.
 | `uv run python scripts/chat.py chat-loop` | Interactive chat with a hosted LLM |
 | `uv run python scripts/report_service.py generate` | Parallel multi-query report generation |
 | `uv run python scripts/agents.py` | Agentic workflow with AI Foundry tools |
-| `uv run python scripts/blob.py` | Upload/download blobs to Azure Storage |
+| `uv run python scripts/api_server.py serve` | Start the Copilot Chat API server (FastAPI + OAuth) |
+| `uv run python scripts/blob.py list-blobs` | List blobs in Azure Blob Storage |
+| `uv run python scripts/blob.py upload-blob` | Upload a string as a blob to Azure Blob Storage |
+| `uv run python scripts/blob.py generate-sas-url` | Generate a SAS URL for a blob |
 | `uv run python scripts/byok.py` | Chat using Bring-Your-Own-Key |
 | `uv run python scripts/slacks.py` | Post a message to Slack via webhook |
 
@@ -204,7 +243,7 @@ All configuration is done through environment variables. The platform uses struc
 |---|---|
 | `GITHUB_CLIENT_ID` | GitHub OAuth App client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret |
-| `SESSION_SECRET` | Random secret for cookie signing |
+| `SESSION_SECRET` | Random secret for cookie signing (generate with `openssl rand -hex 32`) |
 | `API_HOST` | Web server host (default: `127.0.0.1`) |
 | `API_PORT` | Web server port (default: `8000`) |
 
@@ -216,7 +255,7 @@ All configuration is done through environment variables. The platform uses struc
 | `BYOK_BASE_URL` | Base URL for the model endpoint |
 | `BYOK_API_KEY` | API key for the provider |
 | `BYOK_MODEL` | Model name to use (e.g. `gpt-5`) |
-| `BYOK_WIRE_API` | Wire API format: `completions` or `responses` |
+| `BYOK_WIRE_API` | Wire API format: `completions` (standard Chat Completions API) or `responses` (OpenAI Responses API) |
 
 For a complete list, see the settings files in `template_github_copilot/settings/`.
 

@@ -69,6 +69,18 @@ CopilotReportForge uses Large Language Models (LLMs) via the GitHub Copilot SDK 
 - AI Foundry Agents operate within defined tool boundaries.
 - All workflow executions are logged in GitHub's audit trail.
 
+### Cost and Rate Limiting
+
+**Risk:** Uncontrolled LLM usage leading to excessive costs or API rate limit exhaustion.
+
+**Mitigations:**
+- Queries are defined declaratively (comma-separated), limiting the number of LLM calls per execution.
+- GitHub Actions workflow runs have built-in timeout limits.
+- Azure AI Foundry deployments support configurable rate limits and quotas.
+- Report artifacts track the number of queries executed, enabling cost attribution.
+
+**Recommendation:** Monitor LLM usage costs through Azure Cost Management and set budget alerts. Configure API rate limits on model deployments to prevent runaway costs.
+
 ---
 
 ## Human Oversight
@@ -103,6 +115,16 @@ Because CopilotReportForge is domain-agnostic, responsible AI considerations var
 - This platform uses **third-party LLMs** (via GitHub Copilot SDK and Azure AI Foundry). The platform operator does not control model training data or model behavior.
 - All AI-generated content should be clearly labeled as such in downstream use.
 - Report metadata includes model information, timestamps, and execution context to support provenance tracking.
+- The `azure-ai-projects` SDK dependency is currently in **beta** (v2.0.0b3). API changes may occur in future releases.
+
+---
+
+## Data Retention
+
+- **GitHub Actions artifacts** are retained based on the `retention_days` workflow input (configurable per run).
+- **Azure Blob Storage** reports persist until explicitly deleted or until storage lifecycle policies take effect.
+- **Ephemeral runners** — all intermediate data on GitHub Actions runners is destroyed when the workflow completes.
+- **OAuth sessions** are time-limited and stored in signed cookies; they are not persisted server-side.
 
 ---
 

@@ -19,12 +19,22 @@ Traditional CI/CD authentication relies on long-lived client secrets stored as G
 ## Architecture
 
 ```mermaid
-flowchart LR
-    GA["GitHub Actions"] -- "1. Request JWT" --> OIDC["GitHub OIDC Provider"]
-    OIDC -- "2. Signed JWT" --> GA
-    GA -- "3. Exchange for Azure token" --> Entra["Microsoft Entra ID"]
-    Entra -- "4. Scoped access token" --> GA
-    GA -- "5. Access resources" --> Azure["Azure Subscription"]
+sequenceDiagram
+    participant GHA as ⚙️ GitHub Actions
+    participant OIDC as 🔑 GitHub OIDC
+    participant Entra as 🛡️ Entra ID
+    participant AZ as ☁️ Azure
+
+    rect rgb(232, 244, 253)
+        note over GHA,Entra: 🔓 Passwordless Token Exchange
+        GHA->>OIDC: ① Request JWT
+        OIDC-->>GHA: ② Signed JWT (expires in minutes)
+        GHA->>Entra: ③ Present JWT, request Azure token
+        Entra-->>GHA: ④ Scoped access token
+    end
+
+    GHA->>AZ: ⑤ Access resources (least privilege)
+    note right of AZ: No stored secrets needed!
 ```
 
 ---

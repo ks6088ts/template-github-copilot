@@ -40,35 +40,40 @@ GitHub Actions natively records who executed what, when, for how long, and with 
 ## System Architecture
 
 ```mermaid
-flowchart TB
-    subgraph Trigger["Trigger Layer"]
-        USER["User / Scheduler / API"]
+flowchart LR
+    USER(["👤 User / Scheduler"])
+
+    subgraph GHA["⚙️ GitHub Actions Runner"]
+        direction TB
+        SDK["🤖 Copilot SDK"]
+        TOOLS["🔧 AI Tools"]
+        SDK <--> TOOLS
     end
 
-    subgraph Runtime["Execution Runtime (GitHub Actions Runner)"]
-        SDK["Copilot SDK Client"]
-        TOOLS["AI Agent Tools"]
+    subgraph AI["🧠 AI Models"]
+        direction TB
+        LLM["💬 GPT-4o / Claude"]
+        FOUNDRY["📚 Foundry Agents"]
     end
 
-    subgraph AI["AI Layer"]
-        LLM["Hosted LLMs"]
-        FOUNDRY["AI Foundry Agents"]
+    subgraph AZ["☁️ Azure"]
+        direction TB
+        AUTH["🔐 Entra ID"]
+        STORAGE[("📦 Blob Storage")]
     end
 
-    subgraph Azure["Azure Services"]
-        AUTH["Entra ID"]
-        STORAGE["Blob Storage"]
-    end
+    USER -- "① Submit" --> SDK
+    SDK -- "② Parallel queries" --> LLM
+    TOOLS -- "③ Delegate" --> FOUNDRY
+    FOUNDRY -. "④ Reference data" .-> STORAGE
+    SDK -- "⑤ Upload report" --> STORAGE
+    STORAGE -- "⑥ Secure URL" --> USER
+    USER -. "OIDC" .-> AUTH
+    AUTH -. "Token" .-> SDK
 
-    USER --> SDK
-    SDK -- "Parallel queries" --> LLM
-    SDK -- "Tool delegation" --> TOOLS
-    TOOLS --> FOUNDRY
-    FOUNDRY -. "Reference data" .-> STORAGE
-    SDK -- "Upload report" --> STORAGE
-    STORAGE -- "Secure URL" --> USER
-    USER -. "OIDC auth" .-> AUTH
-    AUTH -. "Scoped token" .-> SDK
+    style GHA fill:#e8f4fd,stroke:#2196F3,stroke-width:2px
+    style AI fill:#fff3e0,stroke:#FF9800,stroke-width:2px
+    style AZ fill:#e8f5e9,stroke:#4CAF50,stroke-width:2px
 ```
 
 ### Component Responsibilities
@@ -88,25 +93,33 @@ flowchart TB
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant Runtime as Execution Runtime
-    participant LLM as Hosted LLMs
-    participant Storage as Blob Storage
+    actor User as 👤 User
+    participant RT as ⚙️ Runtime
+    participant LLM as 🧠 LLMs
+    participant ST as 📦 Storage
 
-    User->>Runtime: Submit (persona + queries)
+    User->>RT: ① Submit persona + queries
+    activate RT
 
-    par Parallel Execution
-        Runtime->>LLM: Query 1
-        LLM-->>Runtime: Response 1
-    and
-        Runtime->>LLM: Query N
-        LLM-->>Runtime: Response N
+    rect rgb(232, 244, 253)
+        note over RT,LLM: Parallel Execution
+        par Query 1
+            RT->>LLM: Prompt
+            LLM-->>RT: Response
+        and Query 2
+            RT->>LLM: Prompt
+            LLM-->>RT: Response
+        and Query N
+            RT->>LLM: Prompt
+            LLM-->>RT: Response
+        end
     end
 
-    Runtime->>Runtime: Aggregate results (success/failure)
-    Runtime->>Storage: Upload report (JSON)
-    Storage-->>Runtime: Secure URL
-    Runtime-->>User: Return secure URL
+    RT->>RT: ② Aggregate results
+    RT->>ST: ③ Upload report (JSON)
+    ST-->>RT: Secure URL
+    RT-->>User: ④ Return secure URL
+    deactivate RT
 ```
 
 **Key properties of this flow:**
@@ -122,18 +135,27 @@ For evaluations that require access to reference data (floor plans, product spec
 
 ```mermaid
 sequenceDiagram
-    participant User
-    participant SDK as Copilot Session
-    participant Agent as Domain Agent
-    participant Data as Reference Data
+    actor User as 👤 User
+    participant SDK as 🤖 Copilot Session
+    participant Agent as 📚 Domain Agent
+    participant Data as 📦 Reference Data
 
-    User->>SDK: Submit domain-specific query
-    SDK->>SDK: Determine tool delegation
-    SDK->>Agent: Invoke domain agent
-    Agent->>Data: Access reference documents
-    Data-->>Agent: Document content
-    Agent-->>SDK: Structured evaluation
-    SDK-->>User: Agent-enriched report
+    User->>SDK: ① Domain-specific query
+    activate SDK
+
+    rect rgb(255, 243, 224)
+        note over SDK,Data: Agent Orchestration
+        SDK->>SDK: ② Route to specialist
+        SDK->>Agent: ③ Invoke agent
+        activate Agent
+        Agent->>Data: ④ Fetch documents
+        Data-->>Agent: Content
+        Agent-->>SDK: ⑤ Structured evaluation
+        deactivate Agent
+    end
+
+    SDK-->>User: ⑥ Agent-enriched report
+    deactivate SDK
 ```
 
 The Copilot session autonomously decides when to delegate to a Foundry Agent based on the query context. This enables **multi-agent orchestration** within a single session — the user submits a high-level query, and the system routes to the appropriate domain specialist.
@@ -144,16 +166,21 @@ The Copilot session autonomously decides when to delegate to a Foundry Agent bas
 
 ```mermaid
 sequenceDiagram
-    participant Runner as GitHub Actions
-    participant OIDC as GitHub OIDC Provider
-    participant Entra as Microsoft Entra ID
-    participant Azure as Azure Resources
+    participant GHA as ⚙️ GitHub Actions
+    participant OIDC as 🔑 OIDC Provider
+    participant Entra as 🛡️ Entra ID
+    participant AZ as ☁️ Azure
 
-    Runner->>OIDC: Request short-lived JWT
-    OIDC-->>Runner: Signed JWT
-    Runner->>Entra: Exchange JWT for Azure token
-    Entra-->>Runner: Scoped access token
-    Runner->>Azure: Access resources (least privilege)
+    rect rgb(232, 244, 253)
+        note over GHA,Entra: Passwordless Authentication
+        GHA->>OIDC: ① Request JWT
+        OIDC-->>GHA: ② Signed JWT (short-lived)
+        GHA->>Entra: ③ Exchange JWT
+        Entra-->>GHA: ④ Scoped access token
+    end
+
+    GHA->>AZ: ⑤ Access resources (least privilege)
+    note right of AZ: Token expires in minutes
 ```
 
 ### Why OIDC Federation?
@@ -181,27 +208,38 @@ All infrastructure is managed as code via Terraform, organized into reusable mod
 
 ```mermaid
 flowchart LR
-    subgraph Scenarios["Deployment Scenarios"]
-        S1["OIDC Setup"]
-        S2["GitHub Secrets"]
-        S3["AI Foundry"]
-        S4["Container Apps (standalone)"]
+    subgraph Step1["① OIDC Setup"]
+        S1["🔐 Identity & Trust"]
+        P1["Entra ID App\nService Principal\nFederated Credential\nRBAC Roles"]
     end
 
-    S1 -- "Outputs credentials" --> S2
-    S2 -- "Enables workflows" --> S3
+    subgraph Step2["② GitHub Secrets"]
+        S2["🔒 Environment Config"]
+        P2["GitHub Environment\nEncrypted Secrets"]
+    end
 
-    subgraph Provisions["What Gets Created"]
-        P1["Identity + Trust + RBAC"]
-        P2["GitHub Environment + Secrets"]
-        P3["AI Hub + Models + Storage"]
-        P4["Container Apps Environment + Monolith Container"]
+    subgraph Step3["③ AI Foundry"]
+        S3["🧠 AI Infrastructure"]
+        P3["AI Hub + Models\nStorage Account\nAI Search"]
+    end
+
+    subgraph Step4["④ Container Apps"]
+        S4["🐳 Standalone Deploy"]
+        P4["Container Apps Env\nMonolith Container"]
     end
 
     S1 --> P1
     S2 --> P2
     S3 --> P3
     S4 --> P4
+
+    Step1 -- "credentials" --> Step2
+    Step2 -- "enables workflows" --> Step3
+
+    style Step1 fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style Step2 fill:#fce4ec,stroke:#c62828,stroke-width:2px
+    style Step3 fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Step4 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
 
 | Scenario | Purpose | Key Resources |
@@ -260,13 +298,14 @@ The provider system is implemented in `template_github_copilot/providers.py` wit
 - **`register_provider()` hook** — Allows adding custom provider builders without modifying the core code. Register a callable that accepts the same arguments and returns a `ProviderResult`.
 
 ```python
-from template_github_copilot.providers import register_provider, ProviderResult
+from template_github_copilot.providers import AuthMethod, register_provider, ProviderResult
 
-def my_custom_provider(cli_url, verbose, **kwargs) -> ProviderResult:
-    # Build your custom CopilotClient / config here
+def my_custom_provider(**kwargs) -> ProviderResult:
+    # Build your custom ProviderConfig / model here
     ...
 
-register_provider("my_custom_auth", my_custom_provider)
+# Note: register_provider requires an AuthMethod enum value, not a string
+register_provider(AuthMethod.API_KEY, my_custom_provider)
 ```
 
 ---
@@ -296,12 +335,10 @@ class MyToolInput(BaseModel):
     query: str = Field(description="The query to process")
 
 @define_tool(
-    name="my_tool",
     description="Description visible to the LLM",
-    input_schema=MyToolInput,
 )
-async def my_tool(input: MyToolInput) -> str:
-    return f"Processed: {input.query}"
+def my_tool(params: MyToolInput) -> str:
+    return f"Processed: {params.query}"
 ```
 
 The Copilot SDK session will automatically discover the tool and invoke it when the LLM determines it is relevant to the user's query.
@@ -328,12 +365,15 @@ The architecture is designed for extension at five levels:
 |---|---|
 | Language | Python 3.13+ |
 | AI SDK | GitHub Copilot SDK, Azure AI Projects SDK |
+| LLM Client | OpenAI Python SDK |
 | Web Framework | FastAPI |
-| Data Validation | Pydantic |
+| HTTP Client | httpx |
+| Data Validation | Pydantic, pydantic-settings |
 | CLI Framework | Typer |
+| Environment | python-dotenv |
 | Cloud Storage | Azure Blob Storage |
 | Authentication | Azure Identity (OIDC, DefaultAzureCredential) |
 | Infrastructure | Terraform |
 | CI/CD | GitHub Actions |
 | Containerization | Docker, Docker Compose |
-| Testing | pytest |
+| Testing | pytest, pytest-cov |

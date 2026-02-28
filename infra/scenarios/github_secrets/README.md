@@ -23,9 +23,30 @@ Manually configuring GitHub environments is error-prone and difficult to audit. 
 
 ```mermaid
 flowchart LR
-    TF["Terraform"] -- "GitHub Provider" --> ENV["GitHub Environment"]
-    ENV --> SEC["Encrypted Secrets"]
-    SEC --> GA["GitHub Actions Workflows"]
+    subgraph Inputs["📥 Inputs"]
+        direction TB
+        OIDC["🔐 OIDC Output\nclient_id\nsubscription_id\ntenant_id"]
+        USER["👤 User Secrets\ntokens, webhooks\nBYOK keys"]
+    end
+
+    subgraph TF["⚙️ Terraform"]
+        direction TB
+        ENV["📦 GitHub Environment\n(e.g. dev)"]
+        SEC["🔒 Encrypted Secrets\nARM_*, COPILOT_*\nSLACK_*, BYOK_*"]
+        ENV --> SEC
+    end
+
+    subgraph Out["🚀 Output"]
+        GA["⚙️ GitHub Actions\nWorkflows"]
+    end
+
+    OIDC --> ENV
+    USER --> ENV
+    SEC --> GA
+
+    style Inputs fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style TF fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style Out fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
 
 ---

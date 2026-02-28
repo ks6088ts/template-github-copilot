@@ -20,6 +20,7 @@ from typing import Any
 import httpx
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from template_github_copilot.core import (
@@ -136,6 +137,9 @@ def create_app(settings: OAuthSettings | None = None) -> FastAPI:
     # ------------------------------------------------------------------
 
     _html_path = Path(__file__).parent / "templates" / "index.html"
+    _static_dir = Path(__file__).parent / "static"
+
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
     @app.get("/", response_class=HTMLResponse)
     async def index():

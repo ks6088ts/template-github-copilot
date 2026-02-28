@@ -36,3 +36,8 @@ output "app_url" {
   description = "Full URL to access the Monolith Container App"
   value       = module.monolith.app_url
 }
+
+output "identity_principal_id" {
+  description = "Principal ID of the Monolith Container App's system-assigned managed identity"
+  value       = module.monolith.identity_principal_id
+}

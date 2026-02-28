@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from template_github_copilot.services.apis.app import (
     ChatRequest,
     ChatResponse,
+    ReportGenerateResponse,
     ReportRequest,
     UserInfo,
     _sessions,
@@ -17,7 +18,7 @@ from template_github_copilot.services.apis.app import (
     create_app,
 )
 from template_github_copilot.services.reports import ReportOutput, ReportResult
-from template_github_copilot.settings import OAuthSettings
+from template_github_copilot.settings import AzureBlobStorageSettings, OAuthSettings
 
 logger = logging.getLogger("template_github_copilot.services.apis.app")
 
@@ -34,9 +35,20 @@ def settings() -> OAuthSettings:
 
 
 @pytest.fixture
-def client(settings: OAuthSettings) -> TestClient:
+def blob_settings() -> AzureBlobStorageSettings:
+    """Return test-only AzureBlobStorageSettings."""
+    return AzureBlobStorageSettings(
+        azure_blob_storage_account_url="https://testaccount.blob.core.windows.net",
+        azure_blob_storage_container_name="test-container",
+    )
+
+
+@pytest.fixture
+def client(
+    settings: OAuthSettings, blob_settings: AzureBlobStorageSettings
+) -> TestClient:
     """Return a TestClient wired to the test app."""
-    app = create_app(settings)
+    app = create_app(settings, blob_settings=blob_settings)
     return TestClient(app, follow_redirects=False)
 
 
@@ -299,3 +311,122 @@ class TestReport:
         req = ReportRequest(queries=["q1", "q2"], system_prompt="prompt")
         assert req.queries == ["q1", "q2"]
         assert req.system_prompt == "prompt"
+
+
+class TestReportGenerate:
+    def test_report_generate_unauthenticated(self, client: TestClient):
+        resp = client.post(
+            "/api/report/generate",
+            json={"queries": ["q1"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 401
+
+    @patch("template_github_copilot.services.apis.app.AzureBlobStorageClient")
+    @patch("template_github_copilot.services.apis.app.run_parallel_chat")
+    def test_report_generate_success(
+        self,
+        mock_run_parallel_chat,
+        mock_blob_client_cls,
+        client: TestClient,
+        settings: OAuthSettings,
+    ):
+        """Verify report/generate uploads to blob and returns SAS URL."""
+        sid = "gen-sid"
+        _sessions[sid] = {"github_token": "gho_gen_token", "user_login": "dev"}
+        signed_cookie = _sign(sid, settings.session_secret)
+        client.cookies.set("session_id", signed_cookie)
+
+        mock_run_parallel_chat.return_value = ReportOutput(
+            system_prompt="Be helpful",
+            results=[
+                ReportResult(query="q1", response="answer1"),
+            ],
+            total=1,
+            succeeded=1,
+            failed=0,
+        )
+
+        mock_blob_instance = MagicMock()
+        mock_blob_instance.generate_sas_url.return_value = "https://testaccount.blob.core.windows.net/test-container/report.json?sas=token"
+        mock_blob_client_cls.return_value = mock_blob_instance
+
+        resp = client.post(
+            "/api/report/generate",
+            json={"queries": ["q1"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "sas_url" in data
+        assert "blob_name" in data
+        assert data["sas_url"].startswith("https://")
+        assert data["report"]["total"] == 1
+        assert data["report"]["succeeded"] == 1
+        assert data["report"]["results"][0]["query"] == "q1"
+
+        mock_blob_instance.upload_blob.assert_called_once()
+        mock_blob_instance.generate_sas_url.assert_called_once()
+
+    @patch("template_github_copilot.services.apis.app.run_parallel_chat")
+    def test_report_generate_blob_not_configured(
+        self,
+        mock_run_parallel_chat,
+        settings: OAuthSettings,
+    ):
+        """Verify 500 when blob storage is not configured."""
+        empty_blob_settings = AzureBlobStorageSettings(
+            azure_blob_storage_account_url="",
+            azure_blob_storage_container_name="",
+        )
+        app = create_app(settings, blob_settings=empty_blob_settings)
+        unconfigured_client = TestClient(app, follow_redirects=False)
+
+        sid = "no-blob-sid"
+        _sessions[sid] = {"github_token": "gho_no_blob", "user_login": "dev"}
+        signed_cookie = _sign(sid, settings.session_secret)
+        unconfigured_client.cookies.set("session_id", signed_cookie)
+
+        resp = unconfigured_client.post(
+            "/api/report/generate",
+            json={"queries": ["q1"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 500
+        assert "not configured" in resp.json()["detail"]
+
+    @patch("template_github_copilot.services.apis.app.AzureBlobStorageClient")
+    @patch("template_github_copilot.services.apis.app.run_parallel_chat")
+    def test_report_generate_failure(
+        self,
+        mock_run_parallel_chat,
+        mock_blob_client_cls,
+        client: TestClient,
+        settings: OAuthSettings,
+    ):
+        """Verify 500 when report generation raises."""
+        sid = "gen-err-sid"
+        _sessions[sid] = {"github_token": "gho_gen_err", "user_login": "dev"}
+        signed_cookie = _sign(sid, settings.session_secret)
+        client.cookies.set("session_id", signed_cookie)
+
+        mock_run_parallel_chat.side_effect = RuntimeError("boom")
+
+        resp = client.post(
+            "/api/report/generate",
+            json={"queries": ["q1"], "system_prompt": "Be helpful"},
+        )
+        assert resp.status_code == 500
+
+    def test_report_generate_response_model(self):
+        resp = ReportGenerateResponse(
+            report=ReportOutput(
+                system_prompt="prompt",
+                results=[ReportResult(query="q1", response="a1")],
+                total=1,
+                succeeded=1,
+                failed=0,
+            ),
+            sas_url="https://example.com/blob?sas=token",
+            blob_name="report_test.json",
+        )
+        assert resp.sas_url == "https://example.com/blob?sas=token"
+        assert resp.blob_name == "report_test.json"
+        assert resp.report.total == 1

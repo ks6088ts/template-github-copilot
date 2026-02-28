@@ -5,6 +5,10 @@ resource "azurerm_container_app" "this" {
   revision_mode                = var.revision_mode
   tags                         = var.tags
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   template {
     container {
       name   = "app-${var.name}"

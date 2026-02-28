@@ -14,6 +14,7 @@ import hmac
 import logging
 import secrets
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -29,8 +30,14 @@ from template_github_copilot.core import (
     create_message_options,
     create_session_config,
 )
+from template_github_copilot.internals.azure_blob_storages import AzureBlobStorageClient
 from template_github_copilot.services.reports import ReportOutput, run_parallel_chat
-from template_github_copilot.settings import OAuthSettings, get_oauth_settings
+from template_github_copilot.settings import (
+    AzureBlobStorageSettings,
+    OAuthSettings,
+    get_azure_blob_storage_settings,
+    get_oauth_settings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +69,34 @@ class ReportRequest(BaseModel):
     system_prompt: str = Field(
         ..., min_length=1, description="System prompt for Copilot sessions."
     )
+
+
+DEFAULT_SAS_EXPIRY_HOURS = 1
+
+
+class ReportGenerateResponse(BaseModel):
+    """Response for report generation with blob upload."""
+
+    report: ReportOutput = Field(..., description="The generated report.")
+    sas_url: str = Field(
+        ..., description="SAS URL to download the report (valid for 1 hour)."
+    )
+    blob_name: str = Field(..., description="The blob name used for storage.")
+
+
+class ReportUploadRequest(BaseModel):
+    """Request to upload a report to Azure Blob Storage."""
+
+    report: ReportOutput = Field(..., description="The report data to upload.")
+
+
+class ReportUploadResponse(BaseModel):
+    """Response for report upload."""
+
+    sas_url: str = Field(
+        ..., description="SAS URL to download the report (valid for 1 hour)."
+    )
+    blob_name: str = Field(..., description="The blob name used for storage.")
 
 
 class UserInfo(BaseModel):
@@ -117,18 +152,25 @@ GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
 
 
-def create_app(settings: OAuthSettings | None = None) -> FastAPI:
+def create_app(
+    settings: OAuthSettings | None = None,
+    blob_settings: AzureBlobStorageSettings | None = None,
+) -> FastAPI:
     """Create and return the configured FastAPI application.
 
     Args:
         settings: Optional ``OAuthSettings``; falls back to env/dotenv when
             ``None``.
+        blob_settings: Optional ``AzureBlobStorageSettings``; falls back to
+            env/dotenv when ``None``.
 
     Returns:
         A fully-configured ``FastAPI`` instance.
     """
     if settings is None:
         settings = get_oauth_settings()
+    if blob_settings is None:
+        blob_settings = get_azure_blob_storage_settings()
 
     app = FastAPI(title="Copilot Chat (OAuth GitHub App)")
 
@@ -318,6 +360,124 @@ def create_app(settings: OAuthSettings | None = None) -> FastAPI:
             return result
         except Exception as e:
             logger.exception("Report generation failed")
+            raise HTTPException(status_code=500, detail=str(e)) from e
+
+    # ------------------------------------------------------------------
+    # Report generate endpoint (with blob upload + SAS URL)
+    # ------------------------------------------------------------------
+
+    @app.post("/api/report/generate", response_model=ReportGenerateResponse)
+    async def report_generate(body: ReportRequest, request: Request):
+        """Generate a report, upload it to Azure Blob Storage, and return a SAS URL."""
+        session = _get_session(request, settings.session_secret)
+        github_token: str | None = session.get("github_token")
+        if not github_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        if (
+            not blob_settings.azure_blob_storage_account_url
+            or not blob_settings.azure_blob_storage_container_name
+        ):
+            raise HTTPException(
+                status_code=500,
+                detail="Azure Blob Storage is not configured on the server.",
+            )
+
+        try:
+            # 1. Generate report
+            result = await run_parallel_chat(
+                cli_url=settings.copilot_cli_url,
+                queries=body.queries,
+                system_prompt=body.system_prompt,
+                writer=logger.debug,
+                github_token=github_token,
+            )
+
+            # 2. Upload to blob
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            blob_name = f"report_{timestamp}.json"
+
+            azure_blob_client = AzureBlobStorageClient(
+                account_url=blob_settings.azure_blob_storage_account_url,
+                container_name=blob_settings.azure_blob_storage_container_name,
+            )
+            azure_blob_client.upload_blob(
+                blob_name=blob_name,
+                data=result.model_dump_json(indent=2).encode("utf-8"),
+            )
+            logger.info(
+                f"Report uploaded to blob '{blob_name}' in container "
+                f"'{blob_settings.azure_blob_storage_container_name}'"
+            )
+
+            # 3. Generate SAS URL (valid for 1 hour)
+            sas_url = azure_blob_client.generate_sas_url(
+                blob_name=blob_name,
+                expiry_hours=DEFAULT_SAS_EXPIRY_HOURS,
+            )
+
+            return ReportGenerateResponse(
+                report=result,
+                sas_url=sas_url,
+                blob_name=blob_name,
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Report generation with upload failed")
+            raise HTTPException(status_code=500, detail=str(e)) from e
+
+    # ------------------------------------------------------------------
+    # Report upload endpoint (blob upload only)
+    # ------------------------------------------------------------------
+
+    @app.post("/api/report/upload", response_model=ReportUploadResponse)
+    async def report_upload(body: ReportUploadRequest, request: Request):
+        """Upload an existing report to Azure Blob Storage and return a SAS URL."""
+        session = _get_session(request, settings.session_secret)
+        github_token: str | None = session.get("github_token")
+        if not github_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        if (
+            not blob_settings.azure_blob_storage_account_url
+            or not blob_settings.azure_blob_storage_container_name
+        ):
+            raise HTTPException(
+                status_code=500,
+                detail="Azure Blob Storage is not configured on the server.",
+            )
+
+        try:
+            timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+            blob_name = f"report_{timestamp}.json"
+
+            azure_blob_client = AzureBlobStorageClient(
+                account_url=blob_settings.azure_blob_storage_account_url,
+                container_name=blob_settings.azure_blob_storage_container_name,
+            )
+            azure_blob_client.upload_blob(
+                blob_name=blob_name,
+                data=body.report.model_dump_json(indent=2).encode("utf-8"),
+            )
+            logger.info(
+                f"Report uploaded to blob '{blob_name}' in container "
+                f"'{blob_settings.azure_blob_storage_container_name}'"
+            )
+
+            sas_url = azure_blob_client.generate_sas_url(
+                blob_name=blob_name,
+                expiry_hours=DEFAULT_SAS_EXPIRY_HOURS,
+            )
+
+            return ReportUploadResponse(
+                sas_url=sas_url,
+                blob_name=blob_name,
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.exception("Report upload failed")
             raise HTTPException(status_code=500, detail=str(e)) from e
 
     return app

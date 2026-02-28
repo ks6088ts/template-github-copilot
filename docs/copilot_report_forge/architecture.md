@@ -298,13 +298,14 @@ The provider system is implemented in `template_github_copilot/providers.py` wit
 - **`register_provider()` hook** — Allows adding custom provider builders without modifying the core code. Register a callable that accepts the same arguments and returns a `ProviderResult`.
 
 ```python
-from template_github_copilot.providers import register_provider, ProviderResult
+from template_github_copilot.providers import AuthMethod, register_provider, ProviderResult
 
-def my_custom_provider(cli_url, verbose, **kwargs) -> ProviderResult:
-    # Build your custom CopilotClient / config here
+def my_custom_provider(**kwargs) -> ProviderResult:
+    # Build your custom ProviderConfig / model here
     ...
 
-register_provider("my_custom_auth", my_custom_provider)
+# Note: register_provider requires an AuthMethod enum value, not a string
+register_provider(AuthMethod.API_KEY, my_custom_provider)
 ```
 
 ---
@@ -334,12 +335,10 @@ class MyToolInput(BaseModel):
     query: str = Field(description="The query to process")
 
 @define_tool(
-    name="my_tool",
     description="Description visible to the LLM",
-    input_schema=MyToolInput,
 )
-async def my_tool(input: MyToolInput) -> str:
-    return f"Processed: {input.query}"
+def my_tool(params: MyToolInput) -> str:
+    return f"Processed: {params.query}"
 ```
 
 The Copilot SDK session will automatically discover the tool and invoke it when the LLM determines it is relevant to the user's query.
@@ -366,12 +365,15 @@ The architecture is designed for extension at five levels:
 |---|---|
 | Language | Python 3.13+ |
 | AI SDK | GitHub Copilot SDK, Azure AI Projects SDK |
+| LLM Client | OpenAI Python SDK |
 | Web Framework | FastAPI |
-| Data Validation | Pydantic |
+| HTTP Client | httpx |
+| Data Validation | Pydantic, pydantic-settings |
 | CLI Framework | Typer |
+| Environment | python-dotenv |
 | Cloud Storage | Azure Blob Storage |
 | Authentication | Azure Identity (OIDC, DefaultAzureCredential) |
 | Infrastructure | Terraform |
 | CI/CD | GitHub Actions |
 | Containerization | Docker, Docker Compose |
-| Testing | pytest |
+| Testing | pytest, pytest-cov |

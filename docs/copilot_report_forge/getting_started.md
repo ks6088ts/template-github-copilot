@@ -198,7 +198,10 @@ All tools are invoked from `src/python/`.
 | `uv run python scripts/chat.py chat-loop` | Interactive chat with a hosted LLM |
 | `uv run python scripts/report_service.py generate` | Parallel multi-query report generation |
 | `uv run python scripts/agents.py` | Agentic workflow with AI Foundry tools |
-| `uv run python scripts/blob.py` | Upload/download blobs to Azure Storage |
+| `uv run python scripts/api_server.py serve` | Start the Copilot Chat API server (FastAPI + OAuth) |
+| `uv run python scripts/blob.py list-blobs` | List blobs in Azure Blob Storage |
+| `uv run python scripts/blob.py upload-blob` | Upload a string as a blob to Azure Blob Storage |
+| `uv run python scripts/blob.py generate-sas-url` | Generate a SAS URL for a blob |
 | `uv run python scripts/byok.py` | Chat using Bring-Your-Own-Key |
 | `uv run python scripts/slacks.py` | Post a message to Slack via webhook |
 

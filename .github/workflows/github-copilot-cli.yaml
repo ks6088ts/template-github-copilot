@@ -64,7 +64,7 @@ jobs:
             --model "${{ github.event.inputs.model }}"
       - name: Save artifacts
         if: ${{ github.event.inputs.save_artifacts }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: copilot-cli-artifacts
           path: ./artifacts/**

@@ -40,6 +40,7 @@ GitHub Actions natively records who executed what, when, for how long, and with 
 ## System Architecture
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     USER(["👤 User / Scheduler"])
 
@@ -52,7 +53,7 @@ flowchart LR
 
     subgraph AI["🧠 AI Models"]
         direction TB
-        LLM["💬 GPT-4o / Claude"]
+        LLM["💬 GPT-5 / Claude"]
         FOUNDRY["📚 Foundry Agents"]
     end
 
@@ -71,9 +72,9 @@ flowchart LR
     USER -. "OIDC" .-> AUTH
     AUTH -. "Token" .-> SDK
 
-    style GHA fill:#e8f4fd,stroke:#2196F3,stroke-width:2px
-    style AI fill:#fff3e0,stroke:#FF9800,stroke-width:2px
-    style AZ fill:#e8f5e9,stroke:#4CAF50,stroke-width:2px
+    style GHA fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style AI fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style AZ fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0
 ```
 
 ### Component Responsibilities
@@ -81,7 +82,7 @@ flowchart LR
 | Component | Role |
 |---|---|
 | **Copilot SDK Client** | Manages LLM sessions, sends queries in parallel, handles tool calls, aggregates results |
-| **Hosted LLMs** | Provide text generation capabilities (GPT-4o-mini, GPT-4o, Claude) — no self-hosting required |
+| **Hosted LLMs** | Provide text generation capabilities (GPT-5-mini, GPT-5, Claude Sonnet/Opus 4.6) — no self-hosting required |
 | **AI Foundry Agents** | Domain-specific AI personas with access to reference data (documents, images, specifications) |
 | **Entra ID** | Issues short-lived access tokens via OIDC federation — no stored credentials |
 | **Blob Storage** | Stores reports and reference data; generates time-limited sharing URLs |
@@ -92,6 +93,7 @@ flowchart LR
 ## Core Data Flow: Report Generation
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     actor User as 👤 User
     participant RT as ⚙️ Runtime
@@ -101,7 +103,7 @@ sequenceDiagram
     User->>RT: ① Submit persona + queries
     activate RT
 
-    rect rgb(232, 244, 253)
+    rect rgba(26, 54, 93, 0.5)
         note over RT,LLM: Parallel Execution
         par Query 1
             RT->>LLM: Prompt
@@ -134,6 +136,7 @@ sequenceDiagram
 For evaluations that require access to reference data (floor plans, product specs, clinical guidelines), the platform integrates AI Foundry Agents:
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     actor User as 👤 User
     participant SDK as 🤖 Copilot Session
@@ -143,7 +146,7 @@ sequenceDiagram
     User->>SDK: ① Domain-specific query
     activate SDK
 
-    rect rgb(255, 243, 224)
+    rect rgba(116, 66, 16, 0.4)
         note over SDK,Data: Agent Orchestration
         SDK->>SDK: ② Route to specialist
         SDK->>Agent: ③ Invoke agent
@@ -165,13 +168,14 @@ The Copilot session autonomously decides when to delegate to a Foundry Agent bas
 ## Authentication Model
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 sequenceDiagram
     participant GHA as ⚙️ GitHub Actions
     participant OIDC as 🔑 OIDC Provider
     participant Entra as 🛡️ Entra ID
     participant AZ as ☁️ Azure
 
-    rect rgb(232, 244, 253)
+    rect rgba(26, 54, 93, 0.5)
         note over GHA,Entra: Passwordless Authentication
         GHA->>OIDC: ① Request JWT
         OIDC-->>GHA: ② Signed JWT (short-lived)
@@ -207,6 +211,7 @@ Traditional CI/CD authentication stores long-lived API keys as repository secret
 All infrastructure is managed as code via Terraform, organized into reusable modules and deployment scenarios.
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     subgraph Step1["① OIDC Setup"]
         S1["🔐 Identity & Trust"]
@@ -236,10 +241,10 @@ flowchart LR
     Step1 -- "credentials" --> Step2
     Step2 -- "enables workflows" --> Step3
 
-    style Step1 fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
-    style Step2 fill:#fce4ec,stroke:#c62828,stroke-width:2px
-    style Step3 fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Step4 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Step1 fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style Step2 fill:#702459,stroke:#f687b3,stroke-width:2px,color:#e2e8f0
+    style Step3 fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style Step4 fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0
 ```
 
 | Scenario | Purpose | Key Resources |
@@ -294,7 +299,7 @@ Switching between modes requires changing a configuration parameter, not code. T
 The provider system is implemented in `template_github_copilot/providers.py` with three components:
 
 - **`AuthMethod` enum** — Defines available authentication methods: `GITHUB_COPILOT`, `API_KEY`, `FOUNDRY_ENTRA_ID`.
-- **`create_provider()` factory** — Returns a `ProviderResult` containing the `CopilotClient` instance, LLM configuration, and custom tools, based on the selected `AuthMethod`.
+- **`create_provider()` factory** — Returns a `ProviderResult` containing the `ProviderConfig` (for BYOK modes, or `None` for the default Copilot backend) and the target model name, based on the selected `AuthMethod`.
 - **`register_provider()` hook** — Allows adding custom provider builders without modifying the core code. Register a callable that accepts the same arguments and returns a `ProviderResult`.
 
 ```python

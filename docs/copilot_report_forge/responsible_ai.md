@@ -115,7 +115,7 @@ Because CopilotReportForge is domain-agnostic, responsible AI considerations var
 - This platform uses **third-party LLMs** (via GitHub Copilot SDK and Azure AI Foundry). The platform operator does not control model training data or model behavior.
 - All AI-generated content should be clearly labeled as such in downstream use.
 - Report metadata includes model information, timestamps, and execution context to support provenance tracking.
-- The `azure-ai-projects` SDK dependency is currently in **beta** (v2.0.0b3). API changes may occur in future releases.
+- The `azure-ai-projects` SDK dependency requires **>=2.0.0b3** (beta). API changes may occur in future releases.
 
 ---
 

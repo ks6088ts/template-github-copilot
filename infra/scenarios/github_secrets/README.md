@@ -22,6 +22,7 @@ Manually configuring GitHub environments is error-prone and difficult to audit. 
 ## Architecture
 
 ```mermaid
+%%{init: {'theme': 'dark'}}%%
 flowchart LR
     subgraph Inputs["📥 Inputs"]
         direction TB
@@ -44,9 +45,9 @@ flowchart LR
     USER --> ENV
     SEC --> GA
 
-    style Inputs fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
-    style TF fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    style Out fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Inputs fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style TF fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style Out fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0
 ```
 
 ---
@@ -59,6 +60,8 @@ flowchart LR
 | Environment Secrets | Encrypted secrets accessible only to workflows in this environment |
 
 ### Secrets Configured
+
+Secrets are managed through the generic `actions_environment_secrets` list variable. Any `{ name, value }` pair can be added. Typical secrets include:
 
 | Secret | Source | Description |
 |---|---|---|
@@ -84,24 +87,31 @@ flowchart LR
 ```bash
 cd infra/scenarios/github_secrets
 
+# Set the GitHub token for the provider
+export GITHUB_TOKEN="<your-github-token>"
+
 # Edit terraform.tfvars with your values
 terraform init
 terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
-### Required Variables
+### Variables
 
-Secrets are managed through a single list variable `actions_environment_secrets` in `terraform.tfvars`. Each entry is an object with `name` and `value` fields.
-
-| Variable | Description |
-|---|---|
-| `github_owner` | Repository owner (user or organization) |
-| `repository_name` | Repository name |
-| `environment_name` | GitHub environment name (e.g., `dev`) |
-| `actions_environment_secrets` | List of `{ name, value }` objects for environment secrets |
+| Variable | Description | Type | Default | Required |
+|---|---|---|---|---|
+| `github_owner` | Repository owner (user or organization) | `string` | `"ks6088ts"` | no |
+| `repository_name` | Repository name | `string` | `"template-github-copilot"` | no |
+| `environment_name` | GitHub environment name (e.g., `dev`) | `string` | `"dev"` | no |
+| `actions_environment_secrets` | List of `{ name, value }` objects for environment secrets | `list(object)` | `[]` | no |
 
 The `github_token` is provided via the `GITHUB_TOKEN` environment variable or the GitHub provider configuration.
+
+### Outputs
+
+| Output | Description |
+|---|---|
+| `github_repository_environment_name` | Name of the created GitHub repository environment |
 
 #### Example `terraform.tfvars`
 

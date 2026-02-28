@@ -90,7 +90,7 @@ jobs:
           uv run python scripts/chat.py chat --verbose --prompt "${{ github.event.inputs.prompt }}"
       - name: Save artifacts
         if: ${{ github.event.inputs.save_artifacts }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: report-service-artifacts
           path: |

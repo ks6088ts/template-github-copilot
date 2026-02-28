@@ -67,7 +67,13 @@ Set the following environment variables before starting the server:
 | `GITHUB_CLIENT_SECRET` | Your OAuth App's Client Secret |
 | `SESSION_SECRET` | A random secret string for cookie signing |
 
+Generate a secure `SESSION_SECRET` value:
+
 ```bash
+openssl rand -hex 32
+```
+
+Then set the variables:
 export GITHUB_CLIENT_ID="your-client-id"
 export GITHUB_CLIENT_SECRET="your-client-secret"
 export SESSION_SECRET="a-random-secret-string"

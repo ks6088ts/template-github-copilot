@@ -34,12 +34,22 @@
 
 - [Typer — CLI framework](https://typer.tiangolo.com/)
 - [Pydantic — Data validation](https://docs.pydantic.dev/)
+- [Pydantic Settings — Settings management](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
 - [FastAPI — Web framework](https://fastapi.tiangolo.com/)
+- [httpx — HTTP client](https://www.python-httpx.org/)
 - [azure-storage-blob — Blob Storage SDK](https://learn.microsoft.com/en-us/python/api/overview/azure/storage-blob-readme)
 - [azure-identity — Azure authentication](https://learn.microsoft.com/en-us/python/api/overview/azure/identity-readme)
+- [azure-ai-projects — Azure AI Projects SDK](https://learn.microsoft.com/en-us/python/api/overview/azure/ai-projects-readme)
 - [uv — Python package manager](https://docs.astral.sh/uv/)
 - [Ruff — Linter & formatter](https://docs.astral.sh/ruff/)
+- [ty — Type checker](https://docs.astral.sh/ty/)
+- [pyrefly — Type checker (Meta)](https://github.com/facebook/pyrefly)
 
 ## Tools
 
 - [Draw.io MCP Server](https://github.com/jgraph/drawio-mcp)
+- [actionlint — GitHub Actions linter](https://github.com/rhysd/actionlint)
+- [hadolint — Dockerfile linter](https://github.com/hadolint/hadolint)
+- [Trivy — Container image scanner](https://aquasecurity.github.io/trivy/)
+- [supervisord — Process manager](http://supervisord.org/)
+- [Docker Compose documentation](https://docs.docker.com/compose/)

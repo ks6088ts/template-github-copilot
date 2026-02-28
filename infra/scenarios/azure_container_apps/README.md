@@ -22,18 +22,30 @@ This scenario creates:
 ## Architecture
 
 ```mermaid
-flowchart TB
-    Internet((Internet))
+flowchart LR
+    User(["🌐 Internet"])
 
-    subgraph Azure["Azure Resource Group (name + random suffix)"]
-        subgraph CAE["Container Apps Environment"]
-            Monolith["Monolith Container App<br/>- External Access Enabled<br/>- HTTPS Endpoint<br/>- Port 8000 (API)<br/>- Port 3000 (Copilot CLI, internal)<br/>- supervisord manages both processes"]
+    subgraph RG["☁️ Azure Resource Group"]
+        subgraph CAE["📦 Container Apps Environment"]
+            subgraph Mono["🐳 Monolith Container"]
+                direction TB
+                API["🚀 API Server\nport 8000"]
+                CLI["🤖 Copilot CLI\nport 3000"]
+                SUP["⚙️ supervisord"]
+                SUP --> API
+                SUP --> CLI
+            end
         end
-        LAW["Log Analytics Workspace<br/>- Logs & Metrics<br/>- (optional)"]
+        LAW["📊 Log Analytics\n(optional)"]
     end
 
-    Internet -->|HTTPS| Monolith
-    CAE -.->|Monitoring| LAW
+    User -- "HTTPS :8000" --> API
+    CAE -. "logs & metrics" .-> LAW
+
+    style RG fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style CAE fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Mono fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style LAW fill:#f3e5f5,stroke:#7b1fa2,stroke-dasharray: 5 5
 ```
 
 ## How to use

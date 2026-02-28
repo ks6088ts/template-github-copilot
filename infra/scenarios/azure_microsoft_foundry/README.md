@@ -23,18 +23,25 @@ This Terraform scenario deploys Azure AI Foundry infrastructure — the AI Hub, 
 
 ```mermaid
 flowchart TB
-    subgraph Azure["Azure Resource Group"]
-        Hub["AI Hub (AI Services)"]
-        Project["Foundry Project"]
-        Models["Model Deployments"]
-        Storage["Storage Account"]
-        Search["AI Search (optional)"]
+    subgraph RG["☁️ Azure Resource Group"]
+        Hub["🏢 AI Hub\n(AI Services)"]
+        Project["💼 Foundry Project"]
+        Models["🧠 Model Deployments\nGPT-4o · GPT-4o-mini\nEmbeddings"]
+        Storage[("📦 Storage Account")]
+        Search["🔍 AI Search\n(optional)"]
     end
 
     Hub --> Project
     Project --> Models
     Hub --> Storage
-    Hub -.-> Search
+    Hub -. "if enabled" .-> Search
+
+    style RG fill:#e3f2fd,stroke:#1565C0,stroke-width:2px
+    style Hub fill:#bbdefb,stroke:#1565C0
+    style Project fill:#c8e6c9,stroke:#2e7d32
+    style Models fill:#fff3e0,stroke:#e65100
+    style Storage fill:#f3e5f5,stroke:#7b1fa2
+    style Search fill:#fff9c4,stroke:#f57f17,stroke-dasharray: 5 5
 ```
 
 ---

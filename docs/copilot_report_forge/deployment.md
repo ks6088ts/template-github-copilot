@@ -110,6 +110,21 @@ Once infrastructure is deployed, AI evaluations run as GitHub Actions workflows.
 | **Push/PR** | Run evaluations as part of CI/CD |
 | **API call** | Programmatic triggering from external systems |
 
+### Available Workflows
+
+The repository includes the following CI/CD and automation workflows:
+
+| Workflow | File | Purpose |
+|---|---|---|
+| **Test** | `test.yaml` | Run Python CI tests (format-check, lint, test) |
+| **Docker** | `docker.yaml` | Build, lint, and scan Docker images |
+| **Infrastructure** | `infra.yaml` | Validate Terraform configurations |
+| **Report Service** | `report-service.yaml` | Execute AI evaluations and generate reports |
+| **Copilot CLI** | `github-copilot-cli.yaml` | Run Copilot CLI-based workflows |
+| **Copilot SDK** | `github-copilot-sdk.yaml` | Run Copilot SDK-based workflows |
+| **Docker Release** | `docker-release.yaml` | Publish Docker images to Docker Hub |
+| **GHCR Release** | `ghcr-release.yaml` | Publish Docker images to GitHub Container Registry |
+
 ### Workflow Execution
 
 Each workflow run:
@@ -212,3 +227,24 @@ See [Getting Started](getting_started.md) for detailed local setup instructions.
 | Model endpoint unavailable | Model not yet deployed or quota exceeded | Check AI Hub deployments and subscription quotas |
 | Blob upload permission denied | Missing RBAC role | Ensure `Storage Blob Data Contributor` role is assigned |
 | Workflow times out | Too many parallel queries | Reduce query count or increase timeout |
+
+---
+
+## Updates and Rollback
+
+### Updating the Application
+
+To update a running Container Apps deployment:
+
+1. Build and push a new container image (via `docker-release.yaml` or `ghcr-release.yaml` workflows)
+2. Re-run the `azure_container_apps` Terraform scenario — it will pull the latest image
+
+```bash
+cd infra/scenarios/azure_container_apps
+export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+terraform apply
+```
+
+### Rollback
+
+To rollback to a previous version, specify the previous image tag in the Terraform variables and re-apply. All previous images are available in Docker Hub and GHCR with their Git tag versions.

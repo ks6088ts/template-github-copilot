@@ -34,7 +34,7 @@ variable "enable_log_analytics" {
 variable "container_image" {
   description = "Docker image for the monolith service (API + Copilot CLI)"
   type        = string
-  default     = "docker.io/ks6088ts/template-github-copilot:latest"
+  default     = "docker.io/ks6088ts/template-github-copilot-monolith:latest"
 
   validation {
     condition     = length(var.container_image) > 0

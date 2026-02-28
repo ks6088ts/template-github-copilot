@@ -104,6 +104,22 @@ For production deployments, update the OAuth App settings in GitHub Developer Se
 
 > **Important:** The callback URL in the OAuth App settings must match the URL where the server is running.
 
+### Deploying to Azure Container Apps
+
+When deploying to Azure Container Apps, the callback URL must include the `/auth/callback` path. Set the **Authorization callback URL** in your GitHub OAuth App using the following format:
+
+```
+https://<app-name>.<unique-id>.<region>.azurecontainerapps.io/auth/callback
+```
+
+Example:
+
+```
+https://app-azurecontainerapps.grayocean-38a4ba3f.japaneast.azurecontainerapps.io/auth/callback
+```
+
+> **Note:** After deploying to Container Apps, append `/auth/callback` to the `app_url` output and set this as the **Authorization callback URL** in GitHub Developer Settings. If this is not configured correctly, you will encounter a `redirect_uri mismatch` error.
+
 ---
 
 ## Troubleshooting

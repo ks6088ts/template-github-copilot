@@ -93,6 +93,8 @@ terraform apply tfplan
 
 **Key outputs:** `app_url`, `app_fqdn`
 
+> **GitHub OAuth App Callback URL:** After deploying to Container Apps, you must update the **Authorization callback URL** in your GitHub OAuth App settings. Append `/auth/callback` to the `app_url` output value. Example: `https://app-azurecontainerapps.grayocean-38a4ba3f.japaneast.azurecontainerapps.io/auth/callback`. See [GitHub OAuth App Setup](github_oauth_app.md#deploying-to-azure-container-apps) for details.
+
 See [azure_container_apps/README.md](../../infra/scenarios/azure_container_apps/README.md) for full configuration details including environment variables.
 
 ---

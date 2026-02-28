@@ -60,6 +60,7 @@ jupyterlab: ## run Jupyter Lab
 # Docker
 # ---
 DOCKER_REPO_NAME ?= ks6088ts
+DOCKER_IMAGE_NAME ?= template-github-copilot
 DOCKER_IMAGE_NAME_API ?= template-github-copilot-api
 DOCKER_IMAGE_NAME_COPILOT ?= template-github-copilot-copilot
 DOCKER_COMMAND ?= python scripts/api_server.py --help
@@ -70,6 +71,10 @@ TRIVY_VERSION ?= 0.58.1
 
 .PHONY: docker-build
 docker-build: ## build Docker image
+	docker build \
+		-f Dockerfile \
+		-t $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG) \
+		.
 	docker build \
 		-f api.Dockerfile \
 		-t $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_API):$(GIT_TAG) \
@@ -85,10 +90,11 @@ docker-build: ## build Docker image
 
 .PHONY: docker-run
 docker-run: ## run Docker container
-	docker run --rm $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_API):$(GIT_TAG) $(DOCKER_COMMAND)
+	docker run --rm $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG) $(DOCKER_COMMAND)
 
 .PHONY: docker-lint
 docker-lint: ## lint Dockerfile
+	docker run --rm -i hadolint/hadolint < Dockerfile
 	docker run --rm -i hadolint/hadolint < api.Dockerfile
 	docker run --rm -i hadolint/hadolint < copilot.Dockerfile
 
@@ -96,6 +102,7 @@ docker-lint: ## lint Dockerfile
 docker-scan: ## scan Docker image
 	@# https://aquasecurity.github.io/trivy/v0.18.3/installation/#install-script
 	@which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(TOOLS_DIR) v$(TRIVY_VERSION)
+	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME):$(GIT_TAG)
 	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_API):$(GIT_TAG)
 	trivy image $(DOCKER_REPO_NAME)/$(DOCKER_IMAGE_NAME_COPILOT):$(GIT_TAG)
 

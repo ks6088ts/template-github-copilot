@@ -28,11 +28,13 @@
 - [Terraform AzureRM Provider](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 - [GitHub Actions OIDC with Azure](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-azure)
 - [Terraform GitHub Provider](https://registry.terraform.io/providers/integrations/github/latest/docs)
+- [Azure Container Apps documentation](https://learn.microsoft.com/en-us/azure/container-apps/)
 
 ## Python Libraries
 
 - [Typer — CLI framework](https://typer.tiangolo.com/)
 - [Pydantic — Data validation](https://docs.pydantic.dev/)
+- [FastAPI — Web framework](https://fastapi.tiangolo.com/)
 - [azure-storage-blob — Blob Storage SDK](https://learn.microsoft.com/en-us/python/api/overview/azure/storage-blob-readme)
 - [azure-identity — Azure authentication](https://learn.microsoft.com/en-us/python/api/overview/azure/identity-readme)
 - [uv — Python package manager](https://docs.astral.sh/uv/)

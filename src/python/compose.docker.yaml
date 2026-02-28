@@ -26,3 +26,19 @@ services:
     depends_on:
       copilot:
         condition: service_healthy
+
+  monolith:
+    image: ${CONTAINER_REGISTRY:-docker.io}/ks6088ts/template-github-copilot:latest
+    env_file:
+      - .env
+    environment:
+      - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}
+      - COPILOT_MODEL=${COPILOT_MODEL:-gpt-5-mini}
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - COPILOT_CLI_URL=127.0.0.1:3000
+    ports:
+      - "3000:3000"
+      - "8000:8000"
+    profiles:
+      - monolith

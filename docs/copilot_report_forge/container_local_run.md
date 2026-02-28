@@ -66,10 +66,27 @@ CONTAINER_REGISTRY=ghcr.io docker compose -f compose.docker.yaml up
 
 ## Services
 
-| Service | Port | Description |
-|---|---|---|
-| `copilot` | `3000` | Copilot CLI server |
-| `api` | `8000` | Web application with chat and report UI |
+| Service | Port | Description | Profile |
+|---|---|---|---|
+| `copilot` | `3000` | Copilot CLI server | default |
+| `api` | `8000` | Web application with chat and report UI | default |
+| `monolith` | `3000`, `8000` | Single container running both Copilot CLI and API via supervisord | `monolith` |
+
+### Running the Monolith Service
+
+The `monolith` service bundles both the Copilot CLI and API server into a single container using supervisord. It is activated via a Docker Compose profile:
+
+```bash
+# Local build
+cd src/python
+docker compose --profile monolith up monolith --build
+
+# Pre-built images (Docker Hub)
+cd src/python
+docker compose -f compose.docker.yaml --profile monolith up monolith
+```
+
+This is the same image used for the [Azure Container Apps deployment](../../infra/scenarios/azure_container_apps/README.md).
 
 ---
 

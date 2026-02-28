@@ -185,6 +185,7 @@ flowchart LR
         S1["OIDC Setup"]
         S2["GitHub Secrets"]
         S3["AI Foundry"]
+        S4["Container Apps (standalone)"]
     end
 
     S1 -- "Outputs credentials" --> S2
@@ -194,11 +195,13 @@ flowchart LR
         P1["Identity + Trust + RBAC"]
         P2["GitHub Environment + Secrets"]
         P3["AI Hub + Models + Storage"]
+        P4["Container Apps Environment + Monolith Container"]
     end
 
     S1 --> P1
     S2 --> P2
     S3 --> P3
+    S4 --> P4
 ```
 
 | Scenario | Purpose | Key Resources |
@@ -206,8 +209,9 @@ flowchart LR
 | `azure_github_oidc` | Establish passwordless trust between GitHub and Azure | Entra ID app, service principal, federated credential, RBAC roles |
 | `github_secrets` | Automate GitHub environment configuration | GitHub environment, encrypted secrets |
 | `azure_microsoft_foundry` | Deploy AI capabilities and storage | AI Hub, model deployments, Storage Account, optional AI Search |
+| `azure_container_apps` | Deploy monolith service to Azure | Resource group, Container Apps Environment, monolith container (Copilot CLI + API) |
 
-> Scenarios must be deployed in order: OIDC → Secrets → Foundry. See [Deployment](deployment.md) for step-by-step instructions.
+> The first three scenarios must be deployed in order: OIDC → Secrets → Foundry. The Container Apps scenario is standalone. See [Deployment](deployment.md) for step-by-step instructions.
 
 ---
 

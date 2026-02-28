@@ -34,7 +34,7 @@ jobs:
         with:
           tflint_version: ${{ env.TFLINT_VERSION }}
       - name: Cache TFLint plugins
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.tflint.d/plugins
           key: tflint-${{ runner.os }}-${{ hashFiles('**/.tflint.hcl') }}
@@ -70,7 +70,7 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - name: Cache Terraform plugins
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-${{ runner.os }}-azure-${{ hashFiles('infra/scenarios/azure_github_oidc/.terraform.lock.hcl') }}
@@ -102,7 +102,7 @@ jobs:
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - name: Cache Terraform plugins
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
           key: terraform-${{ runner.os }}-github-${{ hashFiles('infra/scenarios/github_secrets/.terraform.lock.hcl') }}

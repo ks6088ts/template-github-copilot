@@ -1,6 +1,7 @@
 environment_variables = {
   GITHUB_CLIENT_ID                  = "xxx"
   COPILOT_MODEL                     = "gpt-5-mini"
+  COPILOT_SEND_TIMEOUT              = "300"
   AZURE_BLOB_STORAGE_ACCOUNT_URL    = "https://xxx.blob.core.windows.net"
   AZURE_BLOB_STORAGE_CONTAINER_NAME = "xxx"
 }

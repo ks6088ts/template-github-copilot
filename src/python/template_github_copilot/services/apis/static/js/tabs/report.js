@@ -75,39 +75,6 @@
     reportResults.insertBefore(downloadDiv, reportResults.firstChild);
   }
 
-  // ── Progress indicator helpers ────────────────────────────────
-  function showBlobProgress(message) {
-    let progressDiv = reportResults.querySelector(".blob-progress");
-    if (!progressDiv) {
-      progressDiv = document.createElement("div");
-      progressDiv.className = "blob-progress";
-      reportResults.insertBefore(progressDiv, reportResults.firstChild);
-    }
-    progressDiv.innerHTML = `
-      <div class="blob-progress-inner">
-        <span class="blob-spinner"></span>
-        <span class="blob-progress-text">${message}</span>
-      </div>
-    `;
-  }
-
-  function hideBlobProgress() {
-    const progressDiv = reportResults.querySelector(".blob-progress");
-    if (progressDiv) progressDiv.remove();
-  }
-
-  function showBlobError(message) {
-    hideBlobProgress();
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "blob-progress blob-progress-error";
-    errorDiv.innerHTML = `
-      <div class="blob-progress-inner">
-        <span class="blob-progress-text">⚠ ${message}</span>
-      </div>
-    `;
-    reportResults.insertBefore(errorDiv, reportResults.firstChild);
-  }
-
   // ── Run report ────────────────────────────────────────────────
   async function runReport() {
     const systemPrompt = document.getElementById("system-prompt").value.trim();
@@ -124,10 +91,8 @@
     }
 
     runReportBtn.disabled = true;
-    reportStatus.textContent = "Running report…";
+    reportStatus.innerHTML = '<span class="status-spinner"></span> Running report…';
     reportResults.innerHTML = "";
-
-    // Phase 1: Generate report and display results
     let reportData;
     try {
       const resp = await fetch("/api/report", {
@@ -151,7 +116,7 @@
     }
 
     // Phase 2: Upload to blob storage with progress
-    showBlobProgress("Uploading report to Azure Blob Storage…");
+    reportStatus.innerHTML = '<span class="status-spinner"></span> Uploading report to Azure Blob Storage…';
     try {
       const uploadResp = await fetch("/api/report/upload", {
         method: "POST",
@@ -160,17 +125,16 @@
       });
       if (!uploadResp.ok) {
         const err = await uploadResp.json().catch(() => ({}));
-        showBlobError(`Upload failed: ${err.detail || uploadResp.statusText}`);
+        reportStatus.textContent = `Upload failed: ${err.detail || uploadResp.statusText}`;
         runReportBtn.disabled = false;
         return;
       }
-      showBlobProgress("Generating download URL…");
+      reportStatus.innerHTML = '<span class="status-spinner"></span> Generating download URL…';
       const uploadData = await uploadResp.json();
-      hideBlobProgress();
-      appendDownloadLink(uploadData.sas_url, uploadData.blob_name);
       reportStatus.textContent = "Report completed. Download link ready.";
+      appendDownloadLink(uploadData.sas_url, uploadData.blob_name);
     } catch (e) {
-      showBlobError(`Upload error: ${e.message}`);
+      reportStatus.textContent = `Upload error: ${e.message}`;
     } finally {
       runReportBtn.disabled = false;
     }

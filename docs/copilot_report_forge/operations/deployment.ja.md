@@ -122,6 +122,7 @@ terraform apply tfplan
 | **Copilot SDK** | `github-copilot-sdk.yaml` | Copilot SDK ベースのワークフロー実行 |
 | **Docker Release** | `docker-release.yaml` | Docker Hub への Docker イメージ公開 |
 | **GHCR Release** | `ghcr-release.yaml` | GitHub Container Registry への Docker イメージ公開 |
+| **GitHub Pages** | `github-pages.yaml` | MkDocs ドキュメントを GitHub Pages にデプロイ |
 
 ### ワークフロー実行
 

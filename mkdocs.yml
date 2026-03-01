@@ -14,6 +14,7 @@ nav:
       - User Guide:
           - Getting Started: copilot_report_forge/guide/getting_started.md
           - Web UI Guide: copilot_report_forge/guide/web_ui_guide.md
+          - Industry Use Case Examples: copilot_report_forge/guide/industry_examples.md
           - GitHub OAuth App Setup: copilot_report_forge/guide/github_oauth_app.md
       - Operations:
           - Running Containers Locally: copilot_report_forge/operations/container_local_run.md

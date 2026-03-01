@@ -347,6 +347,19 @@ header h1 {
 #report-status {
   font-size: 0.82rem;
   color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: blob-spin 0.7s linear infinite;
+  flex-shrink: 0;
 }
 
 /* ── Report results ────────────────────────────────────────── */

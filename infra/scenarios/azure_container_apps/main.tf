@@ -71,28 +71,24 @@ data "azurerm_subscription" "this" {
 }
 
 resource "azurerm_role_assignment" "contributor" {
-  count                = module.monolith.identity_principal_id != null ? 1 : 0
   scope                = data.azurerm_subscription.this.id
   role_definition_name = "Contributor"
   principal_id         = module.monolith.identity_principal_id
 }
 
 resource "azurerm_role_assignment" "storage_blob_data_contributor" {
-  count                = module.monolith.identity_principal_id != null ? 1 : 0
   scope                = data.azurerm_subscription.this.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = module.monolith.identity_principal_id
 }
 
 resource "azurerm_role_assignment" "storage_blob_delegator" {
-  count                = module.monolith.identity_principal_id != null ? 1 : 0
   scope                = data.azurerm_subscription.this.id
   role_definition_name = "Storage Blob Delegator"
   principal_id         = module.monolith.identity_principal_id
 }
 
 resource "azurerm_role_assignment" "cognitive_services_openai_user" {
-  count                = module.monolith.identity_principal_id != null ? 1 : 0
   scope                = data.azurerm_subscription.this.id
   role_definition_name = "Cognitive Services OpenAI User"
   principal_id         = module.monolith.identity_principal_id

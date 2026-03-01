@@ -211,3 +211,29 @@ def create_message_options(
     return MessageOptions(
         prompt=prompt,
     )
+
+
+async def send_and_wait(
+    session: Any,
+    options: MessageOptions,
+    timeout: float | None = None,
+) -> Any:
+    """Wrapper around ``session.send_and_wait`` with a configurable default timeout.
+
+    The timeout defaults to the ``COPILOT_SEND_TIMEOUT`` environment variable
+    (loaded via project settings). Callers can still override it per-call.
+
+    Args:
+        session: A Copilot session object.
+        options: Message options to send.
+        timeout: Optional override for the timeout in seconds.
+            When ``None``, uses ``Settings.copilot_send_timeout`` (default 300s).
+
+    Returns:
+        The response event from ``session.send_and_wait``.
+    """
+    if timeout is None:
+        from template_github_copilot.settings.copilot import get_copilot_settings
+
+        timeout = get_copilot_settings().copilot_send_timeout
+    return await session.send_and_wait(options, timeout=timeout)

@@ -15,7 +15,7 @@ A showcase repository for multiple use cases built on the **GitHub Copilot SDK**
 
 | Use Case | Description | Documentation |
 |---|---|---|
-| [CopilotReportForge](docs/copilot_report_forge/index.md) | An extensible AI automation platform for parallel LLM query execution, structured report generation, and agentic AI workflows | [Getting Started](docs/copilot_report_forge/getting_started.md) · [Architecture](docs/copilot_report_forge/architecture.md) · [Deployment](docs/copilot_report_forge/deployment.md) |
+| [CopilotReportForge](docs/copilot_report_forge/index.md) | An extensible AI automation platform for parallel LLM query execution, structured report generation, and agentic AI workflows | [Getting Started](docs/copilot_report_forge/guide/getting_started.md) · [Architecture](docs/copilot_report_forge/overview/architecture.md) · [Deployment](docs/copilot_report_forge/operations/deployment.md) |
 
 ## Infrastructure (Terraform Scenarios)
 

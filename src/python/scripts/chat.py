@@ -10,6 +10,7 @@ from template_github_copilot.core import (
     create_event_handler,
     create_message_options,
     create_session_config,
+    send_and_wait,
 )
 from template_github_copilot.services.chat import ChatParallelOutput, ChatResult
 from template_github_copilot.loggers import get_logger
@@ -97,7 +98,7 @@ def chat(
         handler = create_event_handler(writer=logger.info)
         session.on(handler)
 
-        reply = await session.send_and_wait(create_message_options(prompt))
+        reply = await send_and_wait(session, create_message_options(prompt))
         content = reply.data.content if reply else None
         logger.info(f"Assistant: {content or '(no response)'}")
 
@@ -150,7 +151,7 @@ def chat_loop(
             if not user_input:
                 continue
 
-            reply = await session.send_and_wait(create_message_options(user_input))
+            reply = await send_and_wait(session, create_message_options(user_input))
             content = reply.data.content if reply else None
             typer.echo(
                 typer.style("Assistant: ", fg=typer.colors.GREEN, bold=True)
@@ -202,7 +203,7 @@ def chat_parallel(
             handler = create_event_handler(writer=logger.debug)
             session.on(handler)
 
-            reply = await session.send_and_wait(create_message_options(prompt))
+            reply = await send_and_wait(session, create_message_options(prompt))
             content = reply.data.content if reply else None
             return ChatResult(prompt=prompt, response=content)
         except Exception as e:

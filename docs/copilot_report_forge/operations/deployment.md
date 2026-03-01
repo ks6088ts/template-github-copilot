@@ -122,6 +122,7 @@ The repository includes the following CI/CD and automation workflows:
 | **Copilot SDK** | `github-copilot-sdk.yaml` | Run Copilot SDK-based workflows |
 | **Docker Release** | `docker-release.yaml` | Publish Docker images to Docker Hub |
 | **GHCR Release** | `ghcr-release.yaml` | Publish Docker images to GitHub Container Registry |
+| **GitHub Pages** | `github-pages.yaml` | Deploy MkDocs documentation to GitHub Pages |
 
 ### Workflow Execution
 

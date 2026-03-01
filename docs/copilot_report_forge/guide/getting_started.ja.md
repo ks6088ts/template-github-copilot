@@ -188,22 +188,39 @@ terraform init && terraform apply
 | `make compose-down` | Docker Compose サービスを停止 |
 | `make compose-logs` | Docker Compose ログを表示 |
 
+#### ドキュメント
+
+| コマンド | 機能 |
+|---|---|
+| `make install-deps-docs` | ドキュメント用依存関係をインストール |
+| `make docs` | MkDocs でドキュメントをビルド |
+| `make docs-serve` | ドキュメントをローカルで配信 |
+| `make ci-test-docs` | ドキュメントの CI テスト（インストール + ビルド） |
+
 ### スクリプトコマンド
 
 | スクリプト | 機能 |
 |---|---|
 | `uv run python scripts/chat.py chat-loop` | ホストされた LLM とのインタラクティブチャット |
 | `uv run python scripts/chat.py chat --prompt "Hello"` | ホストされた LLM との単一プロンプトチャット |
+| `uv run python scripts/chat.py hello` | 挨拶を表示して設定を確認 |
 | `uv run python scripts/chat.py chat-parallel -p "Q1" -p "Q2"` | 並列セッションで複数プロンプトを送信 |
 | `uv run python scripts/report_service.py generate` | 並列マルチクエリレポート生成 |
+| `uv run python scripts/agents.py create` | AI Foundry エージェントの作成 |
+| `uv run python scripts/agents.py get` | 名前で AI Foundry エージェントを取得 |
 | `uv run python scripts/agents.py list` | AI Foundry エージェントの一覧表示 |
 | `uv run python scripts/agents.py run` | クエリで AI Foundry エージェントを実行 |
+| `uv run python scripts/agents.py delete` | 名前で AI Foundry エージェントを削除 |
 | `uv run python scripts/api_server.py serve` | Copilot Chat API サーバーを起動（FastAPI + OAuth） |
 | `uv run python scripts/blob.py list-blobs` | Azure Blob Storage の blob を一覧表示 |
 | `uv run python scripts/blob.py upload-blob` | 文字列を blob として Azure Blob Storage にアップロード |
 | `uv run python scripts/blob.py generate-sas-url` | blob の SAS URL を生成 |
+| `uv run python scripts/byok.py chat-api-key` | BYOK（API キー）での単一プロンプトチャット |
 | `uv run python scripts/byok.py chat-loop-api-key` | Bring-Your-Own-Key（API キー）でインタラクティブチャット |
+| `uv run python scripts/byok.py chat-parallel-api-key` | BYOK（API キー）での並列マルチプロンプトチャット |
+| `uv run python scripts/byok.py chat-entra-id` | BYOK（Entra ID）での単一プロンプトチャット |
 | `uv run python scripts/byok.py chat-loop-entra-id` | Bring-Your-Own-Key（Entra ID）でインタラクティブチャット |
+| `uv run python scripts/byok.py chat-parallel-entra-id` | BYOK（Entra ID）での並列マルチプロンプトチャット |
 | `uv run python scripts/slacks.py send` | Webhook 経由で Slack にメッセージを送信 |
 
 ### 例: マルチペルソナ評価
@@ -234,6 +251,7 @@ uv run python scripts/report_service.py generate \
 | `COPILOT_GITHUB_TOKEN` | Copilot スコープ付き GitHub PAT |
 | `COPILOT_MODEL` | Copilot CLI サーバーが使用するモデル（例: `gpt-5-mini`） |
 | `COPILOT_CLI_URL` | Copilot CLI サーバー URL（空でサブプロセスを起動） |
+| `COPILOT_SEND_TIMEOUT` | Copilot SDK `send_and_wait` 呼び出しのタイムアウト秒数（デフォルト: `300`） |
 | `AZURE_BLOB_STORAGE_ACCOUNT_URL` | Azure Blob Storage アカウント URL |
 | `AZURE_BLOB_STORAGE_CONTAINER_NAME` | Blob コンテナ名 |
 | `MICROSOFT_FOUNDRY_PROJECT_ENDPOINT` | Microsoft Foundry プロジェクトエンドポイント URL |

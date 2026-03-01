@@ -29,6 +29,7 @@ from template_github_copilot.core import (
     create_event_handler,
     create_message_options,
     create_session_config,
+    send_and_wait,
 )
 from template_github_copilot.internals.azure_blob_storages import AzureBlobStorageClient
 from template_github_copilot.services.reports import ReportOutput, run_parallel_chat
@@ -328,8 +329,8 @@ def create_app(
             handler = create_event_handler(writer=logger.debug)
             copilot_session.on(handler)
 
-            reply = await copilot_session.send_and_wait(
-                create_message_options(body.message)
+            reply = await send_and_wait(
+                copilot_session, create_message_options(body.message)
             )
             content = reply.data.content if reply else "(no response)"
             return ChatResponse(reply=content or "(no response)")

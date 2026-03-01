@@ -188,22 +188,39 @@ All tools are invoked from `src/python/`.
 | `make compose-down` | Stop Docker Compose services |
 | `make compose-logs` | Show Docker Compose logs |
 
+#### Documentation
+
+| Command | What It Does |
+|---|---|
+| `make install-deps-docs` | Install documentation dependencies |
+| `make docs` | Build documentation with MkDocs |
+| `make docs-serve` | Serve documentation locally |
+| `make ci-test-docs` | CI test for documentation (install + build) |
+
 ### Script Commands
 
 | Script | What It Does |
 |---|---|
 | `uv run python scripts/chat.py chat-loop` | Interactive chat with a hosted LLM |
 | `uv run python scripts/chat.py chat --prompt "Hello"` | Single-prompt chat with a hosted LLM |
+| `uv run python scripts/chat.py hello` | Verify settings by printing a greeting |
 | `uv run python scripts/chat.py chat-parallel -p "Q1" -p "Q2"` | Send multiple prompts in parallel sessions |
 | `uv run python scripts/report_service.py generate` | Parallel multi-query report generation |
+| `uv run python scripts/agents.py create` | Create an AI Foundry agent |
+| `uv run python scripts/agents.py get` | Retrieve an AI Foundry agent by name |
 | `uv run python scripts/agents.py list` | List AI Foundry agents |
 | `uv run python scripts/agents.py run` | Run an AI Foundry agent with a query |
+| `uv run python scripts/agents.py delete` | Delete an AI Foundry agent by name |
 | `uv run python scripts/api_server.py serve` | Start the Copilot Chat API server (FastAPI + OAuth) |
 | `uv run python scripts/blob.py list-blobs` | List blobs in Azure Blob Storage |
 | `uv run python scripts/blob.py upload-blob` | Upload a string as a blob to Azure Blob Storage |
 | `uv run python scripts/blob.py generate-sas-url` | Generate a SAS URL for a blob |
+| `uv run python scripts/byok.py chat-api-key` | Single-prompt chat using BYOK (API key) |
 | `uv run python scripts/byok.py chat-loop-api-key` | Interactive chat using Bring-Your-Own-Key (API key) |
+| `uv run python scripts/byok.py chat-parallel-api-key` | Parallel multi-prompt chat using BYOK (API key) |
+| `uv run python scripts/byok.py chat-entra-id` | Single-prompt chat using BYOK (Entra ID) |
 | `uv run python scripts/byok.py chat-loop-entra-id` | Interactive chat using Bring-Your-Own-Key (Entra ID) |
+| `uv run python scripts/byok.py chat-parallel-entra-id` | Parallel multi-prompt chat using BYOK (Entra ID) |
 | `uv run python scripts/slacks.py send` | Post a message to Slack via webhook |
 
 ### Example: Multi-Persona Evaluation
@@ -234,6 +251,7 @@ All configuration is done through environment variables. The platform uses struc
 | `COPILOT_GITHUB_TOKEN` | GitHub PAT with Copilot scope |
 | `COPILOT_MODEL` | Model used by the Copilot CLI server (e.g. `gpt-5-mini`) |
 | `COPILOT_CLI_URL` | Copilot CLI server URL (leave empty to spawn subprocess) |
+| `COPILOT_SEND_TIMEOUT` | Timeout in seconds for Copilot SDK `send_and_wait` calls (default: `300`) |
 | `AZURE_BLOB_STORAGE_ACCOUNT_URL` | Azure Blob Storage account URL |
 | `AZURE_BLOB_STORAGE_CONTAINER_NAME` | Blob container name |
 | `MICROSOFT_FOUNDRY_PROJECT_ENDPOINT` | Microsoft Foundry project endpoint URL |

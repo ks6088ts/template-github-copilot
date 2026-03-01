@@ -11,6 +11,7 @@ from template_github_copilot.core import (
     create_event_handler,
     create_message_options,
     create_session_config,
+    send_and_wait,
 )
 
 
@@ -82,7 +83,7 @@ async def run_parallel_chat(
             handler = create_event_handler(writer=writer)
             session.on(handler)
 
-            reply = await session.send_and_wait(create_message_options(query))
+            reply = await send_and_wait(session, create_message_options(query))
             content = reply.data.content if reply else None
             return ReportResult(query=query, response=content)
         except Exception as e:

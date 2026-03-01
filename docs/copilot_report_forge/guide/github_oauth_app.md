@@ -1,9 +1,5 @@
 # GitHub OAuth App Setup
 
-> **Navigation:** [CopilotReportForge](index.md) > **GitHub OAuth App Setup**
->
-> **See also:** [Getting Started](getting_started.md) · [Web UI Guide](web_ui_guide.md) · [Architecture](architecture.md)
-
 ---
 
 ## Why OAuth?

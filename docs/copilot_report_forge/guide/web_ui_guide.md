@@ -1,9 +1,5 @@
 # Web UI Guide
 
-> **Navigation:** [CopilotReportForge](index.md) > **Web UI Guide**
->
-> **See also:** [Getting Started](getting_started.md) · [GitHub OAuth App Setup](github_oauth_app.md)
-
 ---
 
 ## Overview
@@ -66,7 +62,7 @@ flowchart TB
 
 When you open the application, you see a login page with a **"Sign in with GitHub"** button. Clicking it initiates the GitHub OAuth flow (see [GitHub OAuth App Setup](github_oauth_app.md)).
 
-![Login Screen](images/01_login_screen.png)
+![Login Screen](../images/01_login_screen.png)
 
 ### GitHub OAuth Authentication Flow
 
@@ -109,7 +105,7 @@ After successful authentication, you are redirected to the chat interface.
 
 The chat interface provides a conversational experience with hosted LLMs.
 
-![Chat Screen](images/05_chat_ui.png)
+![Chat Screen](../images/05_chat_ui.png)
 
 | Element | Description |
 |---|---|
@@ -153,7 +149,7 @@ sequenceDiagram
 
 The report panel enables parallel execution of multiple LLM queries with a configurable system prompt.
 
-![Report Panel](images/06_report_form.png)
+![Report Panel](../images/06_report_form.png)
 
 ### How to Use
 
@@ -256,4 +252,4 @@ cd src/python
 docker compose up --build
 ```
 
-See [Running Containers Locally](container_local_run.md) for detailed container usage.
+See [Running Containers Locally](../operations/container_local_run.md) for detailed container usage.

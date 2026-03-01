@@ -1,7 +1,5 @@
 # CopilotReportForge
 
-> **Navigation:** [README](../../README.md) > **CopilotReportForge (index)**
-
 CopilotReportForge is an open-source platform that transforms ad-hoc LLM interactions into governed, repeatable, and auditable report-generation pipelines. Users define expert personas as system prompts and evaluation queries as input; the platform executes all personas in parallel via the GitHub Copilot SDK and aggregates the results into structured JSON reports. Reports are uploaded to Azure Blob Storage and shared through time-limited, revocable URLs. The entire workflow runs in ephemeral GitHub Actions environments with passwordless OIDC authentication — no GPU provisioning, no model hosting, and no long-lived secrets. By treating personas as configuration rather than code, the same pipeline adapts to any industry — from manufacturing quality panels to financial risk committees — without code changes. Infrastructure is fully managed via Terraform, and a browser-based Web UI with GitHub OAuth login is included for interactive use.
 
 ---
@@ -39,7 +37,7 @@ The persona + parallel execution model can be applied to any industry. See [Cros
 
 Enterprises use LLMs through copy-paste chat sessions — producing unstructured, unreproducible, and ungoverned outputs that cannot be audited, scaled, or safely shared with stakeholders.
 
-> For a deeper analysis of the problem space, see [Problem & Solution](problem_and_solution.md).
+> For a deeper analysis of the problem space, see [Problem & Solution](overview/problem_and_solution.md).
 
 ---
 
@@ -88,7 +86,7 @@ flowchart TB
     AUTH -. "Access token" .-> SDK
 ```
 
-> For component-level details and data flows, see [Architecture](architecture.md).
+> For component-level details and data flows, see [Architecture](overview/architecture.md).
 
 ---
 
@@ -166,7 +164,7 @@ uv run python scripts/report_service.py generate \
   --container-name "reports"
 ```
 
-> For full setup instructions, see [Getting Started](getting_started.md).
+> For full setup instructions, see [Getting Started](guide/getting_started.md).
 
 ---
 
@@ -174,25 +172,25 @@ uv run python scripts/report_service.py generate \
 
 | Document | Description |
 |---|---|
-| [Problem & Solution](problem_and_solution.md) | Why this platform exists — the enterprise AI adoption gap and how the architecture addresses it |
-| [Architecture](architecture.md) | System design, execution model, security model, and extensibility |
-| [Getting Started](getting_started.md) | Prerequisites, local development setup, infrastructure provisioning, and CLI reference |
-| [Deployment](deployment.md) | Step-by-step deployment from local dev to production GitHub Actions workflows |
-| [GitHub OAuth App](github_oauth_app.md) | Setting up GitHub OAuth for the web UI authentication flow |
-| [Web UI Guide](web_ui_guide.md) | Walkthrough of the browser-based chat and report generation interface |
-| [Running Containers](container_local_run.md) | Running the platform via Docker Compose (local build, Docker Hub, or GHCR) |
-| [Responsible AI](responsible_ai.md) | Fairness, transparency, safety, privacy guidelines, and deployment checklist |
-| [References](references.md) | External links and further reading |
+| [Problem & Solution](overview/problem_and_solution.md) | Why this platform exists — the enterprise AI adoption gap and how the architecture addresses it |
+| [Architecture](overview/architecture.md) | System design, execution model, security model, and extensibility |
+| [Getting Started](guide/getting_started.md) | Prerequisites, local development setup, infrastructure provisioning, and CLI reference |
+| [Deployment](operations/deployment.md) | Step-by-step deployment from local dev to production GitHub Actions workflows |
+| [GitHub OAuth App](guide/github_oauth_app.md) | Setting up GitHub OAuth for the web UI authentication flow |
+| [Web UI Guide](guide/web_ui_guide.md) | Walkthrough of the browser-based chat and report generation interface |
+| [Running Containers](operations/container_local_run.md) | Running the platform via Docker Compose (local build, Docker Hub, or GHCR) |
+| [Responsible AI](appendix/responsible_ai.md) | Fairness, transparency, safety, privacy guidelines, and deployment checklist |
+| [References](appendix/references.md) | External links and further reading |
 
 ## Infrastructure (Terraform Scenarios)
 
 | Scenario | Purpose |
 |---|---|
-| [Azure GitHub OIDC](../../infra/scenarios/azure_github_oidc/README.md) | Establish passwordless trust between GitHub Actions and Azure |
-| [GitHub Secrets](../../infra/scenarios/github_secrets/README.md) | Automate GitHub environment and secrets configuration |
-| [Azure Microsoft Foundry](../../infra/scenarios/azure_microsoft_foundry/README.md) | Deploy AI Foundry with model endpoints and storage |
-| [Azure Container Apps](../../infra/scenarios/azure_container_apps/README.md) | Deploy monolith service (Copilot CLI + API) as Azure Container App (standalone) |
+| [Azure GitHub OIDC](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_github_oidc/README.md) | Establish passwordless trust between GitHub Actions and Azure |
+| [GitHub Secrets](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/github_secrets/README.md) | Automate GitHub environment and secrets configuration |
+| [Azure Microsoft Foundry](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_microsoft_foundry/README.md) | Deploy AI Foundry with model endpoints and storage |
+| [Azure Container Apps](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_container_apps/README.md) | Deploy monolith service (Copilot CLI + API) as Azure Container App (standalone) |
 
 ## License
 
-[MIT](../../LICENSE)
+[MIT](https://github.com/ks6088ts/template-github-copilot/blob/main/LICENSE)

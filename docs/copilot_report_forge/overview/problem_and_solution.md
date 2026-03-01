@@ -1,9 +1,5 @@
 # Problem & Solution
 
-> **Navigation:** [CopilotReportForge](index.md) > **Problem & Solution**
->
-> **See also:** [Architecture](architecture.md) · [Deployment](deployment.md) · [Responsible AI](responsible_ai.md)
-
 ---
 
 ## The Enterprise AI Adoption Gap

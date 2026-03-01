@@ -1,9 +1,5 @@
 # Architecture
 
-> **Navigation:** [CopilotReportForge](index.md) > **Architecture**
->
-> **See also:** [Problem & Solution](problem_and_solution.md) · [Deployment](deployment.md) · [Responsible AI](responsible_ai.md)
-
 ---
 
 ## Design Philosophy
@@ -254,7 +250,7 @@ flowchart LR
 | `azure_microsoft_foundry` | Deploy AI capabilities and storage | AI Hub, model deployments, Storage Account, optional AI Search |
 | `azure_container_apps` | Deploy monolith service to Azure | Resource group, Container Apps Environment, monolith container (Copilot CLI + API) |
 
-> The first three scenarios must be deployed in order: OIDC → Secrets → Foundry. The Container Apps scenario is standalone. See [Deployment](deployment.md) for step-by-step instructions.
+> The first three scenarios must be deployed in order: OIDC → Secrets → Foundry. The Container Apps scenario is standalone. See [Deployment](../operations/deployment.md) for step-by-step instructions.
 
 ---
 

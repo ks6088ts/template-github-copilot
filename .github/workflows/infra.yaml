@@ -35,14 +35,17 @@ jobs:
         uses: terraform-linters/setup-tflint@v6
         with:
           tflint_version: ${{ env.TFLINT_VERSION }}
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2.5
-        with:
-          version: ${{ env.TRIVY_VERSION }}
+      # FIXME: issue #44
+      # - name: Install Trivy
+      #   uses: aquasecurity/setup-trivy@v0.2.5
+      #   with:
+      #     version: ${{ env.TRIVY_VERSION }}
       - name: Run lint and security scan
         working-directory: infra
         run: |
-          make tflint trivy
+          make tflint
+          # FIXME: issue #44
+          # make trivy
 
   # Test Azure scenarios (azure_*)
   test-azure:

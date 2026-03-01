@@ -3,6 +3,7 @@
 [![infra](https://github.com/ks6088ts/template-github-copilot/actions/workflows/infra.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/infra.yaml?query=branch%3Amain)
 [![ghcr-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/ghcr-release.yaml)
 [![docker-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/docker-release.yaml)
+[![github-pages](https://github.com/ks6088ts/template-github-copilot/actions/workflows/github-pages.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/github-pages.yaml)
 
 # template-github-copilot
 

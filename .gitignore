@@ -1,3 +1,4 @@
 **/artifacts/**
 !**/artifacts/.gitkeep
 .playwright-cli/
+site

@@ -1,16 +1,12 @@
 # Getting Started
 
-> **Navigation:** [CopilotReportForge](index.md) > **Getting Started**
->
-> **See also:** [Architecture](architecture.md) · [Deployment](deployment.md) · [GitHub OAuth App](github_oauth_app.md)
-
 ---
 
 ## What Is CopilotReportForge?
 
 CopilotReportForge is an AI automation platform that executes multiple LLM queries in parallel, aggregates the results into structured reports, and distributes those reports through secure channels. It is designed for enterprise teams that need **reproducible, governed AI evaluations** across any domain — from product development to healthcare to real estate.
 
-For a deeper look at the problems this solves and why the architecture is designed this way, see [Problem & Solution](problem_and_solution.md).
+For a deeper look at the problems this solves and why the architecture is designed this way, see [Problem & Solution](../overview/problem_and_solution.md).
 
 ---
 
@@ -103,7 +99,7 @@ cd infra/scenarios/azure_github_oidc
 terraform init && terraform apply
 ```
 
-See [Azure GitHub OIDC README](../../infra/scenarios/azure_github_oidc/README.md) for details.
+See [Azure GitHub OIDC README](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_github_oidc/README.md) for details.
 
 ### Step 2: GitHub Secrets
 
@@ -114,7 +110,7 @@ cd infra/scenarios/github_secrets
 terraform init && terraform apply
 ```
 
-See [GitHub Secrets README](../../infra/scenarios/github_secrets/README.md) for details.
+See [GitHub Secrets README](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/github_secrets/README.md) for details.
 
 ### Step 3: AI Foundry (Optional)
 
@@ -125,7 +121,7 @@ cd infra/scenarios/azure_microsoft_foundry
 terraform init && terraform apply
 ```
 
-See [Azure Microsoft Foundry README](../../infra/scenarios/azure_microsoft_foundry/README.md) for details.
+See [Azure Microsoft Foundry README](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_microsoft_foundry/README.md) for details.
 
 ### Step 4: Container Apps (Standalone)
 
@@ -137,7 +133,7 @@ export ARM_SUBSCRIPTION_ID=$(az account show --query id --output tsv)
 terraform init && terraform apply
 ```
 
-See [Azure Container Apps README](../../infra/scenarios/azure_container_apps/README.md) for details.
+See [Azure Container Apps README](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_container_apps/README.md) for details.
 
 ---
 
@@ -288,7 +284,7 @@ See [GitHub OAuth App Setup](github_oauth_app.md) for authentication configurati
 
 ## Running with Docker
 
-For containerized deployment, see [Running Containers Locally](container_local_run.md).
+For containerized deployment, see [Running Containers Locally](../operations/container_local_run.md).
 
 Quick start with Docker Compose:
 
@@ -303,8 +299,8 @@ docker compose up --build
 
 | Goal | Document |
 |---|---|
-| Understand the system design | [Architecture](architecture.md) |
-| Deploy to production | [Deployment](deployment.md) |
+| Understand the system design | [Architecture](../overview/architecture.md) |
+| Deploy to production | [Deployment](../operations/deployment.md) |
 | Set up GitHub OAuth | [GitHub OAuth App](github_oauth_app.md) |
-| Run in containers | [Running Containers Locally](container_local_run.md) |
-| Understand AI safety considerations | [Responsible AI](responsible_ai.md) |
+| Run in containers | [Running Containers Locally](../operations/container_local_run.md) |
+| Understand AI safety considerations | [Responsible AI](../appendix/responsible_ai.md) |

@@ -1,9 +1,5 @@
 # Running Containers Locally
 
-> **Navigation:** [CopilotReportForge](index.md) > **Running Containers Locally**
->
-> **See also:** [Getting Started](getting_started.md) · [Web UI Guide](web_ui_guide.md)
-
 ---
 
 ## Overview
@@ -83,7 +79,7 @@ CONTAINER_REGISTRY=ghcr.io docker compose -f compose.docker.yaml up
 
 > **Service Dependencies:** The `api` service depends on `copilot` with a health check condition (`service_healthy`). The `copilot` service runs a TCP connection test on port 3000 to verify readiness before `api` starts. This means the `api` service will wait for the Copilot CLI to be fully ready before starting.
 
-> **Monolith Architecture:** The `monolith` service uses [supervisord](http://supervisord.org/) internally to manage two processes: the Copilot CLI server (port 3000) and the API server (port 8000). This is the same image used for [Azure Container Apps deployment](../../infra/scenarios/azure_container_apps/README.md).
+> **Monolith Architecture:** The `monolith` service uses [supervisord](http://supervisord.org/) internally to manage two processes: the Copilot CLI server (port 3000) and the API server (port 8000). This is the same image used for [Azure Container Apps deployment](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_container_apps/README.md).
 
 ### Running the Monolith Service
 
@@ -99,7 +95,7 @@ cd src/python
 docker compose -f compose.docker.yaml --profile monolith up monolith
 ```
 
-This is the same image used for the [Azure Container Apps deployment](../../infra/scenarios/azure_container_apps/README.md).
+This is the same image used for the [Azure Container Apps deployment](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_container_apps/README.md).
 
 ---
 

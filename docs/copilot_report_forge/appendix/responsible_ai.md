@@ -1,9 +1,5 @@
 # Responsible AI Notes
 
-> **Navigation:** [CopilotReportForge](index.md) > **Responsible AI**
->
-> **See also:** [Problem & Solution](problem_and_solution.md) · [Architecture](architecture.md)
-
 ---
 
 ## Overview

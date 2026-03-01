@@ -135,6 +135,25 @@ compose-logs: ## show Docker Compose logs
 	docker compose logs -f
 
 # ---
+# Docs
+# ---
+
+.PHONY: install-deps-docs
+install-deps-docs: ## install dependencies for documentation
+	uv sync --group docs
+
+.PHONY: docs
+docs: ## build documentation
+	uv run mkdocs build -f ../../mkdocs.yml
+
+.PHONY: docs-serve
+docs-serve: ## serve documentation
+	uv run mkdocs serve -f ../../mkdocs.yml
+
+.PHONY: ci-test-docs
+ci-test-docs: install-deps-docs docs ## run CI test for documentation
+
+# ---
 # Project
 # ---
 

@@ -1,9 +1,5 @@
 # References
 
-> **Navigation:** [CopilotReportForge](index.md) > **References**
->
-> **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md)
-
 ---
 
 ## GitHub Copilot

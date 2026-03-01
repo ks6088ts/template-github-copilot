@@ -1,9 +1,5 @@
 # Deployment
 
-> **Navigation:** [CopilotReportForge](index.md) > **Deployment**
->
-> **See also:** [Getting Started](getting_started.md) · [Architecture](architecture.md)
-
 ---
 
 ## Overview
@@ -95,9 +91,9 @@ terraform apply tfplan
 
 **Key outputs:** `app_url`, `app_fqdn`
 
-> **GitHub OAuth App Callback URL:** After deploying to Container Apps, you must update the **Authorization callback URL** in your GitHub OAuth App settings. Append `/auth/callback` to the `app_url` output value. Example: `https://app-azurecontainerapps.grayocean-38a4ba3f.japaneast.azurecontainerapps.io/auth/callback`. See [GitHub OAuth App Setup](github_oauth_app.md#deploying-to-azure-container-apps) for details.
+> **GitHub OAuth App Callback URL:** After deploying to Container Apps, you must update the **Authorization callback URL** in your GitHub OAuth App settings. Append `/auth/callback` to the `app_url` output value. Example: `https://app-azurecontainerapps.grayocean-38a4ba3f.japaneast.azurecontainerapps.io/auth/callback`. See [GitHub OAuth App Setup](../guide/github_oauth_app.md#deploying-to-azure-container-apps) for details.
 
-See [azure_container_apps/README.md](../../infra/scenarios/azure_container_apps/README.md) for full configuration details including environment variables.
+See [azure_container_apps/README.md](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/azure_container_apps/README.md) for full configuration details including environment variables.
 
 ---
 
@@ -204,7 +200,7 @@ uv run python scripts/report_service.py generate \
   --container-name "reports"
 ```
 
-See [Getting Started](getting_started.md) for detailed local setup instructions.
+See [Getting Started](../guide/getting_started.md) for detailed local setup instructions.
 
 ---
 

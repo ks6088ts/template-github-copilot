@@ -57,7 +57,7 @@ jobs:
       fail-fast: false
       matrix:
         scenario:
-          # FIXME: - azure_container_apps
+          - azure_container_apps
           - azure_github_oidc
           - azure_microsoft_foundry
     env:

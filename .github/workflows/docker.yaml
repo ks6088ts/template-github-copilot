@@ -10,7 +10,7 @@ on:
       - "main"
 
 env:
-  TRIVY_VERSION: v0.68.2
+  TRIVY_VERSION: v0.69.2
 
 jobs:
   docker:
@@ -25,11 +25,11 @@ jobs:
         shell: bash
         run: |
           echo "/home/runner/bin" >> "$GITHUB_PATH"
-      # FIXME: issue #44
-      # - name: Install Trivy
-      #   uses: aquasecurity/setup-trivy@v0.2.5
-      #   with:
-      #     version: ${{ env.TRIVY_VERSION }}
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+          cache: true
       - name: Run CI tests for Docker
         working-directory: ./src/python
         shell: bash

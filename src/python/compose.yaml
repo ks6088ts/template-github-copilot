@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: copilot.Dockerfile
       args:
-        COPILOT_CLI_VERSION: "0.0.418"
+        COPILOT_CLI_VERSION: "0.0.420"
     environment:
       - COPILOT_GITHUB_TOKEN=${COPILOT_GITHUB_TOKEN}
       - COPILOT_MODEL=${COPILOT_MODEL:-gpt-5-mini}
@@ -38,7 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        COPILOT_CLI_VERSION: "0.0.418"
+        COPILOT_CLI_VERSION: "0.0.420"
     env_file:
       - .env
     environment:

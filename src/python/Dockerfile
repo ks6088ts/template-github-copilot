@@ -21,7 +21,7 @@ RUN uv sync --no-dev
 # --- Runtime stage ---
 FROM python:3.13-slim-bookworm AS runtime
 
-ARG COPILOT_CLI_VERSION=0.0.418
+ARG COPILOT_CLI_VERSION=0.0.420
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

@@ -1,6 +1,6 @@
 FROM node:22-slim
 
-ARG COPILOT_CLI_VERSION=0.0.418
+ARG COPILOT_CLI_VERSION=0.0.420
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

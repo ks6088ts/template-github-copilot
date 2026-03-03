@@ -61,7 +61,7 @@ jobs:
         node-version:
           - "22.12.0"
         copilot-cli-version:
-          - "0.0.418"
+          - "0.0.420"
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 5
     environment: dev

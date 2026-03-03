@@ -21,7 +21,7 @@ CopilotReportForge provides Docker Compose configurations for running the platfo
 - (GitHub Packages) A GitHub Personal Access Token with `read:packages` scope
 - (Docker Hub) A Docker Hub account
 
-> **Note:** The Docker images use Copilot CLI version `0.0.418` (pinned in compose files and Dockerfiles). To update, change `COPILOT_CLI_VERSION` in the compose files and Dockerfiles.
+> **Note:** The Docker images use Copilot CLI version `0.0.420` (pinned in compose files and Dockerfiles). To update, change `COPILOT_CLI_VERSION` in the compose files and Dockerfiles.
 
 ---
 

@@ -9,6 +9,8 @@
 
 A showcase repository for multiple use cases built on the **GitHub Copilot SDK**, **Azure AI Foundry**, and **GitHub Actions**.
 
+> 📖 **Documentation Site**: For a more readable experience, visit the [GitHub Pages documentation](https://ks6088ts.github.io/template-github-copilot/).
+
 ---
 
 ## Use Cases

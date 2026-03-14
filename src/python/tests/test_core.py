@@ -4,6 +4,7 @@ Functions that depend heavily on the copilot SDK are tested with mocks.
 """
 
 import types
+from typing import cast
 from unittest.mock import MagicMock
 
 import typer
@@ -76,10 +77,10 @@ def test_get_system_message():
 
 def test_approve_all():
     """approve_all should return an approved result."""
-    request: PermissionRequest = MagicMock()  # type: ignore[assignment]
+    request = cast(PermissionRequest, MagicMock())
     result = approve_all(request, {})
-    assert result["kind"] == "approved"
-    assert result["rules"] == []
+    assert result.kind == "approved"
+    assert result.rules == []
 
 
 # ---------------------------------------------------------------------------

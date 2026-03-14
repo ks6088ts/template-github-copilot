@@ -1,6 +1,7 @@
 """Tests for template_github_copilot.tools (foundry_agent + get_custom_tools)."""
 
 import asyncio
+import types
 from unittest.mock import MagicMock, patch
 
 from template_github_copilot.internals.agents import (
@@ -17,12 +18,16 @@ from template_github_copilot.tools.foundry_agent import (
 
 def _invoke_tool(tool, arguments: dict) -> str:
     """Helper: invoke a Tool's async handler synchronously and return the LLM text."""
-    invocation = {"arguments": arguments, "name": tool.name}
-    result = asyncio.new_event_loop().run_until_complete(tool.handler(invocation))
+    invocation = types.SimpleNamespace(arguments=arguments, name=tool.name)
+    loop = asyncio.new_event_loop()
+    try:
+        result = loop.run_until_complete(tool.handler(invocation))
+    finally:
+        loop.close()
     return (
-        result.get("textResultForLlm", "")
+        result.get("text_result_for_llm", "")
         if isinstance(result, dict)
-        else getattr(result, "textResultForLlm", "")
+        else getattr(result, "text_result_for_llm", "")
     )
 
 

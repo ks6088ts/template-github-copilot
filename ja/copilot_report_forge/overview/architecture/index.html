@@ -1,0 +1,2191 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://ks6088ts-labs.github.io/template-github-copilot/ja/copilot_report_forge/overview/architecture/">
+      
+      
+        <link rel="prev" href="../problem_and_solution/">
+      
+      
+        <link rel="next" href="../../guide/getting_started/">
+      
+      
+        
+          <link rel="alternate" href="../../../../copilot_report_forge/overview/architecture/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="ja">
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Architecture - template-github-copilot</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-0ZTKFXVQ5K"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-0ZTKFXVQ5K",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-0ZTKFXVQ5K",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href="../../../" title="template-github-copilot" class="md-header__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            template-github-copilot
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="言語切り替え">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../../copilot_report_forge/overview/architecture/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ks6088ts/template-github-copilot" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../" title="template-github-copilot" class="md-nav__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    template-github-copilot
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ks6088ts/template-github-copilot" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CopilotReportForge
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CopilotReportForge
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../problem_and_solution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem & Solution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計哲学
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実行モデル: なぜ GitHub Actions か?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実行モデル: なぜ GitHub Actions か?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        エフェメラルな分離
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        環境の一貫性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        組み込みガバナンス
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        システムアーキテクチャ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="システムアーキテクチャ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンポーネントの責務
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コアデータフロー: レポート生成
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        エージェントデータフロー: ドメイン固有の評価
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        認証モデル
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="認証モデル">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oidc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜ OIDC フェデレーションか?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBAC ロール
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        インフラストラクチャアーキテクチャ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        アプリケーションアーキテクチャ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="アプリケーションアーキテクチャ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI ツール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web アプリケーション
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions ワークフロー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM プロバイダーモデル
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM プロバイダーモデル">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プロバイダー拡張性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#copilot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタム Copilot ツール
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="カスタム Copilot ツール">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        組み込みツール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタムツールの追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拡張性
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        技術スタック
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/web_ui_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web UI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/industry_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Industry Use Case Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/github_oauth_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub OAuth App Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/container_local_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Containers Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/responsible_ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        設計哲学
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        実行モデル: なぜ GitHub Actions か?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="実行モデル: なぜ GitHub Actions か?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        エフェメラルな分離
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        環境の一貫性
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        組み込みガバナンス
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        システムアーキテクチャ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="システムアーキテクチャ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンポーネントの責務
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コアデータフロー: レポート生成
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        エージェントデータフロー: ドメイン固有の評価
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        認証モデル
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="認証モデル">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oidc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        なぜ OIDC フェデレーションか?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBAC ロール
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        インフラストラクチャアーキテクチャ
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        アプリケーションアーキテクチャ
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="アプリケーションアーキテクチャ">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI ツール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web アプリケーション
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions ワークフロー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM プロバイダーモデル
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM プロバイダーモデル">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プロバイダー拡張性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#copilot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタム Copilot ツール
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="カスタム Copilot ツール">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        組み込みツール
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタムツールの追加
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        拡張性
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        技術スタック
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">アーキテクチャ</h1>
+<hr />
+<h2 id="_2">設計哲学</h2>
+<p>CopilotReportForge は、<a href="../problem_and_solution/">エンタープライズ AI 導入で特定された課題</a> に直接対処する 4 つの原則に基づいて構築されています:</p>
+<table>
+<thead>
+<tr>
+<th>原則</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>合成可能性</strong></td>
+<td>すべてのビルディングブロック（LLM クエリ、AI エージェント、ストレージ、通知）は独立しています。システムプロンプトを入れ替えてドメインを変更、ツールを追加して機能を追加できます。</td>
+</tr>
+<tr>
+<td><strong>ゼロインフラ AI</strong></td>
+<td>Copilot SDK を通じてホストされた LLM を利用。GPU プロビジョニング、モデル管理、推論サーバーは不要です。</td>
+</tr>
+<tr>
+<td><strong>デフォルトでセキュア</strong></td>
+<td>OIDC フェデレーション、スコープ付き RBAC、期限付き共有 URL、エフェメラル実行環境。どこにも長期保存シークレットなし。</td>
+</tr>
+<tr>
+<td><strong>監査可能な実行</strong></td>
+<td>すべての実行が完全な入出力コンテキスト、実行メタデータ、来歴と共に記録されます — 設定ではなくデフォルトで。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="github-actions">実行モデル: なぜ GitHub Actions か?</h2>
+<p>重要なアーキテクチャの決定として、<strong>すべての AI エージェント実行は開発者のローカルマシンではなく GitHub Actions ランナー内で実行</strong>されます。この選択は 3 つの問題を同時に解決します:</p>
+<h3 id="_3">エフェメラルな分離</h3>
+<p>各ワークフロー実行はクリーンなサンドボックス環境を起動し、完了時に破棄します。シークレット、中間ファイル、モデル出力は実行期間中のみ存在します。これは本質的に、開発者のワークステーションで AI エージェントを実行するよりも安全です。ワークステーションではシェル履歴、ファイルシステムのアーティファクト、マルウェアを通じて認証情報が漏洩する可能性があります。</p>
+<h3 id="_4">環境の一貫性</h3>
+<p>すべてのチームメンバー、すべてのワークフロー、すべてのドメインが同じランナー設定を使用します。これにより「自分のマシンでは動く」問題が排除され、チーム間の環境ドリフトが防止され、誰がトリガーしたかに関係なく AI 評価結果が再現可能になります。</p>
+<h3 id="_5">組み込みガバナンス</h3>
+<p>GitHub Actions は、誰が何をいつ、どのくらいの時間、どのような入出力で実行したかをネイティブに記録します。完全な実行ログが保持され、検索可能です。組織では、すべてのワークフロー活動が企業監査ログに記録されます — 追加のツールなしでコンプライアンス対応の監査証跡を提供します。</p>
+<hr />
+<h2 id="_6">システムアーキテクチャ</h2>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    USER(["👤 User / Scheduler"])
+
+    subgraph GHA["⚙️ GitHub Actions Runner"]
+        direction TB
+        SDK["🤖 Copilot SDK"]
+        TOOLS["🔧 AI Tools"]
+        SDK &lt;--&gt; TOOLS
+    end
+
+    subgraph AI["🧠 AI Models"]
+        direction TB
+        LLM["💬 GPT-5 / Claude"]
+        FOUNDRY["📚 Foundry Agents"]
+    end
+
+    subgraph AZ["☁️ Azure"]
+        direction TB
+        AUTH["🔐 Entra ID"]
+        STORAGE[("📦 Blob Storage")]
+    end
+
+    USER -- "① Submit" --&gt; SDK
+    SDK -- "② Parallel queries" --&gt; LLM
+    TOOLS -- "③ Delegate" --&gt; FOUNDRY
+    FOUNDRY -. "④ Reference data" .-&gt; STORAGE
+    SDK -- "⑤ Upload report" --&gt; STORAGE
+    STORAGE -- "⑥ Secure URL" --&gt; USER
+    USER -. "OIDC" .-&gt; AUTH
+    AUTH -. "Token" .-&gt; SDK
+
+    style GHA fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style AI fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style AZ fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0</code></pre>
+<h3 id="_7">コンポーネントの責務</h3>
+<table>
+<thead>
+<tr>
+<th>コンポーネント</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Copilot SDK Client</strong></td>
+<td>LLM セッションの管理、クエリの並列送信、ツールコールの処理、結果の集約</td>
+</tr>
+<tr>
+<td><strong>ホストされた LLM</strong></td>
+<td>テキスト生成機能の提供（GPT-5-mini、GPT-5、Claude Sonnet/Opus 4.6）— セルフホスティング不要</td>
+</tr>
+<tr>
+<td><strong>AI Foundry Agents</strong></td>
+<td>参照データ（ドキュメント、画像、仕様書）にアクセスできるドメイン固有の AI ペルソナ</td>
+</tr>
+<tr>
+<td><strong>Entra ID</strong></td>
+<td>OIDC フェデレーションを介した短期アクセストークンの発行 — 保存された認証情報なし</td>
+</tr>
+<tr>
+<td><strong>Blob Storage</strong></td>
+<td>レポートと参照データの保存、期限付き共有 URL の生成</td>
+</tr>
+<tr>
+<td><strong>GitHub Actions</strong></td>
+<td>エフェメラル実行、OIDC 認証、監査ログの提供</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_8">コアデータフロー: レポート生成</h2>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor User as 👤 User
+    participant RT as ⚙️ Runtime
+    participant LLM as 🧠 LLMs
+    participant ST as 📦 Storage
+
+    User-&gt;&gt;RT: ① Submit persona + queries
+    activate RT
+
+    rect rgba(26, 54, 93, 0.5)
+        note over RT,LLM: Parallel Execution
+        par Query 1
+            RT-&gt;&gt;LLM: Prompt
+            LLM--&gt;&gt;RT: Response
+        and Query 2
+            RT-&gt;&gt;LLM: Prompt
+            LLM--&gt;&gt;RT: Response
+        and Query N
+            RT-&gt;&gt;LLM: Prompt
+            LLM--&gt;&gt;RT: Response
+        end
+    end
+
+    RT-&gt;&gt;RT: ② Aggregate results
+    RT-&gt;&gt;ST: ③ Upload report (JSON)
+    ST--&gt;&gt;RT: Secure URL
+    RT--&gt;&gt;User: ④ Return secure URL
+    deactivate RT</code></pre>
+<p><strong>このフローの主要特性:</strong>
+- 各クエリは<strong>独立したセッション</strong>で実行されます — ペルソナ間の会話的な相互汚染なし。
+- 結果は<strong>型付けされ検証</strong>されます — 出力スキーマはクエリ総数、成功数、失敗数を追跡します。
+- レポートはアップロード後<strong>不変</strong>です — 評価のポイントインタイムの記録を提供します。</p>
+<hr />
+<h2 id="_9">エージェントデータフロー: ドメイン固有の評価</h2>
+<p>参照データ（フロアプラン、製品仕様、臨床ガイドライン）へのアクセスを必要とする評価のために、プラットフォームは AI Foundry Agents を統合します:</p>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor User as 👤 User
+    participant SDK as 🤖 Copilot Session
+    participant Agent as 📚 Domain Agent
+    participant Data as 📦 Reference Data
+
+    User-&gt;&gt;SDK: ① Domain-specific query
+    activate SDK
+
+    rect rgba(116, 66, 16, 0.4)
+        note over SDK,Data: Agent Orchestration
+        SDK-&gt;&gt;SDK: ② Route to specialist
+        SDK-&gt;&gt;Agent: ③ Invoke agent
+        activate Agent
+        Agent-&gt;&gt;Data: ④ Fetch documents
+        Data--&gt;&gt;Agent: Content
+        Agent--&gt;&gt;SDK: ⑤ Structured evaluation
+        deactivate Agent
+    end
+
+    SDK--&gt;&gt;User: ⑥ Agent-enriched report
+    deactivate SDK</code></pre>
+<p>Copilot セッションはクエリのコンテキストに基づいて、Foundry Agent に委任するタイミングを自律的に判断します。これにより、単一セッション内での<strong>マルチエージェントオーケストレーション</strong>が可能になります — ユーザーは高レベルのクエリを送信し、システムが適切なドメインスペシャリストにルーティングします。</p>
+<hr />
+<h2 id="_10">認証モデル</h2>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    participant GHA as ⚙️ GitHub Actions
+    participant OIDC as 🔑 OIDC Provider
+    participant Entra as 🛡️ Entra ID
+    participant AZ as ☁️ Azure
+
+    rect rgba(26, 54, 93, 0.5)
+        note over GHA,Entra: Passwordless Authentication
+        GHA-&gt;&gt;OIDC: ① Request JWT
+        OIDC--&gt;&gt;GHA: ② Signed JWT (short-lived)
+        GHA-&gt;&gt;Entra: ③ Exchange JWT
+        Entra--&gt;&gt;GHA: ④ Scoped access token
+    end
+
+    GHA-&gt;&gt;AZ: ⑤ Access resources (least privilege)
+    note right of AZ: Token expires in minutes</code></pre>
+<h3 id="oidc">なぜ OIDC フェデレーションか?</h3>
+<p>従来の CI/CD 認証は長期有効な API キーをリポジトリシークレットとして保存します。これらのキーはローテーションが困難で、漏洩しやすく、広範なアクセスを付与します。OIDC フェデレーションはこのパターンを完全に排除します:</p>
+<ul>
+<li><strong>Azure アクセスのための保存シークレットなし</strong> — トークンはワークフロー実行ごとに発行され、数分で期限切れになります。</li>
+<li><strong>最小権限スコーピング</strong> — 各トークンは特定の RBAC ロールにスコープされます（下記参照）。</li>
+<li><strong>ローテーションオーバーヘッドなし</strong> — ローテーションする認証情報がありません。</li>
+</ul>
+<h3 id="rbac">RBAC ロール</h3>
+<table>
+<thead>
+<tr>
+<th>ロール</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contributor</td>
+<td>Terraform を介した Azure リソース管理</td>
+</tr>
+<tr>
+<td>Storage Blob Data Contributor</td>
+<td>レポートと参照データの読み書き</td>
+</tr>
+<tr>
+<td>Storage Blob Delegator</td>
+<td>安全な共有 URL のためのユーザー委任キー生成</td>
+</tr>
+<tr>
+<td>Cognitive Services OpenAI User</td>
+<td>ホストされたモデルエンドポイントへのアクセス</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_11">インフラストラクチャアーキテクチャ</h2>
+<p>すべてのインフラストラクチャは Terraform を通じてコードとして管理され、再利用可能なモジュールとデプロイシナリオに整理されています。</p>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    subgraph Step1["① OIDC Setup"]
+        S1["🔐 Identity &amp; Trust"]
+        P1["Entra ID App\nService Principal\nFederated Credential\nRBAC Roles"]
+    end
+
+    subgraph Step2["② GitHub Secrets"]
+        S2["🔒 Environment Config"]
+        P2["GitHub Environment\nEncrypted Secrets"]
+    end
+
+    subgraph Step3["③ AI Foundry"]
+        S3["🧠 AI Infrastructure"]
+        P3["AI Hub + Models\nStorage Account\nAI Search"]
+    end
+
+    subgraph Step4["④ Container Apps"]
+        S4["🐳 Standalone Deploy"]
+        P4["Container Apps Env\nMonolith Container"]
+    end
+
+    S1 --&gt; P1
+    S2 --&gt; P2
+    S3 --&gt; P3
+    S4 --&gt; P4
+
+    Step1 -- "credentials" --&gt; Step2
+    Step2 -- "enables workflows" --&gt; Step3
+
+    style Step1 fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style Step2 fill:#702459,stroke:#f687b3,stroke-width:2px,color:#e2e8f0
+    style Step3 fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style Step4 fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0</code></pre>
+<table>
+<thead>
+<tr>
+<th>シナリオ</th>
+<th>目的</th>
+<th>主要リソース</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>azure_github_oidc</code></td>
+<td>GitHub と Azure 間のパスワードレス信頼の確立</td>
+<td>Entra ID アプリ、サービスプリンシパル、フェデレーション資格情報、RBAC ロール</td>
+</tr>
+<tr>
+<td><code>github_secrets</code></td>
+<td>GitHub 環境設定の自動化</td>
+<td>GitHub 環境、暗号化されたシークレット</td>
+</tr>
+<tr>
+<td><code>azure_microsoft_foundry</code></td>
+<td>AI 機能とストレージのデプロイ</td>
+<td>AI Hub、モデルデプロイメント、Storage Account、オプションの AI Search</td>
+</tr>
+<tr>
+<td><code>azure_container_apps</code></td>
+<td>モノリスサービスの Azure へのデプロイ</td>
+<td>リソースグループ、Container Apps 環境、モノリスコンテナ（Copilot CLI + API）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>最初の 3 つのシナリオは順番にデプロイする必要があります: OIDC → Secrets → Foundry。Container Apps シナリオはスタンドアロンです。ステップバイステップの手順については、<a href="../../operations/deployment/">デプロイ</a> を参照してください。</p>
+</blockquote>
+<hr />
+<h2 id="_12">アプリケーションアーキテクチャ</h2>
+<p>プラットフォームは AI 実行パイプラインとやり取りするための 3 つのインターフェースを提供します:</p>
+<h3 id="cli">CLI ツール</h3>
+<p>チャット、レポート生成、エージェント管理、ストレージ操作、通知のためのコマンドラインインターフェース。すべての CLI は同じパターンに従います: 環境変数で設定し、型付きコマンドで実行。</p>
+<h3 id="web">Web アプリケーション</h3>
+<p>GitHub OAuth ログイン、インタラクティブチャット、並列レポート生成パネルを備えたブラウザベースのインターフェース。ユーザーは GitHub ID で認証し、アプリケーションがユーザーに代わって Copilot リクエストを行います。</p>
+<h3 id="github-actions_1">GitHub Actions ワークフロー</h3>
+<p>スケジュール、手動ディスパッチ、または API 呼び出しでトリガーされる自動ワークフロー。これらはプライマリの本番実行パスであり、完全な監査証跡を持つエフェメラル環境を提供します。</p>
+<table>
+<thead>
+<tr>
+<th>インターフェース</th>
+<th>最適な用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td>ローカル開発、スクリプティング、自動化</td>
+</tr>
+<tr>
+<td>Web UI</td>
+<td>インタラクティブな探索、アドホック評価</td>
+</tr>
+<tr>
+<td>GitHub Actions</td>
+<td>本番実行、スケジュールレポート、管理されたワークフロー</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="llm">LLM プロバイダーモデル</h2>
+<p>プラットフォームは統一されたプロバイダーインターフェースを通じて複数の LLM バックエンド設定をサポートします:</p>
+<table>
+<thead>
+<tr>
+<th>モード</th>
+<th>認証</th>
+<th>ユースケース</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Copilot</strong>（デフォルト）</td>
+<td>Copilot CLI 経由の GitHub トークン</td>
+<td>標準使用 — API キー管理なしでホストされたモデルにアクセス</td>
+</tr>
+<tr>
+<td><strong>API Key</strong></td>
+<td>静的 API キー</td>
+<td>Copilot が利用できない場合の直接モデル API アクセス</td>
+</tr>
+<tr>
+<td><strong>Entra ID</strong></td>
+<td>Azure Entra ID ベアラートークン</td>
+<td>プライベートエンドポイントとマネージド ID を使用したエンタープライズデプロイメント</td>
+</tr>
+</tbody>
+</table>
+<p>モード間の切り替えにはコードではなく設定パラメータの変更が必要です。これにより、異なるセキュリティ要件を持つ環境（オープンインターネット開発からエアギャップ企業ネットワークまで）へのデプロイが可能になります。</p>
+<h3 id="_13">プロバイダー拡張性</h3>
+<p>プロバイダーシステムは <code>template_github_copilot/providers.py</code> で 3 つのコンポーネントで実装されています:</p>
+<ul>
+<li><strong><code>AuthMethod</code> enum</strong> — 利用可能な認証方法を定義: <code>GITHUB_COPILOT</code>、<code>API_KEY</code>、<code>FOUNDRY_ENTRA_ID</code>。</li>
+<li><strong><code>create_provider()</code> ファクトリ</strong> — 選択された <code>AuthMethod</code> に基づいて、<code>ProviderConfig</code>（BYOK モードの場合、またはデフォルト Copilot バックエンドの場合は <code>None</code>）とターゲットモデル名を含む <code>ProviderResult</code> を返します。</li>
+<li><strong><code>register_provider()</code> フック</strong> — コアコードを変更せずにカスタムプロバイダービルダーを追加できます。同じ引数を受け取り <code>ProviderResult</code> を返す callable を登録します。</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">template_github_copilot.providers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthMethod</span><span class="p">,</span> <span class="n">register_provider</span><span class="p">,</span> <span class="n">ProviderResult</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">my_custom_provider</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProviderResult</span><span class="p">:</span>
+    <span class="c1"># Build your custom ProviderConfig / model here</span>
+    <span class="o">...</span>
+
+<span class="c1"># Note: register_provider requires an AuthMethod enum value, not a string</span>
+<span class="n">register_provider</span><span class="p">(</span><span class="n">AuthMethod</span><span class="o">.</span><span class="n">API_KEY</span><span class="p">,</span> <span class="n">my_custom_provider</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="copilot">カスタム Copilot ツール</h2>
+<p>プラットフォームは Copilot SDK セッションに追加機能を拡張するカスタムツールをサポートします。ツールは <code>template_github_copilot/tools/</code> で定義され、Copilot セッション作成時に自動的に登録されます。</p>
+<h3 id="_14">組み込みツール</h3>
+<table>
+<thead>
+<tr>
+<th>ツール</th>
+<th>説明</th>
+<th>入力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_foundry_agents</code></td>
+<td>Microsoft Foundry 上のすべての利用可能なエージェントを一覧表示</td>
+<td><code>endpoint</code>（オプション、デフォルトは環境変数）</td>
+</tr>
+<tr>
+<td><code>call_foundry_agent</code></td>
+<td>指定された Foundry エージェントをユーザーメッセージで呼び出す</td>
+<td><code>agent_name</code>、<code>user_message</code>、<code>conversation_id</code>（オプション）、<code>endpoint</code>（オプション）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_15">カスタムツールの追加</h3>
+<ol>
+<li><code>template_github_copilot/tools/</code> に新しいファイルを作成します（例: <code>my_tool.py</code>）。</li>
+<li>Pydantic 入力モデルを定義し、<code>copilot.tools</code> の <code>@define_tool</code> デコレーターを使用してツール関数を実装します。</li>
+<li><code>template_github_copilot/tools/__init__.py</code> の <code>get_custom_tools()</code> でツールをエクスポートします。</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">copilot.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_tool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyToolInput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The query to process&quot;</span><span class="p">)</span>
+
+<span class="nd">@define_tool</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Description visible to the LLM&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_tool</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">MyToolInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Processed: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>Copilot SDK セッションは自動的にツールを検出し、LLM がユーザーのクエリに関連すると判断したときにそれを呼び出します。</p>
+<hr />
+<h2 id="_16">拡張性</h2>
+<p>アーキテクチャは 5 つのレベルでの拡張を想定して設計されています:</p>
+<table>
+<thead>
+<tr>
+<th>拡張ポイント</th>
+<th>拡張方法</th>
+<th>例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>新しいドメイン</strong></td>
+<td>システムプロンプトとクエリを変更</td>
+<td>製品評価から臨床ガイドラインレビューへの適応</td>
+</tr>
+<tr>
+<td><strong>新しい AI 機能</strong></td>
+<td><code>tools/</code> に Copilot ツールを追加</td>
+<td>Web スクレイパー、データベース検索、計算エンジン</td>
+</tr>
+<tr>
+<td><strong>新しい AI エージェント</strong></td>
+<td>ドメイン指示付きの Foundry Agent を作成</td>
+<td>フロアプランデータにアクセスできる特化型不動産鑑定士</td>
+</tr>
+<tr>
+<td><strong>新しい LLM プロバイダー</strong></td>
+<td><code>register_provider()</code> で登録</td>
+<td>独自認証を持つカスタムモデルエンドポイント</td>
+</tr>
+<tr>
+<td><strong>新しい出力チャネル</strong></td>
+<td>レポート JSON を後処理</td>
+<td>Slack、メール、ダッシュボード、PowerBI への送信</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="_17">技術スタック</h2>
+<table>
+<thead>
+<tr>
+<th>レイヤー</th>
+<th>技術</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>言語</td>
+<td>Python 3.13+</td>
+</tr>
+<tr>
+<td>AI SDK</td>
+<td>GitHub Copilot SDK、Azure AI Projects SDK</td>
+</tr>
+<tr>
+<td>LLM クライアント</td>
+<td>OpenAI Python SDK</td>
+</tr>
+<tr>
+<td>Web フレームワーク</td>
+<td>FastAPI</td>
+</tr>
+<tr>
+<td>HTTP クライアント</td>
+<td>httpx</td>
+</tr>
+<tr>
+<td>データバリデーション</td>
+<td>Pydantic、pydantic-settings</td>
+</tr>
+<tr>
+<td>CLI フレームワーク</td>
+<td>Typer</td>
+</tr>
+<tr>
+<td>環境</td>
+<td>python-dotenv</td>
+</tr>
+<tr>
+<td>クラウドストレージ</td>
+<td>Azure Blob Storage</td>
+</tr>
+<tr>
+<td>認証</td>
+<td>Azure Identity（OIDC、DefaultAzureCredential）</td>
+</tr>
+<tr>
+<td>インフラストラクチャ</td>
+<td>Terraform</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions</td>
+</tr>
+<tr>
+<td>コンテナ化</td>
+<td>Docker、Docker Compose</td>
+</tr>
+<tr>
+<td>テスト</td>
+<td>pytest、pytest-cov</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/in/ks6088ts/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ks6088ts" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/ks6088ts" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": [], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

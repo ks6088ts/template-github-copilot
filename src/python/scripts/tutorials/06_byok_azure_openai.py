@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""BYOK (Bring Your Own Key) — Use Azure OpenAI with the GitHub Copilot SDK.
+
+What you will learn:
+    - How to configure a ProviderConfig to point to Azure OpenAI
+    - How to pass an API key or bearer token to the Copilot SDK
+    - How BYOK differs from the default Copilot backend
+
+Usage:
+    # API-key authentication
+    export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
+    export BYOK_API_KEY="<your-azure-openai-api-key>"
+    export BYOK_MODEL="gpt-4o"
+    python 06_byok_azure_openai.py --prompt "Hello from Azure OpenAI!"
+
+    # Bearer-token authentication (Entra ID / Managed Identity)
+    export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
+    export BYOK_MODEL="gpt-4o"
+    python 06_byok_azure_openai.py --auth entra --prompt "Hello from Entra ID!"
+
+Prerequisites:
+    pip install github-copilot-sdk
+
+    # For Entra ID auth only:
+    pip install azure-identity
+
+    Start the Copilot CLI server first:
+        export COPILOT_GITHUB_TOKEN="<your-github-pat>"
+        gh copilot serve --port 3000
+
+Corresponding doc:
+    docs/copilot_sdk_tutorial/tutorials/06_byok.md
+"""
+
+import argparse
+import asyncio
+import os
+import sys
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="BYOK: Use Azure OpenAI with the GitHub Copilot SDK",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    parser.add_argument(
+        "--prompt",
+        "-p",
+        default="Briefly explain what BYOK means in the context of AI APIs.",
+        help="Prompt to send",
+    )
+    parser.add_argument(
+        "--cli-url",
+        "-c",
+        default="localhost:3000",
+        help="Copilot CLI server URL (default: localhost:3000)",
+    )
+    parser.add_argument(
+        "--auth",
+        choices=["api-key", "entra"],
+        default="api-key",
+        help="Authentication method: api-key (default) or entra (Entra ID bearer token)",
+    )
+    parser.add_argument(
+        "--base-url",
+        default=os.environ.get("BYOK_BASE_URL", ""),
+        help="Azure OpenAI deployment base URL (overrides BYOK_BASE_URL env var)",
+    )
+    parser.add_argument(
+        "--api-key",
+        default=os.environ.get("BYOK_API_KEY", ""),
+        help="Azure OpenAI API key (overrides BYOK_API_KEY env var)",
+    )
+    parser.add_argument(
+        "--model",
+        default=os.environ.get("BYOK_MODEL", "gpt-4o"),
+        help="Model/deployment name (overrides BYOK_MODEL env var, default: gpt-4o)",
+    )
+    return parser.parse_args()
+
+
+def _build_entra_bearer_token() -> str:
+    """Obtain an Azure Entra ID bearer token via DefaultAzureCredential."""
+    try:
+        from azure.identity import DefaultAzureCredential
+    except ImportError:
+        print(
+            "Error: azure-identity is required for Entra ID auth.\n"
+            "Install with: pip install azure-identity",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    scope = "https://cognitiveservices.azure.com/.default"
+    credential = DefaultAzureCredential()
+    return credential.get_token(scope).token
+
+
+async def run(cli_url: str, prompt: str, auth: str, base_url: str, api_key: str, model: str) -> None:
+    from copilot import CopilotClient
+    from copilot.generated.session_events import SessionEventType
+    from copilot.types import (
+        CopilotClientOptions,
+        MessageOptions,
+        PermissionRequest,
+        PermissionRequestResult,
+        ProviderConfig,
+        SessionConfig,
+        SystemMessageAppendConfig,
+    )
+
+    if not base_url:
+        print(
+            "Error: --base-url (or BYOK_BASE_URL env var) is required for BYOK mode.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    # ------------------------------------------------------------------
+    # Build ProviderConfig
+    # ------------------------------------------------------------------
+    if auth == "api-key":
+        if not api_key:
+            print(
+                "Error: --api-key (or BYOK_API_KEY env var) is required for api-key auth.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        provider = ProviderConfig(
+            type="azure",
+            base_url=base_url,
+            api_key=api_key,
+        )
+        print(f"[Auth] Using API key authentication — model: {model}")
+    else:
+        bearer_token = _build_entra_bearer_token()
+        provider = ProviderConfig(
+            type="azure",
+            base_url=base_url,
+            bearer_token=bearer_token,
+        )
+        print(f"[Auth] Using Entra ID bearer token — model: {model}")
+
+    # ------------------------------------------------------------------
+    # Session setup
+    # ------------------------------------------------------------------
+
+    def approve_all(
+        request: PermissionRequest,
+        context: dict,
+    ) -> PermissionRequestResult:
+        return PermissionRequestResult(kind="approved", rules=[])
+
+    client = CopilotClient(
+        options=CopilotClientOptions(cli_url=cli_url),
+    )
+    await client.start()
+
+    session = await client.create_session(
+        SessionConfig(
+            on_permission_request=approve_all,
+            tools=[],
+            streaming=True,
+            model=model,
+            provider=provider,
+            system_message=SystemMessageAppendConfig(
+                content="You are a helpful assistant powered by Azure OpenAI."
+            ),
+        )
+    )
+
+    print(f"\nYou: {prompt}\nCopilot: ", end="")
+
+    def on_event(event) -> None:  # noqa: ANN001
+        if event.type == SessionEventType.ASSISTANT_MESSAGE_DELTA:
+            print(event.data.delta_content, end="", flush=True)
+        elif event.type == SessionEventType.SESSION_ERROR:
+            print(f"\n[Error] {event.data.message}", file=sys.stderr)
+
+    session.on(on_event)
+
+    await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    print()
+
+
+def main() -> None:
+    args = parse_args()
+    try:
+        asyncio.run(
+            run(
+                cli_url=args.cli_url,
+                prompt=args.prompt,
+                auth=args.auth,
+                base_url=args.base_url,
+                api_key=args.api_key,
+                model=args.model,
+            )
+        )
+    except KeyboardInterrupt:
+        print("\nBye!")
+
+
+if __name__ == "__main__":
+    main()

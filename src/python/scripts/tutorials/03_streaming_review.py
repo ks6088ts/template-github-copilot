@@ -1,0 +1,151 @@
+#!/usr/bin/env python3
+"""Streaming Code Review using GitHub Copilot SDK.
+
+What you will learn:
+    - How to enable streaming and consume ASSISTANT_MESSAGE_DELTA events
+    - How to structure a code-review prompt around a unified diff
+    - How real-time output differs from waiting for the full response
+
+Usage:
+    python 03_streaming_review.py
+    python 03_streaming_review.py --diff path/to/changes.diff
+    python 03_streaming_review.py --cli-url localhost:3000
+
+Prerequisites:
+    pip install github-copilot-sdk
+
+    Start the Copilot CLI server first:
+        export COPILOT_GITHUB_TOKEN="<your-github-pat>"
+        gh copilot serve --port 3000
+
+Corresponding doc:
+    docs/copilot_sdk_tutorial/tutorials/03_streaming.md
+"""
+
+import argparse
+import asyncio
+import sys
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Sample diff (embedded so the script runs without external files)
+# ---------------------------------------------------------------------------
+
+SAMPLE_DIFF = """\
+diff --git a/src/auth.py b/src/auth.py
+index 1a2b3c4..5d6e7f8 100644
+--- a/src/auth.py
++++ b/src/auth.py
+@@ -12,7 +12,7 @@ import hashlib
+ def hash_password(password: str) -> str:
+-    return hashlib.md5(password.encode()).hexdigest()
++    return hashlib.sha256(password.encode()).hexdigest()
+
+@@ -28,6 +28,12 @@ def verify_token(token: str) -> bool:
+     if not token:
+         return False
++    # TODO: add expiry check
+     return token in _valid_tokens
+
++def delete_user(user_id: int) -> None:
++    # WARNING: no authorisation check
++    db.execute("DELETE FROM users WHERE id = %s" % user_id)
+"""
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Streaming Code Review using the GitHub Copilot SDK",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    parser.add_argument(
+        "--diff",
+        "-d",
+        default=None,
+        help="Path to a unified diff file (uses built-in sample if not provided)",
+    )
+    parser.add_argument(
+        "--cli-url",
+        "-c",
+        default="localhost:3000",
+        help="Copilot CLI server URL (default: localhost:3000)",
+    )
+    return parser.parse_args()
+
+
+async def run(cli_url: str, diff_text: str) -> None:
+    from copilot import CopilotClient
+    from copilot.generated.session_events import SessionEventType
+    from copilot.types import (
+        CopilotClientOptions,
+        MessageOptions,
+        PermissionRequest,
+        PermissionRequestResult,
+        SessionConfig,
+        SystemMessageReplaceConfig,
+    )
+
+    def approve_all(
+        request: PermissionRequest,
+        context: dict,
+    ) -> PermissionRequestResult:
+        return PermissionRequestResult(kind="approved", rules=[])
+
+    client = CopilotClient(
+        options=CopilotClientOptions(cli_url=cli_url),
+    )
+    await client.start()
+
+    session = await client.create_session(
+        SessionConfig(
+            on_permission_request=approve_all,
+            tools=[],
+            streaming=True,  # ← streaming enabled
+            system_message=SystemMessageReplaceConfig(
+                content=(
+                    "You are a senior software engineer conducting a thorough code review. "
+                    "For each change in the diff: identify bugs, security issues, and style problems. "
+                    "Be concise but precise. Use Markdown formatting."
+                )
+            ),
+        )
+    )
+
+    # Stream tokens to stdout as they arrive
+    print("=== Streaming Code Review ===\n")
+
+    def on_event(event) -> None:  # noqa: ANN001
+        if event.type == SessionEventType.ASSISTANT_MESSAGE_DELTA:
+            print(event.data.delta_content, end="", flush=True)
+        elif event.type == SessionEventType.SESSION_ERROR:
+            print(f"\n[Error] {event.data.message}", file=sys.stderr)
+
+    session.on(on_event)
+
+    prompt = f"Please review the following diff and provide feedback:\n\n```diff\n{diff_text}\n```"
+    await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    print("\n\n=== Review Complete ===")
+
+
+def main() -> None:
+    args = parse_args()
+
+    if args.diff:
+        diff_path = Path(args.diff)
+        if not diff_path.exists():
+            print(f"Error: diff file not found: {args.diff}", file=sys.stderr)
+            sys.exit(1)
+        diff_text = diff_path.read_text()
+    else:
+        diff_text = SAMPLE_DIFF
+        print("[Info] Using built-in sample diff. Pass --diff <path> to use your own.\n")
+
+    try:
+        asyncio.run(run(args.cli_url, diff_text))
+    except KeyboardInterrupt:
+        print("\nBye!")
+
+
+if __name__ == "__main__":
+    main()

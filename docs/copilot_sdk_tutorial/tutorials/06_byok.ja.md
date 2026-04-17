@@ -15,7 +15,7 @@
 
 ## 前提条件
 
-- `localhost:3000` で実行中の Copilot CLI サーバー
+- `copilot` CLI がインストール済みかつ認証済み（[はじめに](../getting_started.md) を参照）
 - `github-copilot-sdk` がインストール済み
 - デプロイされたモデル（例: `gpt-4o`）を持つ Azure OpenAI リソース
 - Entra ID 認証の場合: `azure-identity` がインストール済み

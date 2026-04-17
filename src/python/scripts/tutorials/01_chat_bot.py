@@ -8,21 +8,24 @@ What you will learn:
     - How to handle session events
 
 Usage:
-    # Single prompt
+    # Single prompt (SDK auto-launches the copilot CLI via stdio)
     python 01_chat_bot.py --prompt "What is GitHub Copilot?"
 
     # Interactive loop
     python 01_chat_bot.py --loop
 
-    # Connect to a specific CLI server
+    # Connect to an externally running CLI server over TCP
     python 01_chat_bot.py --cli-url localhost:3000 --loop
 
 Prerequisites:
     pip install github-copilot-sdk
 
-    Start the Copilot CLI server first:
-        export COPILOT_GITHUB_TOKEN="<your-github-pat>"
-        gh copilot serve --port 3000
+    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
+        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
+        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
+
+    If the copilot binary is not on PATH, set:
+        export COPILOT_CLI_PATH=/path/to/copilot
 
 Corresponding doc:
     docs/copilot_sdk_tutorial/tutorials/01_chat_bot.md
@@ -48,8 +51,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--cli-url",
         "-c",
-        default="localhost:3000",
-        help="Copilot CLI server URL (default: localhost:3000)",
+        default=None,
+        help=(
+            "Optional Copilot CLI server URL (e.g. localhost:3000). "
+            "When omitted, the SDK launches the copilot CLI over stdio."
+        ),
     )
     parser.add_argument(
         "--loop",
@@ -60,7 +66,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-async def run_single(cli_url: str, prompt: str) -> None:
+async def run_single(cli_url: str | None, prompt: str) -> None:
     """Send a single prompt and print the response."""
     from copilot import CopilotClient
     from copilot.generated.session_events import SessionEventType
@@ -79,9 +85,10 @@ async def run_single(cli_url: str, prompt: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client = CopilotClient(
-        options=CopilotClientOptions(cli_url=cli_url),
+    client_options: CopilotClientOptions = (
+        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
     )
+    client = CopilotClient(options=client_options)
     await client.start()
 
     session = await client.create_session(
@@ -111,7 +118,7 @@ async def run_single(cli_url: str, prompt: str) -> None:
         print("(no response)", file=sys.stderr)
 
 
-async def run_loop(cli_url: str) -> None:
+async def run_loop(cli_url: str | None) -> None:
     """Run an interactive chat loop."""
     from copilot import CopilotClient
     from copilot.generated.session_events import SessionEventType
@@ -130,9 +137,10 @@ async def run_loop(cli_url: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client = CopilotClient(
-        options=CopilotClientOptions(cli_url=cli_url),
+    client_options: CopilotClientOptions = (
+        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
     )
+    client = CopilotClient(options=client_options)
     await client.start()
 
     session = await client.create_session(

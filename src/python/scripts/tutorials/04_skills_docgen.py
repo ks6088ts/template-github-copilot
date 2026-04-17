@@ -14,9 +14,9 @@ Usage:
 Prerequisites:
     pip install github-copilot-sdk
 
-    Start the Copilot CLI server first:
-        export COPILOT_GITHUB_TOKEN="<your-github-pat>"
-        gh copilot serve --port 3000
+    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
+        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
+        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
 
 Corresponding doc:
     docs/copilot_sdk_tutorial/tutorials/04_skills.md
@@ -64,13 +64,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--cli-url",
         "-c",
-        default="localhost:3000",
-        help="Copilot CLI server URL (default: localhost:3000)",
+        default=None,
+        help=(
+            "Optional Copilot CLI server URL (e.g. localhost:3000). "
+            "When omitted, the SDK launches the copilot CLI over stdio."
+        ),
     )
     return parser.parse_args()
 
 
-async def run(cli_url: str, skills_dir: str) -> None:
+async def run(cli_url: str | None, skills_dir: str) -> None:
     from copilot import CopilotClient
     from copilot.generated.session_events import SessionEventType
     from copilot.types import (
@@ -89,10 +92,10 @@ async def run(cli_url: str, skills_dir: str) -> None:
             "Running without skills.",
             file=sys.stderr,
         )
-        skills_dir_opt = None
+        resolved_skills_dir: str | None = None
     else:
-        skills_dir_opt = str(skills_path.resolve())
-        print(f"[Info] Loading skills from: {skills_dir_opt}")
+        resolved_skills_dir = str(skills_path.resolve())
+        print(f"[Info] Loading skills from: {resolved_skills_dir}")
 
     def approve_all(
         request: PermissionRequest,
@@ -100,30 +103,29 @@ async def run(cli_url: str, skills_dir: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client_options: dict = {"cli_url": cli_url}
-    if skills_dir_opt:
-        client_options["skills_directory"] = skills_dir_opt
-
-    client = CopilotClient(
-        options=CopilotClientOptions(**client_options),
+    client_options: CopilotClientOptions = (
+        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
     )
+    client = CopilotClient(options=client_options)
     await client.start()
 
-    session = await client.create_session(
-        SessionConfig(
-            on_permission_request=approve_all,
-            tools=[],
-            streaming=True,
-            system_message=SystemMessageReplaceConfig(
-                mode="replace",
-                content=(
-                    "You are a Python documentation specialist. "
-                    "Generate clear, complete Google-style docstrings for all functions "
-                    "in the provided code. Return only the updated code with docstrings added."
-                ),
+    session_config: dict = {
+        "on_permission_request": approve_all,
+        "tools": [],
+        "streaming": True,
+        "system_message": SystemMessageReplaceConfig(
+            mode="replace",
+            content=(
+                "You are a Python documentation specialist. "
+                "Generate clear, complete Google-style docstrings for all functions "
+                "in the provided code. Return only the updated code with docstrings added."
             ),
-        )
-    )
+        ),
+    }
+    if resolved_skills_dir:
+        session_config["skill_directories"] = [resolved_skills_dir]
+
+    session = await client.create_session(SessionConfig(**session_config))
 
     print("=== Generating Documentation ===\n")
 

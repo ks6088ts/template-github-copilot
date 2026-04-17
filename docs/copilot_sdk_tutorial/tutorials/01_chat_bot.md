@@ -16,22 +16,25 @@
 
 ## Prerequisites
 
-- Copilot CLI server running on `localhost:3000` (see [Getting Started](../getting_started.md))
+- The `copilot` CLI installed and authenticated (see [Getting Started](../getting_started.md))
 - `github-copilot-sdk` installed
 
 ---
 
 ## Step 1 — Create and start the client
 
-The `CopilotClient` is the main entry point. Pass `cli_url` to connect to an external server:
+The `CopilotClient` is the main entry point. By default it launches the `copilot` binary as a subprocess and talks to it over stdio. Pass `cli_url` only if you already have a Copilot CLI running in TCP mode:
 
 ```python
 from copilot import CopilotClient
 from copilot.types import CopilotClientOptions
 
-client = CopilotClient(
-    options=CopilotClientOptions(cli_url="localhost:3000")
-)
+# Default: SDK launches the CLI over stdio
+client = CopilotClient()
+
+# Optional: connect to an already-running CLI server
+# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+
 await client.start()
 ```
 
@@ -150,7 +153,7 @@ python src/python/scripts/tutorials/01_chat_bot.py --prompt "Explain async/await
 # Interactive loop
 python src/python/scripts/tutorials/01_chat_bot.py --loop
 
-# Custom CLI server URL
+# Custom CLI server URL (optional — only when a CLI server is running in TCP mode)
 python src/python/scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 ```
 

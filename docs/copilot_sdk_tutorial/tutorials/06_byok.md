@@ -15,7 +15,7 @@
 
 ## Prerequisites
 
-- Copilot CLI server running on `localhost:3000`
+- The `copilot` CLI installed and authenticated (see [Getting Started](../getting_started.md))
 - `github-copilot-sdk` installed
 - An Azure OpenAI resource with a deployed model (e.g. `gpt-4o`)
 - For Entra ID auth: `azure-identity` installed

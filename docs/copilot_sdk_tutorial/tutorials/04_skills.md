@@ -15,7 +15,7 @@
 
 ## Prerequisites
 
-- Copilot CLI server running on `localhost:3000`
+- The `copilot` CLI installed and authenticated (see [Getting Started](../getting_started.md))
 - `github-copilot-sdk` installed
 
 ---
@@ -66,19 +66,27 @@ Key elements of a good SKILL.md:
 
 ## Step 2 — Configure the skills directory
 
-Pass the directory containing your skill folders to `CopilotClientOptions`:
+Skill directories are attached **per session** via `SessionConfig.skill_directories`:
 
 ```python
 from copilot import CopilotClient
-from copilot.types import CopilotClientOptions
+from copilot.types import SessionConfig
 
-client = CopilotClient(
-    options=CopilotClientOptions(
-        cli_url="localhost:3000",
-        skills_directory="/path/to/skills",
+client = CopilotClient()
+await client.start()
+
+session = await client.create_session(
+    SessionConfig(
+        on_permission_request=approve_all,
+        tools=[],
+        streaming=True,
+        skill_directories=["/path/to/skills"],   # ← list of directories
+        system_message=SystemMessageReplaceConfig(
+            mode="replace",
+            content="You are a Python documentation specialist.",
+        ),
     )
 )
-await client.start()
 ```
 
 The expected layout:
@@ -159,8 +167,8 @@ python src/python/scripts/tutorials/04_skills_docgen.py --skills-dir /nonexisten
 ## Key Takeaways
 
 - Skills are Markdown files (`SKILL.md`) that give the agent persistent instructions
-- Each skill lives in its own subdirectory under the `skills_directory`
-- Configure `CopilotClientOptions(skills_directory=...)` to load skills at startup
+- Each skill lives in its own subdirectory under a configured skill directory
+- Configure `SessionConfig(skill_directories=[...])` to load skills for a session
 - The agent automatically uses the most relevant skill based on the task
 - Skills complement custom tools: skills define **how** to behave, tools provide **what** to call
 

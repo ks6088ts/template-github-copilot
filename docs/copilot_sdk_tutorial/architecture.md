@@ -32,15 +32,18 @@ graph TD
 
 ### CopilotClient
 
-The `CopilotClient` class is the entry point of the SDK. It connects to the Copilot CLI server via **JSON-RPC over stdio** (when spawning a subprocess) or over a **TCP socket** (when connecting to an existing server on `localhost:3000`).
+The `CopilotClient` class is the entry point of the SDK. By default, it spawns the `copilot` CLI as a subprocess and communicates over **JSON-RPC on stdio**. Alternatively, it can connect to an already-running Copilot CLI over a **TCP socket** (for example `localhost:3000`) via the `cli_url` option.
 
 ```python
 from copilot import CopilotClient
 from copilot.types import CopilotClientOptions
 
-client = CopilotClient(
-    options=CopilotClientOptions(cli_url="localhost:3000")
-)
+# Default: stdio subprocess
+client = CopilotClient()
+
+# Optional: connect to an external CLI server over TCP
+# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+
 await client.start()
 ```
 
@@ -60,7 +63,7 @@ session = await client.create_session(SessionConfig(...))
 
 ### Copilot CLI Server
 
-The Copilot CLI server (`gh copilot serve`) is an out-of-process daemon that:
+The Copilot CLI (`copilot` binary) acts as an out-of-process agent runtime that:
 
 1. Authenticates with the GitHub Copilot API using your GitHub token
 2. Receives requests from the SDK over the JSON-RPC channel

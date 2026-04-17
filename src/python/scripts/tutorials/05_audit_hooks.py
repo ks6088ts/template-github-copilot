@@ -14,9 +14,9 @@ Usage:
 Prerequisites:
     pip install github-copilot-sdk
 
-    Start the Copilot CLI server first:
-        export COPILOT_GITHUB_TOKEN="<your-github-pat>"
-        gh copilot serve --port 3000
+    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
+        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
+        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
 
 Corresponding doc:
     docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.md
@@ -45,8 +45,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--cli-url",
         "-c",
-        default="localhost:3000",
-        help="Copilot CLI server URL (default: localhost:3000)",
+        default=None,
+        help=(
+            "Optional Copilot CLI server URL (e.g. localhost:3000). "
+            "When omitted, the SDK launches the copilot CLI over stdio."
+        ),
     )
     parser.add_argument(
         "--deny-tools",
@@ -56,7 +59,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-async def run(cli_url: str, prompt: str, deny_tools: bool) -> None:
+async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
     from copilot import CopilotClient
     from copilot.generated.session_events import SessionEventType
     from copilot.types import (
@@ -102,9 +105,10 @@ async def run(cli_url: str, prompt: str, deny_tools: bool) -> None:
     # Session setup
     # ------------------------------------------------------------------
 
-    client = CopilotClient(
-        options=CopilotClientOptions(cli_url=cli_url),
+    client_options: CopilotClientOptions = (
+        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
     )
+    client = CopilotClient(options=client_options)
     await client.start()
 
     session = await client.create_session(

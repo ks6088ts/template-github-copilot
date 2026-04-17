@@ -14,7 +14,7 @@
 
 ## 前提条件
 
-- `localhost:3000` で実行中の Copilot CLI サーバー
+- `copilot` CLI がインストール済みかつ認証済み（[はじめに](../getting_started.md) を参照）
 - `github-copilot-sdk` と `pydantic` がインストール済み
 
 ---
@@ -140,7 +140,7 @@ print(reply.data.content)
 
 ```bash
 python src/python/scripts/tutorials/02_issue_triage.py
-python src/python/scripts/tutorials/02_issue_triage.py --cli-url localhost:3000
+python src/python/scripts/tutorials/02_issue_triage.py --cli-url localhost:3000  # オプション: 起動済み CLI サーバーを利用
 ```
 
 期待される出力:

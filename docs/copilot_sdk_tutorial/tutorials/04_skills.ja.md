@@ -15,7 +15,7 @@
 
 ## 前提条件
 
-- `localhost:3000` で実行中の Copilot CLI サーバー
+- `copilot` CLI がインストール済みかつ認証済み（[はじめに](../getting_started.md) を参照）
 - `github-copilot-sdk` がインストール済み
 
 ---
@@ -66,19 +66,27 @@ for every function and class that does not already have one.
 
 ## ステップ 2 — スキルディレクトリを設定する
 
-スキルフォルダを含むディレクトリを `CopilotClientOptions` に渡します:
+スキルディレクトリは `SessionConfig.skill_directories` で**セッションごとに**設定します:
 
 ```python
 from copilot import CopilotClient
-from copilot.types import CopilotClientOptions
+from copilot.types import SessionConfig
 
-client = CopilotClient(
-    options=CopilotClientOptions(
-        cli_url="localhost:3000",
-        skills_directory="/path/to/skills",
+client = CopilotClient()
+await client.start()
+
+session = await client.create_session(
+    SessionConfig(
+        on_permission_request=approve_all,
+        tools=[],
+        streaming=True,
+        skill_directories=["/path/to/skills"],   # ← ディレクトリのリスト
+        system_message=SystemMessageReplaceConfig(
+            mode="replace",
+            content="You are a Python documentation specialist.",
+        ),
     )
 )
-await client.start()
 ```
 
 期待されるレイアウト:
@@ -159,8 +167,8 @@ python src/python/scripts/tutorials/04_skills_docgen.py --skills-dir /nonexisten
 ## まとめ
 
 - スキルはエージェントに永続的な指示を与える Markdown ファイル（`SKILL.md`）
-- 各スキルは `skills_directory` 配下の独自のサブディレクトリに配置される
-- 起動時にスキルを読み込むために `CopilotClientOptions(skills_directory=...)` を設定する
+- 各スキルは設定したスキルディレクトリ配下の独自のサブディレクトリに配置される
+- セッションでスキルを読み込むには `SessionConfig(skill_directories=[...])` を設定する
 - エージェントはタスクに基づいて最も関連するスキルを自動的に使用する
 - スキルはカスタムツールを補完する — スキルは**どのように**振る舞うかを定義し、ツールは**何を**呼び出すかを提供する
 

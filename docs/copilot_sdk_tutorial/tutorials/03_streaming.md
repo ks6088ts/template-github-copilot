@@ -15,7 +15,7 @@
 
 ## Prerequisites
 
-- Copilot CLI server running on `localhost:3000`
+- The `copilot` CLI installed and authenticated (see [Getting Started](../getting_started.md))
 - `github-copilot-sdk` installed
 
 ---
@@ -145,7 +145,7 @@ python src/python/scripts/tutorials/03_streaming_review.py
 # Review your own diff
 python src/python/scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
 
-# Custom CLI server
+# Custom CLI server (optional)
 python src/python/scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 ```
 

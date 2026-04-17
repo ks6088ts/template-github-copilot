@@ -15,7 +15,7 @@
 
 ## 前提条件
 
-- `localhost:3000` で実行中の Copilot CLI サーバー
+- `copilot` CLI がインストール済みかつ認証済み（[はじめに](../getting_started.md) を参照）
 - `github-copilot-sdk` がインストール済み
 
 ---
@@ -155,7 +155,7 @@ python src/python/scripts/tutorials/05_audit_hooks.py \
 # すべてのツール呼び出しを拒否
 python src/python/scripts/tutorials/05_audit_hooks.py --deny-tools
 
-# カスタム CLI サーバー
+# カスタム CLI サーバー（オプション）
 python src/python/scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
 ```
 

@@ -15,7 +15,7 @@
 
 ## 前提条件
 
-- `localhost:3000` で実行中の Copilot CLI サーバー
+- `copilot` CLI がインストール済みかつ認証済み（[はじめに](../getting_started.md) を参照）
 - `github-copilot-sdk` がインストール済み
 
 ---
@@ -145,7 +145,7 @@ python src/python/scripts/tutorials/03_streaming_review.py
 # 独自の差分をレビュー
 python src/python/scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
 
-# カスタム CLI サーバー
+# カスタム CLI サーバー（オプション）
 python src/python/scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 ```
 

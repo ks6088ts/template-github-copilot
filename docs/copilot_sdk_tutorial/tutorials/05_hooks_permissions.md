@@ -15,7 +15,7 @@
 
 ## Prerequisites
 
-- Copilot CLI server running on `localhost:3000`
+- The `copilot` CLI installed and authenticated (see [Getting Started](../getting_started.md))
 - `github-copilot-sdk` installed
 
 ---
@@ -155,7 +155,7 @@ python src/python/scripts/tutorials/05_audit_hooks.py \
 # Deny all tool calls
 python src/python/scripts/tutorials/05_audit_hooks.py --deny-tools
 
-# Custom CLI server
+# Custom CLI server (optional)
 python src/python/scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
 ```
 

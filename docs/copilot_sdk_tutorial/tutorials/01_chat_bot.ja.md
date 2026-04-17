@@ -16,22 +16,25 @@
 
 ## 前提条件
 
-- `localhost:3000` で実行中の Copilot CLI サーバー（[はじめに](../getting_started.md) を参照）
+- `copilot` CLI がインストール済みかつ認証済み（[はじめに](../getting_started.md) を参照）
 - `github-copilot-sdk` がインストール済み
 
 ---
 
 ## ステップ 1 — クライアントの作成と起動
 
-`CopilotClient` はメインのエントリーポイントです。外部サーバーに接続するには `cli_url` を渡します:
+`CopilotClient` はメインのエントリーポイントです。デフォルトでは `copilot` バイナリをサブプロセスとして起動し、stdio 経由で通信します。TCP モードで既に Copilot CLI が動く場合に限り `cli_url` を渡します:
 
 ```python
 from copilot import CopilotClient
 from copilot.types import CopilotClientOptions
 
-client = CopilotClient(
-    options=CopilotClientOptions(cli_url="localhost:3000")
-)
+# デフォルト: SDK が CLI を stdio で起動
+client = CopilotClient()
+
+# オプション: 既に起動している CLI サーバーに接続
+# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+
 await client.start()
 ```
 
@@ -150,7 +153,7 @@ python src/python/scripts/tutorials/01_chat_bot.py --prompt "Explain async/await
 # インタラクティブループ
 python src/python/scripts/tutorials/01_chat_bot.py --loop
 
-# カスタム CLI サーバー URL
+# カスタム CLI サーバー URL（オプション — TCP モードで CLI サーバーが起動している場合のみ）
 python src/python/scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 ```
 

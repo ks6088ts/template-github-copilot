@@ -10,7 +10,7 @@ This guide covers everything you need to set up a local development environment 
 |-------------|-----------------|---------|
 | Python | 3.11+ | Runtime |
 | pip / uv | latest | Package management |
-| GitHub CLI (`gh`) | latest | Copilot token and server |
+| Node.js (`npm`) or GitHub CLI (`gh`) | latest | Installing the Copilot CLI |
 | GitHub Copilot subscription | — | Required for API access |
 
 ---
@@ -47,9 +47,16 @@ pip install github-copilot-sdk azure-identity
 
 ## Authenticate with GitHub
 
-The Copilot CLI server needs a GitHub token with Copilot access.
+The Copilot CLI needs a GitHub account with Copilot access.
 
-### Option A: Personal Access Token (PAT)
+### Option A: GitHub CLI auth (recommended)
+
+```bash
+gh auth login
+# The Copilot CLI will use your gh CLI credentials automatically.
+```
+
+### Option B: Personal Access Token (PAT)
 
 1. Go to **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)**
 2. Generate a token with the `copilot` scope (or `read:user` + Copilot-enabled org)
@@ -59,36 +66,39 @@ The Copilot CLI server needs a GitHub token with Copilot access.
 export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
 ```
 
-### Option B: GitHub CLI auth
-
-```bash
-gh auth login
-# The Copilot CLI server will use your gh CLI credentials automatically
-```
-
 ---
 
-## Start the Copilot CLI Server
+## Install the Copilot CLI
 
-The SDK communicates with a **Copilot CLI server** that handles authentication and API routing. Start it in a dedicated terminal:
+The SDK launches the **`copilot` CLI** as a subprocess over stdio, so the binary must be available on your machine. Pick one of the following:
 
 ```bash
-gh copilot serve --port 3000
+# Option A: npm (installs the `copilot` command on PATH)
+npm install -g @github/copilot
+
+# Option B: gh copilot (downloads and manages the binary)
+gh copilot   # On first run, downloads the CLI under ~/.local/share/gh/copilot
 ```
 
-You should see output like:
+Verify it is runnable:
 
-```
-Copilot CLI server listening on :3000
+```bash
+copilot --version
+# or, if you used gh copilot:
+gh copilot -- --version
 ```
 
-Keep this terminal open while running the tutorial scripts.
+> **Tip:** If `copilot` is not on your PATH, tell the SDK where to find the binary:
+>
+> ```bash
+> export COPILOT_CLI_PATH="/absolute/path/to/copilot"
+> ```
+
+The tutorial scripts do **not** require a separately running Copilot CLI server — the SDK starts one for you on demand via stdio. An optional `--cli-url host:port` flag is provided if you already have a Copilot CLI running in TCP mode.
 
 ---
 
 ## Run Your First Script
-
-Open a second terminal and run:
 
 ```bash
 python src/python/scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
@@ -122,11 +132,12 @@ src/python/scripts/tutorials/
 
 ## Environment Variables
 
-All tutorial scripts accept `--cli-url` (default: `localhost:3000`). Scripts 06 also read BYOK settings from environment variables:
+All tutorial scripts accept `--cli-url` (default: *stdio*). Script 06 also reads BYOK settings from environment variables:
 
 | Variable | Purpose | Used by |
 |----------|---------|---------|
-| `COPILOT_GITHUB_TOKEN` | GitHub PAT for Copilot CLI server | `gh copilot serve` |
+| `COPILOT_GITHUB_TOKEN` | GitHub PAT for the Copilot CLI (alternative to `gh auth login`) | Copilot CLI subprocess |
+| `COPILOT_CLI_PATH` | Absolute path to the `copilot` binary (if not on PATH) | SDK subprocess launcher |
 | `BYOK_BASE_URL` | Azure OpenAI deployment base URL | Script 06 |
 | `BYOK_API_KEY` | Azure OpenAI API key | Script 06 (api-key auth) |
 | `BYOK_MODEL` | Model/deployment name | Script 06 |

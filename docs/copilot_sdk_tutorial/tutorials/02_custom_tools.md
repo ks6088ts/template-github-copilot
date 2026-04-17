@@ -14,7 +14,7 @@
 
 ## Prerequisites
 
-- Copilot CLI server running on `localhost:3000`
+- The `copilot` CLI installed and authenticated (see [Getting Started](../getting_started.md))
 - `github-copilot-sdk` and `pydantic` installed
 
 ---
@@ -140,7 +140,7 @@ The agent will:
 
 ```bash
 python src/python/scripts/tutorials/02_issue_triage.py
-python src/python/scripts/tutorials/02_issue_triage.py --cli-url localhost:3000
+python src/python/scripts/tutorials/02_issue_triage.py --cli-url localhost:3000  # optional: use a running CLI server
 ```
 
 Expected output:

@@ -10,7 +10,7 @@
 |------|---------------|------|
 | Python | 3.11+ | ランタイム |
 | pip / uv | 最新版 | パッケージ管理 |
-| GitHub CLI（`gh`） | 最新版 | Copilot トークンとサーバー |
+| Node.js（`npm`） または GitHub CLI（`gh`） | 最新版 | Copilot CLI のインストール |
 | GitHub Copilot サブスクリプション | — | API アクセスに必要 |
 
 ---
@@ -47,9 +47,16 @@ pip install github-copilot-sdk azure-identity
 
 ## GitHub 認証
 
-Copilot CLI サーバーには Copilot アクセス権を持つ GitHub トークンが必要です。
+Copilot CLI は Copilot アクセス権を持つ GitHub アカウントが必要です。
 
-### オプション A: パーソナルアクセストークン（PAT）
+### オプション A: GitHub CLI 認証（推奨）
+
+```bash
+gh auth login
+# Copilot CLI は gh CLI の認証情報を自動的に利用します。
+```
+
+### オプション B: パーソナルアクセストークン（PAT）
 
 1. **GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)** に移動
 2. `copilot` スコープ（または `read:user` + Copilot 有効な org）でトークンを生成
@@ -59,36 +66,39 @@ Copilot CLI サーバーには Copilot アクセス権を持つ GitHub トーク
 export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
 ```
 
-### オプション B: GitHub CLI 認証
-
-```bash
-gh auth login
-# Copilot CLI サーバーは gh CLI の認証情報を自動的に使用します
-```
-
 ---
 
-## Copilot CLI サーバーの起動
+## Copilot CLI のインストール
 
-SDK は認証と API ルーティングを処理する **Copilot CLI サーバー**と通信します。専用のターミナルで起動してください:
+SDK は **`copilot` CLI** を stdio 経由のサブプロセスとして起動します。このためバイナリがマシン上で利用可能である必要があります。次のいずれかでインストールしてください。
 
 ```bash
-gh copilot serve --port 3000
+# オプション A: npm（`copilot` コマンドを PATH にインストール）
+npm install -g @github/copilot
+
+# オプション B: gh copilot（バイナリをダウンロード・管理）
+gh copilot   # 初回実行時に ~/.local/share/gh/copilot に CLI をダウンロード
 ```
 
-以下のような出力が表示されるはずです:
+実行可能か確認:
 
-```
-Copilot CLI server listening on :3000
+```bash
+copilot --version
+# または gh copilot でインストールした場合:
+gh copilot -- --version
 ```
 
-チュートリアルスクリプトを実行している間、このターミナルを開いたままにしておいてください。
+> **ヒント:** `copilot` が PATH 上にない場合は、SDK にバイナリの場所を伝えます:
+>
+> ```bash
+> export COPILOT_CLI_PATH="/absolute/path/to/copilot"
+> ```
+
+チュートリアルスクリプトは独立した Copilot CLI サーバーを起動する**必要はありません** — SDK が stdio 経由でオンデマンドに起動します。既に TCP モードで動く Copilot CLI がある場合は、オプションとして `--cli-url host:port` フラグを使えます。
 
 ---
 
 ## 最初のスクリプトを実行する
-
-2 番目のターミナルを開いて実行します:
 
 ```bash
 python src/python/scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
@@ -122,11 +132,12 @@ src/python/scripts/tutorials/
 
 ## 環境変数
 
-すべてのチュートリアルスクリプトは `--cli-url`（デフォルト: `localhost:3000`）を受け付けます。スクリプト 06 は環境変数から BYOK 設定も読み込みます。
+すべてのチュートリアルスクリプトは `--cli-url`（デフォルト: *stdio*）を受け付けます。スクリプト 06 は環境変数から BYOK 設定も読み込みます。
 
 | 変数名 | 用途 | 使用するスクリプト |
 |--------|------|------------------|
-| `COPILOT_GITHUB_TOKEN` | Copilot CLI サーバー用の GitHub PAT | `gh copilot serve` |
+| `COPILOT_GITHUB_TOKEN` | Copilot CLI 用の GitHub PAT（`gh auth login` の代替） | Copilot CLI サブプロセス |
+| `COPILOT_CLI_PATH` | `copilot` バイナリの絶対パス（PATH にない場合） | SDK のサブプロセスランチャー |
 | `BYOK_BASE_URL` | Azure OpenAI デプロイのベース URL | スクリプト 06 |
 | `BYOK_API_KEY` | Azure OpenAI API キー | スクリプト 06（api-key 認証） |
 | `BYOK_MODEL` | モデル/デプロイ名 | スクリプト 06 |

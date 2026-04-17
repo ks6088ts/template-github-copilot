@@ -32,15 +32,18 @@ graph TD
 
 ### CopilotClient
 
-`CopilotClient` クラスは SDK のエントリーポイントです。サブプロセスを起動する場合は **JSON-RPC over stdio**、既存サーバー（`localhost:3000`）に接続する場合は **TCP ソケット** を介して Copilot CLI サーバーに接続します。
+`CopilotClient` クラスは SDK のエントリーポイントです。デフォルトでは `copilot` CLI をサブプロセスとして起動し、**JSON-RPC over stdio** で通信します。`cli_url` オプション経由で、既に起動している Copilot CLI に **TCP ソケット**（例: `localhost:3000`）で接続することもできます。
 
 ```python
 from copilot import CopilotClient
 from copilot.types import CopilotClientOptions
 
-client = CopilotClient(
-    options=CopilotClientOptions(cli_url="localhost:3000")
-)
+# デフォルト: stdio サブプロセス
+client = CopilotClient()
+
+# オプション: TCP で外部 CLI サーバーに接続
+# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+
 await client.start()
 ```
 
@@ -60,7 +63,7 @@ session = await client.create_session(SessionConfig(...))
 
 ### Copilot CLI サーバー
 
-Copilot CLI サーバー（`gh copilot serve`）は、以下を担当するアウトオブプロセスのデーモンです。
+Copilot CLI（`copilot` バイナリ）は以下を担当するアウトオブプロセスのエージェントランタイムです。
 
 1. GitHub トークンを使って GitHub Copilot API に認証
 2. JSON-RPC チャネルを通じて SDK からリクエストを受信

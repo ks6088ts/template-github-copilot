@@ -62,11 +62,11 @@ graph TD
 # 1. SDK をインストール
 pip install github-copilot-sdk
 
-# 2. Copilot CLI サーバーを起動
-export COPILOT_GITHUB_TOKEN="<your-github-pat>"
-gh copilot serve --port 3000
+# 2. Copilot CLI をインストールして認証（SDK がオンデマンドで起動します）
+npm install -g @github/copilot       # または: gh copilot （初回実行時にダウンロード）
+gh auth login                        # または: export COPILOT_GITHUB_TOKEN="<pat>"
 
-# 3. チュートリアルスクリプトを実行（別ターミナルで）
+# 3. チュートリアルスクリプトを実行
 python src/python/scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```
 

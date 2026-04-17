@@ -62,11 +62,11 @@ Each tutorial pairs a **documentation page** with a **self-contained CLI script*
 # 1. Install the SDK
 pip install github-copilot-sdk
 
-# 2. Start the Copilot CLI server
-export COPILOT_GITHUB_TOKEN="<your-github-pat>"
-gh copilot serve --port 3000
+# 2. Install and authenticate the Copilot CLI (the SDK launches it on demand)
+npm install -g @github/copilot       # or: gh copilot (downloads on first run)
+gh auth login                        # or: export COPILOT_GITHUB_TOKEN="<pat>"
 
-# 3. Run your first tutorial script (in another terminal)
+# 3. Run your first tutorial script
 python src/python/scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```
 

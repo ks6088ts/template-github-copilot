@@ -30,19 +30,25 @@ Or, if you are inside `src/python` and use `uv`:
 uv run python scripts/tutorials/01_chat_bot.py
 ```
 
-### 3. Start the Copilot CLI server
+### 3. Install and authenticate the Copilot CLI
 
-Each script connects to a local Copilot CLI server.
+The SDK launches the `copilot` CLI over stdio, so the binary must be installed.
 
 ```bash
-# Authenticate with GitHub
-export COPILOT_GITHUB_TOKEN="<your-github-personal-access-token>"
+# Option A: install via npm (provides the `copilot` command on PATH)
+npm install -g @github/copilot
 
-# Start the server (in a separate terminal)
-gh copilot serve --port 3000
+# Option B: let `gh copilot` download and manage the binary
+gh copilot   # downloads on first run
+
+# Authenticate with GitHub
+gh auth login
+# or: export COPILOT_GITHUB_TOKEN="<your-github-personal-access-token>"
 ```
 
-The server must be running before you execute any of the scripts below.
+> If the `copilot` binary is not on your `PATH`, set `COPILOT_CLI_PATH=/path/to/copilot`.
+
+The scripts do **not** require a separately running Copilot CLI server. Use `--cli-url host:port` only if you have one running in TCP mode.
 
 ---
 
@@ -62,7 +68,7 @@ The server must be running before you execute any of the scripts below.
 ## Quick Start
 
 ```bash
-# 1. Start the Copilot CLI server (see Prerequisites above)
+# 1. Install and authenticate the Copilot CLI (see Prerequisites above)
 
 # 2. Run a tutorial script
 python src/python/scripts/tutorials/01_chat_bot.py --help

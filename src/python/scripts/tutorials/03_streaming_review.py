@@ -48,7 +48,7 @@ index 1a2b3c4..5d6e7f8 100644
      return token in _valid_tokens
 
 +def delete_user(user_id: int) -> None:
-+    # WARNING: no authorisation check
++    # WARNING: no authorization check
 +    db.execute("DELETE FROM users WHERE id = %s" % user_id)
 """
 

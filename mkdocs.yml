@@ -6,6 +6,19 @@ repo_name: ks6088ts/template-github-copilot
 docs_dir: docs
 nav:
   - Home: index.md
+  - Copilot SDK Tutorial:
+      - Home: copilot_sdk_tutorial/index.md
+      - Architecture: copilot_sdk_tutorial/architecture.md
+      - Getting Started: copilot_sdk_tutorial/getting_started.md
+      - Tutorials:
+          - "01: CLI Chatbot": copilot_sdk_tutorial/tutorials/01_chat_bot.md
+          - "02: Custom Tools": copilot_sdk_tutorial/tutorials/02_custom_tools.md
+          - "03: Streaming": copilot_sdk_tutorial/tutorials/03_streaming.md
+          - "04: Skills": copilot_sdk_tutorial/tutorials/04_skills.md
+          - "05: Hooks & Permissions": copilot_sdk_tutorial/tutorials/05_hooks_permissions.md
+          - "06: BYOK": copilot_sdk_tutorial/tutorials/06_byok.md
+      - Appendix:
+          - References: copilot_sdk_tutorial/appendix/references.md
   - CopilotReportForge:
       - Home: copilot_report_forge/index.md
       - Overview:

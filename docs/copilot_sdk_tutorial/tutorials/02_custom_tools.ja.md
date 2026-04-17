@@ -101,12 +101,13 @@ session = await client.create_session(
         tools=[list_issues, label_issue],  # ← ここで登録
         streaming=False,
         system_message=SystemMessageReplaceConfig(
+            mode="replace",
             content=(
                 "You are an expert GitHub issue triage assistant. "
                 "Use list_issues to fetch open issues, classify each one "
                 "as 'bug', 'enhancement', or 'documentation', then call "
                 "label_issue to apply the appropriate label."
-            )
+            ),
         ),
     )
 )

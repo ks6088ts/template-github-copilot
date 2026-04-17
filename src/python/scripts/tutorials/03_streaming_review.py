@@ -103,11 +103,12 @@ async def run(cli_url: str, diff_text: str) -> None:
             tools=[],
             streaming=True,  # ← streaming enabled
             system_message=SystemMessageReplaceConfig(
+                mode="replace",
                 content=(
                     "You are a senior software engineer conducting a thorough code review. "
                     "For each change in the diff: identify bugs, security issues, and style problems. "
                     "Be concise but precise. Use Markdown formatting."
-                )
+                ),
             ),
         )
     )
@@ -139,7 +140,9 @@ def main() -> None:
         diff_text = diff_path.read_text()
     else:
         diff_text = SAMPLE_DIFF
-        print("[Info] Using built-in sample diff. Pass --diff <path> to use your own.\n")
+        print(
+            "[Info] Using built-in sample diff. Pass --diff <path> to use your own.\n"
+        )
 
     try:
         asyncio.run(run(args.cli_url, diff_text))

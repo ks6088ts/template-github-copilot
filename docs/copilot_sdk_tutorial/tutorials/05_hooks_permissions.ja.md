@@ -90,7 +90,7 @@ def permission_handler(
     # 例: すべてのツール呼び出しを拒否（読み取り専用の監査に有用）
     if should_deny(tool_name):
         print(f"[Permission] DENIED: {tool_name}")
-        return PermissionRequestResult(kind="denied", rules=[])
+        return PermissionRequestResult(kind="denied-interactively-by-user", rules=[])
 
     print(f"[Permission] APPROVED: {tool_name}")
     return PermissionRequestResult(kind="approved", rules=[])

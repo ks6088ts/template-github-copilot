@@ -26,13 +26,21 @@ import argparse
 import asyncio
 import json
 import sys
-from typing import Any
+from typing import Any, TypedDict
 
 # ---------------------------------------------------------------------------
 # Sample issue data (no external API calls needed)
 # ---------------------------------------------------------------------------
 
-SAMPLE_ISSUES = [
+
+class _IssueDict(TypedDict):
+    id: int
+    title: str
+    body: str
+    labels: list[str]
+
+
+SAMPLE_ISSUES: list[_IssueDict] = [
     {
         "id": 1,
         "title": "Application crashes when uploading files larger than 100 MB",
@@ -121,7 +129,15 @@ async def run(cli_url: str) -> None:
     )
     def list_issues(_input: ListIssuesInput) -> ListIssuesOutput:  # noqa: ANN001
         return ListIssuesOutput(
-            issues=[IssueItem(**issue) for issue in SAMPLE_ISSUES]
+            issues=[
+                IssueItem(
+                    id=issue["id"],
+                    title=issue["title"],
+                    body=issue["body"],
+                    labels=issue["labels"],
+                )
+                for issue in SAMPLE_ISSUES
+            ]
         )
 
     @define_tool(
@@ -157,13 +173,14 @@ async def run(cli_url: str) -> None:
             tools=[list_issues, label_issue],
             streaming=False,
             system_message=SystemMessageReplaceConfig(
+                mode="replace",
                 content=(
                     "You are an expert GitHub issue triage assistant. "
                     "Use list_issues to fetch open issues, classify each one "
                     "as 'bug', 'enhancement', or 'documentation', then call "
                     "label_issue to apply the appropriate label. "
                     "After triaging all issues, summarise your actions."
-                )
+                ),
             ),
         )
     )

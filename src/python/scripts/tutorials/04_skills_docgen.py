@@ -31,7 +31,7 @@ from pathlib import Path
 # Sample Python code that needs docstrings generated
 # ---------------------------------------------------------------------------
 
-SAMPLE_CODE = '''\
+SAMPLE_CODE = """\
 def calculate_discount(price: float, discount_pct: float) -> float:
     if discount_pct < 0 or discount_pct > 100:
         raise ValueError("discount_pct must be between 0 and 100")
@@ -46,7 +46,7 @@ def batch_process(items: list[str], handler) -> list[str]:
         except Exception as exc:
             results.append(f"ERROR: {exc}")
     return results
-'''
+"""
 
 
 def parse_args() -> argparse.Namespace:
@@ -115,11 +115,12 @@ async def run(cli_url: str, skills_dir: str) -> None:
             tools=[],
             streaming=True,
             system_message=SystemMessageReplaceConfig(
+                mode="replace",
                 content=(
                     "You are a Python documentation specialist. "
                     "Generate clear, complete Google-style docstrings for all functions "
                     "in the provided code. Return only the updated code with docstrings added."
-                )
+                ),
             ),
         )
     )

@@ -104,10 +104,11 @@ session = await client.create_session(
         tools=[],
         streaming=True,
         system_message=SystemMessageReplaceConfig(
+            mode="replace",
             content=(
                 "You are a Python documentation specialist. "
                 "Generate Google-style docstrings for all functions."
-            )
+            ),
         ),
     )
 )

@@ -91,10 +91,10 @@ async def run(cli_url: str, prompt: str, deny_tools: bool) -> None:
         tool_name = getattr(request, "tool_name", "unknown")
         if deny_tools:
             record("PERMISSION_DENIED", f"tool={tool_name}")
-            print(
-                f"[Permission] DENIED tool execution: {tool_name}", file=sys.stderr
+            print(f"[Permission] DENIED tool execution: {tool_name}", file=sys.stderr)
+            return PermissionRequestResult(
+                kind="denied-interactively-by-user", rules=[]
             )
-            return PermissionRequestResult(kind="denied", rules=[])
         record("PERMISSION_APPROVED", f"tool={tool_name}")
         return PermissionRequestResult(kind="approved", rules=[])
 

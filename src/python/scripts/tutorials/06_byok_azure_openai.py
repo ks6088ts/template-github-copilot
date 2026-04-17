@@ -96,7 +96,9 @@ def _build_entra_bearer_token() -> str:
     return credential.get_token(scope).token
 
 
-async def run(cli_url: str, prompt: str, auth: str, base_url: str, api_key: str, model: str) -> None:
+async def run(
+    cli_url: str, prompt: str, auth: str, base_url: str, api_key: str, model: str
+) -> None:
     from copilot import CopilotClient
     from copilot.generated.session_events import SessionEventType
     from copilot.types import (

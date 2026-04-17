@@ -90,7 +90,7 @@ def permission_handler(
     # Example: deny all tool calls (useful for read-only auditing)
     if should_deny(tool_name):
         print(f"[Permission] DENIED: {tool_name}")
-        return PermissionRequestResult(kind="denied", rules=[])
+        return PermissionRequestResult(kind="denied-interactively-by-user", rules=[])
 
     print(f"[Permission] APPROVED: {tool_name}")
     return PermissionRequestResult(kind="approved", rules=[])

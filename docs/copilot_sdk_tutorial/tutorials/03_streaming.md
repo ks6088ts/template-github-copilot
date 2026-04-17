@@ -39,10 +39,11 @@ session = await client.create_session(
         tools=[],
         streaming=True,     # ← enable streaming
         system_message=SystemMessageReplaceConfig(
+            mode="replace",
             content=(
                 "You are a senior software engineer conducting a thorough code review. "
                 "For each change in the diff: identify bugs, security issues, and style problems."
-            )
+            ),
         ),
     )
 )

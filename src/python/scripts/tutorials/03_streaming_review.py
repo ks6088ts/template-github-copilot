@@ -27,14 +27,17 @@ import asyncio
 import sys
 from pathlib import Path
 
-from copilot import CopilotClient
-from copilot.generated.session_events import SessionEventType
-from copilot.types import (
-    CopilotClientOptions,
-    MessageOptions,
+from copilot import (
+    CopilotClient,
+    ExternalServerConfig,
+    SubprocessConfig,
+)
+from copilot.generated.session_events import (
+    SessionEventType,
     PermissionRequest,
+)
+from copilot.session import (
     PermissionRequestResult,
-    SessionConfig,
     SystemMessageReplaceConfig,
 )
 
@@ -95,26 +98,24 @@ async def run(cli_url: str | None, diff_text: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client_options: CopilotClientOptions = (
-        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
+    client_options: ExternalServerConfig | SubprocessConfig = (
+        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
     )
-    client = CopilotClient(options=client_options)
+    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
-        SessionConfig(
-            on_permission_request=approve_all,
-            tools=[],
-            streaming=True,  # ← streaming enabled
-            system_message=SystemMessageReplaceConfig(
-                mode="replace",
-                content=(
-                    "You are a senior software engineer conducting a thorough code review. "
-                    "For each change in the diff: identify bugs, security issues, and style problems. "
-                    "Be concise but precise. Use Markdown formatting."
-                ),
+        on_permission_request=approve_all,
+        tools=[],
+        streaming=True,  # ← streaming enabled
+        system_message=SystemMessageReplaceConfig(
+            mode="replace",
+            content=(
+                "You are a senior software engineer conducting a thorough code review. "
+                "For each change in the diff: identify bugs, security issues, and style problems. "
+                "Be concise but precise. Use Markdown formatting."
             ),
-        )
+        ),
     )
 
     # Stream tokens to stdout as they arrive
@@ -129,7 +130,7 @@ async def run(cli_url: str | None, diff_text: str) -> None:
     session.on(on_event)
 
     prompt = f"Please review the following diff and provide feedback:\n\n```diff\n{diff_text}\n```"
-    await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    await session.send_and_wait(prompt, timeout=300)
     print("\n\n=== Review Complete ===")
 
 

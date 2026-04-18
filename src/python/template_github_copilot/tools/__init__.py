@@ -1,4 +1,4 @@
-from copilot.types import Tool
+from copilot.tools import Tool
 
 from template_github_copilot.tools.foundry_agent import (
     call_foundry_agent,

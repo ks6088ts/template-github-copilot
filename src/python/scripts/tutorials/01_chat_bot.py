@@ -35,14 +35,17 @@ import argparse
 import asyncio
 import sys
 
-from copilot import CopilotClient
-from copilot.generated.session_events import SessionEventType
-from copilot.types import (
-    CopilotClientOptions,
-    MessageOptions,
+from copilot import (
+    CopilotClient,
+    ExternalServerConfig,
+    SubprocessConfig,
+)
+from copilot.generated.session_events import (
+    SessionEventType,
     PermissionRequest,
+)
+from copilot.session import (
     PermissionRequestResult,
-    SessionConfig,
     SystemMessageAppendConfig,
 )
 
@@ -86,21 +89,19 @@ async def run_single(cli_url: str | None, prompt: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client_options: CopilotClientOptions = (
-        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
+    client_options: ExternalServerConfig | SubprocessConfig = (
+        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
     )
-    client = CopilotClient(options=client_options)
+    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
-        SessionConfig(
-            on_permission_request=approve_all,
-            tools=[],
-            streaming=True,
-            system_message=SystemMessageAppendConfig(
-                content="You are a helpful assistant."
-            ),
-        )
+        on_permission_request=approve_all,
+        tools=[],
+        streaming=True,
+        system_message=SystemMessageAppendConfig(
+            content="You are a helpful assistant."
+        ),
     )
 
     def on_event(event) -> None:  # noqa: ANN001
@@ -111,7 +112,7 @@ async def run_single(cli_url: str | None, prompt: str) -> None:
 
     session.on(on_event)
 
-    reply = await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    reply = await session.send_and_wait(prompt, timeout=300)
     content = reply.data.content if reply else None
     # Ensure a newline after streaming output
     print()
@@ -128,21 +129,19 @@ async def run_loop(cli_url: str | None) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client_options: CopilotClientOptions = (
-        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
+    client_options: ExternalServerConfig | SubprocessConfig = (
+        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
     )
-    client = CopilotClient(options=client_options)
+    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
-        SessionConfig(
-            on_permission_request=approve_all,
-            tools=[],
-            streaming=True,
-            system_message=SystemMessageAppendConfig(
-                content="You are a helpful assistant."
-            ),
-        )
+        on_permission_request=approve_all,
+        tools=[],
+        streaming=True,
+        system_message=SystemMessageAppendConfig(
+            content="You are a helpful assistant."
+        ),
     )
 
     def on_event(event) -> None:  # noqa: ANN001
@@ -162,7 +161,7 @@ async def run_loop(cli_url: str | None) -> None:
         if not user_input:
             continue
         print("Copilot: ", end="")
-        await session.send_and_wait(MessageOptions(prompt=user_input), timeout=300)
+        await session.send_and_wait(user_input, timeout=300)
         print()
 
 

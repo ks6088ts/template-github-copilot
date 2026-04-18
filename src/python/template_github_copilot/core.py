@@ -1,22 +1,37 @@
 from collections.abc import Callable
-from typing import Any
+from typing import Any, TypedDict
 
 import typer
-from copilot import CopilotClient
-from copilot.generated.session_events import SessionEventType
-from copilot.types import (
-    CopilotClientOptions,
-    MessageOptions,
+from copilot import (
+    CopilotClient,
+    ExternalServerConfig,
+    SubprocessConfig,
+)
+from copilot.generated.session_events import (
     PermissionRequest,
+    SessionEventType,
+)
+from copilot.session import (
     PermissionRequestResult,
     SessionConfig,
     SystemMessageAppendConfig,
     SystemMessageConfig,
-    SystemMessageReplaceConfig,
-    Tool,
 )
+from copilot.tools import Tool
 
 from template_github_copilot.tools import get_custom_tools
+
+
+class MessageOptions(TypedDict):
+    """Options for a single chat message.
+
+    Retained as a thin abstraction over the Copilot SDK (which now takes a
+    plain ``prompt`` string) so downstream callers can pass a structured
+    object and keep room for additional fields in the future.
+    """
+
+    prompt: str
+
 
 # Type alias for the writer function used by the event handler
 WriterFunc = Callable[[str], Any]
@@ -146,21 +161,17 @@ def create_copilot_client(
     """
     if cli_url:
         return CopilotClient(
-            options=CopilotClientOptions(
-                cli_url=cli_url,
-            ),
+            ExternalServerConfig(url=cli_url),
         )
     if github_token:
         return CopilotClient(
-            options=CopilotClientOptions(
+            SubprocessConfig(
                 github_token=github_token,
                 use_logged_in_user=False,
             ),
         )
     return CopilotClient(
-        options=CopilotClientOptions(
-            cli_url="localhost:3000",
-        ),
+        ExternalServerConfig(url="localhost:3000"),
     )
 
 
@@ -168,9 +179,7 @@ def create_session_config(
     on_permission_request: Callable[
         [PermissionRequest, dict[str, str]], PermissionRequestResult
     ] = approve_all,
-    system_message: SystemMessageAppendConfig
-    | SystemMessageReplaceConfig
-    | None = _get_system_message(),
+    system_message: SystemMessageConfig | None = _get_system_message(),
     tools: list[Tool] | None = get_custom_tools(),
     streaming: bool = True,
     **kwargs: Any,
@@ -236,4 +245,17 @@ async def send_and_wait(
         from template_github_copilot.settings.copilot import get_copilot_settings
 
         timeout = get_copilot_settings().copilot_send_timeout
-    return await session.send_and_wait(options, timeout=timeout)
+    return await session.send_and_wait(options["prompt"], timeout=timeout)
+
+
+async def create_session(
+    client: CopilotClient,
+    config: SessionConfig,
+) -> Any:
+    """Create a new Copilot session from a :class:`SessionConfig` mapping.
+
+    The underlying SDK exposes ``CopilotClient.create_session`` as a
+    keyword-only method, so this helper unpacks the ``SessionConfig`` dict
+    into keyword arguments.
+    """
+    return await client.create_session(**config)

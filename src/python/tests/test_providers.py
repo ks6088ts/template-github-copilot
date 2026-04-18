@@ -41,7 +41,7 @@ def test_provider_result_frozen():
     """ProviderResult should be immutable."""
     result = ProviderResult()
     with pytest.raises(AttributeError):
-        result.model = "gpt-5"  # type: ignore[misc]
+        result.model = "gpt-5"  # type: ignore[misc]  # ty: ignore[invalid-assignment]
 
 
 # ---------------------------------------------------------------------------
@@ -131,7 +131,7 @@ def test_create_provider_foundry_entra_id(monkeypatch: pytest.MonkeyPatch):
 def test_create_provider_unknown_raises():
     """An unknown auth method should raise ValueError."""
     with pytest.raises(ValueError, match="Unknown auth method"):
-        create_provider("nonexistent")  # type: ignore[arg-type]
+        create_provider("nonexistent")  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
 
 
 # ---------------------------------------------------------------------------

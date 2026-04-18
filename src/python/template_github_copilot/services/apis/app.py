@@ -28,6 +28,7 @@ from template_github_copilot.core import (
     create_copilot_client,
     create_event_handler,
     create_message_options,
+    create_session,
     create_session_config,
     send_and_wait,
 )
@@ -323,8 +324,8 @@ def create_app(
             )
             await client.start()
 
-            copilot_session = await client.create_session(
-                create_session_config(tools=[])
+            copilot_session = await create_session(
+                client, create_session_config(tools=[])
             )
             handler = create_event_handler(writer=logger.debug)
             copilot_session.on(handler)

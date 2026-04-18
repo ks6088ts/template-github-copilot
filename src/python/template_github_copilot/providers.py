@@ -31,7 +31,7 @@ from enum import StrEnum
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
-from copilot.types import ProviderConfig
+from copilot.session import ProviderConfig
 
 if TYPE_CHECKING:
     from template_github_copilot.settings.byok import ByokSettings

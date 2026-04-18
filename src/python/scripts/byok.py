@@ -9,6 +9,7 @@ from template_github_copilot.core import (
     create_copilot_client,
     create_event_handler,
     create_message_options,
+    create_session,
     create_session_config,
     send_and_wait,
 )
@@ -68,11 +69,12 @@ def chat_api_key(
         client = create_copilot_client(cli_url)
         await client.start()
 
-        session = await client.create_session(
+        session = await create_session(
+            client,
             create_session_config(
                 model=result.model,
                 provider=result.provider,
-            )
+            ),
         )
 
         handler = create_event_handler(writer=logger.info)
@@ -112,11 +114,12 @@ def chat_loop_api_key(
         client = create_copilot_client(cli_url)
         await client.start()
 
-        session = await client.create_session(
+        session = await create_session(
+            client,
             create_session_config(
                 model=result.model,
                 provider=result.provider,
-            )
+            ),
         )
 
         handler = create_event_handler(writer=logger.info)
@@ -172,11 +175,12 @@ def chat_parallel_api_key(
 
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:
-            session = await client.create_session(
+            session = await create_session(
+                client,
                 create_session_config(
                     model=result.model,
                     provider=result.provider,
-                )
+                ),
             )
             handler = create_event_handler(writer=logger.debug)
             session.on(handler)
@@ -244,11 +248,12 @@ def chat_entra_id(
         client = create_copilot_client(cli_url)
         await client.start()
 
-        session = await client.create_session(
+        session = await create_session(
+            client,
             create_session_config(
                 model=result.model,
                 provider=result.provider,
-            )
+            ),
         )
 
         handler = create_event_handler(writer=logger.info)
@@ -292,11 +297,12 @@ def chat_loop_entra_id(
 
         # Obtain a fresh bearer token for the session
         result = create_provider(AuthMethod.FOUNDRY_ENTRA_ID)
-        session = await client.create_session(
+        session = await create_session(
+            client,
             create_session_config(
                 model=result.model,
                 provider=result.provider,
-            )
+            ),
         )
 
         handler = create_event_handler(writer=logger.info)
@@ -355,11 +361,12 @@ def chat_parallel_entra_id(
 
     async def process_prompt(client, prompt: str) -> ChatResult:
         try:
-            session = await client.create_session(
+            session = await create_session(
+                client,
                 create_session_config(
                     model=result.model,
                     provider=result.provider,
-                )
+                ),
             )
             handler = create_event_handler(writer=logger.debug)
             session.on(handler)

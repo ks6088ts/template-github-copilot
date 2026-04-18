@@ -146,15 +146,20 @@ while True:
 
 ## Run the Script
 
+Run the scripts from the `src/python` directory so `uv` picks up the project's
+virtual environment automatically:
+
 ```bash
+cd src/python
+
 # Single prompt
-python src/python/scripts/tutorials/01_chat_bot.py --prompt "Explain async/await in Python"
+uv run python scripts/tutorials/01_chat_bot.py --prompt "Explain async/await in Python"
 
 # Interactive loop
-python src/python/scripts/tutorials/01_chat_bot.py --loop
+uv run python scripts/tutorials/01_chat_bot.py --loop
 
 # Custom CLI server URL (optional — only when a CLI server is running in TCP mode)
-python src/python/scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
+uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 ```
 
 ---

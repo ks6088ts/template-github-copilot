@@ -148,15 +148,17 @@ print(json.dumps(audit_log, indent=2))
 ## スクリプトの実行
 
 ```bash
+cd src/python
+
 # すべてのツールを承認（デフォルト）
-python src/python/scripts/tutorials/05_audit_hooks.py \
+uv run python scripts/tutorials/05_audit_hooks.py \
     --prompt "What are best practices for Python error handling?"
 
 # すべてのツール呼び出しを拒否
-python src/python/scripts/tutorials/05_audit_hooks.py --deny-tools
+uv run python scripts/tutorials/05_audit_hooks.py --deny-tools
 
 # カスタム CLI サーバー（オプション）
-python src/python/scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
+uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
 ```
 
 ---

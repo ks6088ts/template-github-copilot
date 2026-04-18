@@ -139,14 +139,16 @@ authorization check. Any caller can delete any user...
 ## スクリプトの実行
 
 ```bash
+cd src/python
+
 # 組み込みのサンプル差分を使用
-python src/python/scripts/tutorials/03_streaming_review.py
+uv run python scripts/tutorials/03_streaming_review.py
 
 # 独自の差分をレビュー
-python src/python/scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
+uv run python scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
 
 # カスタム CLI サーバー（オプション）
-python src/python/scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
+uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 ```
 
 ---

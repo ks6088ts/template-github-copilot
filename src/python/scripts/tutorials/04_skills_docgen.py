@@ -6,13 +6,13 @@ What you will learn:
     - How to point the Copilot SDK to a local skills directory
     - How to invoke a skill to auto-generate docstrings for Python code
 
-Usage:
-    python 04_skills_docgen.py
-    python 04_skills_docgen.py --skills-dir ./skills
-    python 04_skills_docgen.py --cli-url localhost:3000
+Usage (run from ``src/python``):
+    uv run python scripts/tutorials/04_skills_docgen.py
+    uv run python scripts/tutorials/04_skills_docgen.py --skills-dir ./skills
+    uv run python scripts/tutorials/04_skills_docgen.py --cli-url localhost:3000
 
 Prerequisites:
-    pip install github-copilot-sdk
+    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
 
     Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
         npm install -g @github/copilot            # or: gh copilot (downloads on first run)
@@ -26,6 +26,17 @@ import argparse
 import asyncio
 import sys
 from pathlib import Path
+
+from copilot import CopilotClient
+from copilot.generated.session_events import SessionEventType
+from copilot.types import (
+    CopilotClientOptions,
+    MessageOptions,
+    PermissionRequest,
+    PermissionRequestResult,
+    SessionConfig,
+    SystemMessageReplaceConfig,
+)
 
 # ---------------------------------------------------------------------------
 # Sample Python code that needs docstrings generated
@@ -74,17 +85,6 @@ def parse_args() -> argparse.Namespace:
 
 
 async def run(cli_url: str | None, skills_dir: str) -> None:
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        SessionConfig,
-        SystemMessageReplaceConfig,
-    )
-
     skills_path = Path(skills_dir)
     if not skills_path.exists():
         print(

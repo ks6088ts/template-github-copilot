@@ -6,13 +6,13 @@ What you will learn:
     - How to pass structured input/output via Pydantic models
     - How to build a simple issue-triage agent that classifies and labels issues
 
-Usage:
-    python 02_issue_triage.py
-    python 02_issue_triage.py --cli-url localhost:3000
-    python 02_issue_triage.py --help
+Usage (run from ``src/python``):
+    uv run python scripts/tutorials/02_issue_triage.py
+    uv run python scripts/tutorials/02_issue_triage.py --cli-url localhost:3000
+    uv run python scripts/tutorials/02_issue_triage.py --help
 
 Prerequisites:
-    pip install github-copilot-sdk pydantic
+    uv sync   # installs github-copilot-sdk and pydantic (declared in pyproject.toml)
 
     Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
         npm install -g @github/copilot            # or: gh copilot (downloads on first run)
@@ -27,6 +27,51 @@ import asyncio
 import json
 import sys
 from typing import Any, TypedDict
+
+from copilot import CopilotClient
+from copilot.generated.session_events import SessionEventType
+from copilot.tools import define_tool
+from copilot.types import (
+    CopilotClientOptions,
+    MessageOptions,
+    PermissionRequest,
+    PermissionRequestResult,
+    SessionConfig,
+    SystemMessageReplaceConfig,
+)
+from pydantic import BaseModel
+
+
+# ---------------------------------------------------------------------------
+# Custom tool input/output schemas
+# ---------------------------------------------------------------------------
+
+
+class ListIssuesInput(BaseModel):
+    pass
+
+
+class IssueItem(BaseModel):
+    id: int
+    title: str
+    body: str
+    labels: list[str]
+
+
+class ListIssuesOutput(BaseModel):
+    issues: list[IssueItem]
+
+
+class LabelIssueInput(BaseModel):
+    issue_id: int
+    labels: list[str]
+
+
+class LabelIssueOutput(BaseModel):
+    success: bool
+    issue_id: int
+    applied_labels: list[str]
+
 
 # ---------------------------------------------------------------------------
 # Sample issue data (no external API calls needed)
@@ -82,44 +127,6 @@ def parse_args() -> argparse.Namespace:
 
 
 async def run(cli_url: str | None) -> None:
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        SessionConfig,
-        SystemMessageReplaceConfig,
-    )
-    from copilot.tools import define_tool
-    from pydantic import BaseModel
-
-    # ------------------------------------------------------------------
-    # Custom tool input/output schemas
-    # ------------------------------------------------------------------
-
-    class ListIssuesInput(BaseModel):
-        pass
-
-    class IssueItem(BaseModel):
-        id: int
-        title: str
-        body: str
-        labels: list[str]
-
-    class ListIssuesOutput(BaseModel):
-        issues: list[IssueItem]
-
-    class LabelIssueInput(BaseModel):
-        issue_id: int
-        labels: list[str]
-
-    class LabelIssueOutput(BaseModel):
-        success: bool
-        issue_id: int
-        applied_labels: list[str]
-
     # ------------------------------------------------------------------
     # Tool implementations
     # ------------------------------------------------------------------

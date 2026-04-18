@@ -139,14 +139,16 @@ authorization check. Any caller can delete any user...
 ## Run the Script
 
 ```bash
+cd src/python
+
 # Use the built-in sample diff
-python src/python/scripts/tutorials/03_streaming_review.py
+uv run python scripts/tutorials/03_streaming_review.py
 
 # Review your own diff
-python src/python/scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
+uv run python scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
 
 # Custom CLI server (optional)
-python src/python/scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
+uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 ```
 
 ---

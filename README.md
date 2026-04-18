@@ -17,6 +17,7 @@ A showcase repository for multiple use cases built on the **GitHub Copilot SDK**
 
 | Use Case | Description | Documentation |
 |---|---|---|
+| [GitHub Copilot SDK Tutorial](docs/copilot_sdk_tutorial/index.md) | Step-by-step tutorials for building Python applications with the GitHub Copilot SDK — chatbots, custom tools, streaming, skills, hooks, and BYOK | [Getting Started](docs/copilot_sdk_tutorial/getting_started.md) · [Architecture](docs/copilot_sdk_tutorial/architecture.md) · [Scripts](src/python/scripts/tutorials/README.md) |
 | [CopilotReportForge](docs/copilot_report_forge/index.md) | An extensible AI automation platform for parallel LLM query execution, structured report generation, and agentic AI workflows | [Getting Started](docs/copilot_report_forge/guide/getting_started.md) · [Architecture](docs/copilot_report_forge/overview/architecture.md) · [Deployment](docs/copilot_report_forge/operations/deployment.md) |
 
 ## Infrastructure (Terraform Scenarios)

@@ -6,13 +6,13 @@ What you will learn:
     - How to implement a custom permission handler (approve / deny)
     - How to build a simple structured audit log from event stream
 
-Usage:
-    python 05_audit_hooks.py --prompt "List 3 interesting Python tips"
-    python 05_audit_hooks.py --deny-tools
-    python 05_audit_hooks.py --cli-url localhost:3000
+Usage (run from ``src/python``):
+    uv run python scripts/tutorials/05_audit_hooks.py --prompt "List 3 interesting Python tips"
+    uv run python scripts/tutorials/05_audit_hooks.py --deny-tools
+    uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
 
 Prerequisites:
-    pip install github-copilot-sdk
+    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
 
     Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
         npm install -g @github/copilot            # or: gh copilot (downloads on first run)
@@ -28,6 +28,17 @@ import json
 import sys
 import time
 from typing import Any
+
+from copilot import CopilotClient
+from copilot.generated.session_events import SessionEventType
+from copilot.types import (
+    CopilotClientOptions,
+    MessageOptions,
+    PermissionRequest,
+    PermissionRequestResult,
+    SessionConfig,
+    SystemMessageAppendConfig,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,17 +71,6 @@ def parse_args() -> argparse.Namespace:
 
 
 async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        SessionConfig,
-        SystemMessageAppendConfig,
-    )
-
     audit_log: list[dict[str, Any]] = []
     start_time = time.time()
 

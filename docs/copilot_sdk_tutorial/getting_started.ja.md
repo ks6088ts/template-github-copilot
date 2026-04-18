@@ -8,8 +8,8 @@
 
 | 要件 | 最低バージョン | 用途 |
 |------|---------------|------|
-| Python | 3.11+ | ランタイム |
-| pip / uv | 最新版 | パッケージ管理 |
+| Python | 3.13+ | ランタイム |
+| [uv](https://docs.astral.sh/uv/) | 最新版 | パッケージ管理 |
 | Node.js（`npm`） または GitHub CLI（`gh`） | 最新版 | Copilot CLI のインストール |
 | GitHub Copilot サブスクリプション | — | API アクセスに必要 |
 
@@ -17,31 +17,16 @@
 
 ## インストール
 
-### SDK のインストール
+### SDK とチュートリアルの依存関係をインストール
+
+チュートリアルスクリプトで使用するすべてのパッケージ（`github-copilot-sdk`、`pydantic`、`azure-identity` など）は [`src/python/pyproject.toml`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/pyproject.toml) に宣言されています。`uv sync` コマンド一つでまとめてインストールできます。
 
 ```bash
-pip install github-copilot-sdk
-```
-
-`src/python` 内で **uv** を使用している場合:
-
-```bash
-# uv は pyproject.toml を読み込みます — SDK はすでに依存関係に記載されています
 cd src/python
-uv sync
+uv sync --all-groups
 ```
 
-スクリプト 02 に必要な `pydantic` も含めてインストールする場合:
-
-```bash
-pip install github-copilot-sdk pydantic
-```
-
-Entra ID 認証を使った BYOK の場合（スクリプト 06）:
-
-```bash
-pip install github-copilot-sdk azure-identity
-```
+> `uv sync` は `.venv/` に仮想環境を作成し、`uv.lock` に固定された依存関係をすべてインストールします。仮想環境を手動でアクティブ化する代わりに `uv run <command>` を使うと、その環境内でツールを実行できます。
 
 ---
 
@@ -100,8 +85,11 @@ gh copilot -- --version
 
 ## 最初のスクリプトを実行する
 
+チュートリアルスクリプトは `src/python` ディレクトリから `uv run python` で実行すると、管理された仮想環境内で動作します。
+
 ```bash
-python src/python/scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
 ```
 
 期待される出力（ストリーミング）:

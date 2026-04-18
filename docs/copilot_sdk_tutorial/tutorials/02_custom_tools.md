@@ -139,8 +139,9 @@ The agent will:
 ## Run the Script
 
 ```bash
-python src/python/scripts/tutorials/02_issue_triage.py
-python src/python/scripts/tutorials/02_issue_triage.py --cli-url localhost:3000  # optional: use a running CLI server
+cd src/python
+uv run python scripts/tutorials/02_issue_triage.py
+uv run python scripts/tutorials/02_issue_triage.py --cli-url localhost:3000  # optional: use a running CLI server
 ```
 
 Expected output:

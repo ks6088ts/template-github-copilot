@@ -8,8 +8,8 @@ This guide covers everything you need to set up a local development environment 
 
 | Requirement | Minimum Version | Purpose |
 |-------------|-----------------|---------|
-| Python | 3.11+ | Runtime |
-| pip / uv | latest | Package management |
+| Python | 3.13+ | Runtime |
+| [uv](https://docs.astral.sh/uv/) | latest | Package management |
 | Node.js (`npm`) or GitHub CLI (`gh`) | latest | Installing the Copilot CLI |
 | GitHub Copilot subscription | — | Required for API access |
 
@@ -17,31 +17,19 @@ This guide covers everything you need to set up a local development environment 
 
 ## Installation
 
-### Install the SDK
+### Install the SDK and tutorial dependencies
+
+All packages used by the tutorial scripts (`github-copilot-sdk`, `pydantic`,
+`azure-identity`, …) are declared in [`src/python/pyproject.toml`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/pyproject.toml). Install them with a single `uv sync` command:
 
 ```bash
-pip install github-copilot-sdk
-```
-
-If you are working inside `src/python` and use **uv**:
-
-```bash
-# uv reads pyproject.toml — the SDK is already listed as a dependency
 cd src/python
-uv sync
+uv sync --all-groups
 ```
 
-To run tutorial scripts with `pydantic` (required for script 02):
-
-```bash
-pip install github-copilot-sdk pydantic
-```
-
-For BYOK with Entra ID authentication (script 06):
-
-```bash
-pip install github-copilot-sdk azure-identity
-```
+> `uv sync` creates a virtual environment under `.venv/` and installs every
+> dependency pinned in `uv.lock`. Use `uv run <command>` to run tools inside
+> that environment without activating it manually.
 
 ---
 
@@ -100,8 +88,12 @@ The tutorial scripts do **not** require a separately running Copilot CLI server 
 
 ## Run Your First Script
 
+Run tutorial scripts with `uv run python` from the `src/python` directory so
+they execute inside the managed virtual environment:
+
 ```bash
-python src/python/scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
 ```
 
 Expected output (streaming):

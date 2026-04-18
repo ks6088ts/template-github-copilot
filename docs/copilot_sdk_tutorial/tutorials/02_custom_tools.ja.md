@@ -139,8 +139,9 @@ print(reply.data.content)
 ## スクリプトの実行
 
 ```bash
-python src/python/scripts/tutorials/02_issue_triage.py
-python src/python/scripts/tutorials/02_issue_triage.py --cli-url localhost:3000  # オプション: 起動済み CLI サーバーを利用
+cd src/python
+uv run python scripts/tutorials/02_issue_triage.py
+uv run python scripts/tutorials/02_issue_triage.py --cli-url localhost:3000  # オプション: 起動済み CLI サーバーを利用
 ```
 
 期待される出力:

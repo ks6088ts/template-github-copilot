@@ -152,14 +152,16 @@ await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
 ## スクリプトの実行
 
 ```bash
+cd src/python
+
 # デフォルトのスキルディレクトリ（./skills）を使用
-python src/python/scripts/tutorials/04_skills_docgen.py
+uv run python scripts/tutorials/04_skills_docgen.py
 
 # カスタムスキルディレクトリ
-python src/python/scripts/tutorials/04_skills_docgen.py --skills-dir /path/to/my/skills
+uv run python scripts/tutorials/04_skills_docgen.py --skills-dir /path/to/my/skills
 
 # スキルなし（サーバーのみのプロンプティング）
-python src/python/scripts/tutorials/04_skills_docgen.py --skills-dir /nonexistent
+uv run python scripts/tutorials/04_skills_docgen.py --skills-dir /nonexistent
 ```
 
 ---

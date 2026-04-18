@@ -129,19 +129,21 @@ print(reply.data.content)
 ## スクリプトの実行
 
 ```bash
+cd src/python
+
 # API キー認証
 export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
 export BYOK_API_KEY="<your-azure-openai-api-key>"
 export BYOK_MODEL="gpt-4o"
-python src/python/scripts/tutorials/06_byok_azure_openai.py
+uv run python scripts/tutorials/06_byok_azure_openai.py
 
 # Entra ID 認証（DefaultAzureCredential を使用）
 export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
 export BYOK_MODEL="gpt-4o"
-python src/python/scripts/tutorials/06_byok_azure_openai.py --auth entra
+uv run python scripts/tutorials/06_byok_azure_openai.py --auth entra
 
 # カスタムプロンプト
-python src/python/scripts/tutorials/06_byok_azure_openai.py \
+uv run python scripts/tutorials/06_byok_azure_openai.py \
     --prompt "BYOK パターンを 3 文で要約してください。"
 ```
 

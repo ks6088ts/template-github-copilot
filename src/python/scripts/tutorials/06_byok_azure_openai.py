@@ -6,23 +6,20 @@ What you will learn:
     - How to pass an API key or bearer token to the Copilot SDK
     - How BYOK differs from the default Copilot backend
 
-Usage:
+Usage (run from ``src/python``):
     # API-key authentication
     export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
     export BYOK_API_KEY="<your-azure-openai-api-key>"
     export BYOK_MODEL="gpt-4o"
-    python 06_byok_azure_openai.py --prompt "Hello from Azure OpenAI!"
+    uv run python scripts/tutorials/06_byok_azure_openai.py --prompt "Hello from Azure OpenAI!"
 
     # Bearer-token authentication (Entra ID / Managed Identity)
     export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
     export BYOK_MODEL="gpt-4o"
-    python 06_byok_azure_openai.py --auth entra --prompt "Hello from Entra ID!"
+    uv run python scripts/tutorials/06_byok_azure_openai.py --auth entra --prompt "Hello from Entra ID!"
 
 Prerequisites:
-    pip install github-copilot-sdk
-
-    # For Entra ID auth only:
-    pip install azure-identity
+    uv sync   # installs github-copilot-sdk and azure-identity (declared in pyproject.toml)
 
     Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
         npm install -g @github/copilot            # or: gh copilot (downloads on first run)
@@ -36,6 +33,19 @@ import argparse
 import asyncio
 import os
 import sys
+
+from azure.identity import DefaultAzureCredential
+from copilot import CopilotClient
+from copilot.generated.session_events import SessionEventType
+from copilot.types import (
+    CopilotClientOptions,
+    MessageOptions,
+    PermissionRequest,
+    PermissionRequestResult,
+    ProviderConfig,
+    SessionConfig,
+    SystemMessageAppendConfig,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -85,15 +95,6 @@ def parse_args() -> argparse.Namespace:
 
 def _build_entra_bearer_token() -> str:
     """Obtain an Azure Entra ID bearer token via DefaultAzureCredential."""
-    try:
-        from azure.identity import DefaultAzureCredential
-    except ImportError:
-        print(
-            "Error: azure-identity is required for Entra ID auth.\n"
-            "Install with: pip install azure-identity",
-            file=sys.stderr,
-        )
-        sys.exit(1)
     scope = "https://cognitiveservices.azure.com/.default"
     credential = DefaultAzureCredential()
     return credential.get_token(scope).token
@@ -102,18 +103,6 @@ def _build_entra_bearer_token() -> str:
 async def run(
     cli_url: str | None, prompt: str, auth: str, base_url: str, api_key: str, model: str
 ) -> None:
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        ProviderConfig,
-        SessionConfig,
-        SystemMessageAppendConfig,
-    )
-
     if not base_url:
         print(
             "Error: --base-url (or BYOK_BASE_URL env var) is required for BYOK mode.",

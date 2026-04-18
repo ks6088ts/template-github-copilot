@@ -59,15 +59,16 @@ graph TD
 ## クイックスタート
 
 ```bash
-# 1. SDK をインストール
-pip install github-copilot-sdk
+# 1. SDK とチュートリアルの依存関係をインストール（src/python/pyproject.toml を利用）
+cd src/python
+uv sync --all-groups
 
 # 2. Copilot CLI をインストールして認証（SDK がオンデマンドで起動します）
 npm install -g @github/copilot       # または: gh copilot （初回実行時にダウンロード）
 gh auth login                        # または: export COPILOT_GITHUB_TOKEN="<pat>"
 
 # 3. チュートリアルスクリプトを実行
-python src/python/scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
+uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```
 
 詳細なセットアップ手順については [はじめに](getting_started.md) を参照してください。

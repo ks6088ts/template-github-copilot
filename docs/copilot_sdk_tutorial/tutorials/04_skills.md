@@ -152,14 +152,16 @@ You can extend this directory with your own skills.
 ## Run the Script
 
 ```bash
+cd src/python
+
 # Use the default skills directory (./skills)
-python src/python/scripts/tutorials/04_skills_docgen.py
+uv run python scripts/tutorials/04_skills_docgen.py
 
 # Custom skills directory
-python src/python/scripts/tutorials/04_skills_docgen.py --skills-dir /path/to/my/skills
+uv run python scripts/tutorials/04_skills_docgen.py --skills-dir /path/to/my/skills
 
 # Without skills (server-only prompting)
-python src/python/scripts/tutorials/04_skills_docgen.py --skills-dir /nonexistent
+uv run python scripts/tutorials/04_skills_docgen.py --skills-dir /nonexistent
 ```
 
 ---

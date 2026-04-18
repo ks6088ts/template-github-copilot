@@ -148,15 +148,17 @@ Sample audit log output:
 ## Run the Script
 
 ```bash
+cd src/python
+
 # Approve all tools (default)
-python src/python/scripts/tutorials/05_audit_hooks.py \
+uv run python scripts/tutorials/05_audit_hooks.py \
     --prompt "What are best practices for Python error handling?"
 
 # Deny all tool calls
-python src/python/scripts/tutorials/05_audit_hooks.py --deny-tools
+uv run python scripts/tutorials/05_audit_hooks.py --deny-tools
 
 # Custom CLI server (optional)
-python src/python/scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
+uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
 ```
 
 ---

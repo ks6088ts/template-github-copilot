@@ -7,18 +7,18 @@ What you will learn:
     - How to run an interactive chat loop
     - How to handle session events
 
-Usage:
+Usage (run from ``src/python``):
     # Single prompt (SDK auto-launches the copilot CLI via stdio)
-    python 01_chat_bot.py --prompt "What is GitHub Copilot?"
+    uv run python scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
 
     # Interactive loop
-    python 01_chat_bot.py --loop
+    uv run python scripts/tutorials/01_chat_bot.py --loop
 
     # Connect to an externally running CLI server over TCP
-    python 01_chat_bot.py --cli-url localhost:3000 --loop
+    uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 
 Prerequisites:
-    pip install github-copilot-sdk
+    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
 
     Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
         npm install -g @github/copilot            # or: gh copilot (downloads on first run)
@@ -34,6 +34,17 @@ Corresponding doc:
 import argparse
 import asyncio
 import sys
+
+from copilot import CopilotClient
+from copilot.generated.session_events import SessionEventType
+from copilot.types import (
+    CopilotClientOptions,
+    MessageOptions,
+    PermissionRequest,
+    PermissionRequestResult,
+    SessionConfig,
+    SystemMessageAppendConfig,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -68,16 +79,6 @@ def parse_args() -> argparse.Namespace:
 
 async def run_single(cli_url: str | None, prompt: str) -> None:
     """Send a single prompt and print the response."""
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        SessionConfig,
-        SystemMessageAppendConfig,
-    )
 
     def approve_all(
         request: PermissionRequest,
@@ -120,16 +121,6 @@ async def run_single(cli_url: str | None, prompt: str) -> None:
 
 async def run_loop(cli_url: str | None) -> None:
     """Run an interactive chat loop."""
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        SessionConfig,
-        SystemMessageAppendConfig,
-    )
 
     def approve_all(
         request: PermissionRequest,

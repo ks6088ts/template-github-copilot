@@ -146,15 +146,19 @@ while True:
 
 ## スクリプトの実行
 
+チュートリアルスクリプトは `src/python` ディレクトリから `uv run` で実行し、プロジェクトの仮想環境を自動的に使用します。
+
 ```bash
+cd src/python
+
 # 単一プロンプト
-python src/python/scripts/tutorials/01_chat_bot.py --prompt "Explain async/await in Python"
+uv run python scripts/tutorials/01_chat_bot.py --prompt "Explain async/await in Python"
 
 # インタラクティブループ
-python src/python/scripts/tutorials/01_chat_bot.py --loop
+uv run python scripts/tutorials/01_chat_bot.py --loop
 
 # カスタム CLI サーバー URL（オプション — TCP モードで CLI サーバーが起動している場合のみ）
-python src/python/scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
+uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 ```
 
 ---

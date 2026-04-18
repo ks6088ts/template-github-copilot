@@ -129,19 +129,21 @@ The tutorial script reads configuration from environment variables for convenien
 ## Run the Script
 
 ```bash
+cd src/python
+
 # API-key authentication
 export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
 export BYOK_API_KEY="<your-azure-openai-api-key>"
 export BYOK_MODEL="gpt-4o"
-python src/python/scripts/tutorials/06_byok_azure_openai.py
+uv run python scripts/tutorials/06_byok_azure_openai.py
 
 # Entra ID authentication (uses DefaultAzureCredential)
 export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
 export BYOK_MODEL="gpt-4o"
-python src/python/scripts/tutorials/06_byok_azure_openai.py --auth entra
+uv run python scripts/tutorials/06_byok_azure_openai.py --auth entra
 
 # Custom prompt
-python src/python/scripts/tutorials/06_byok_azure_openai.py \
+uv run python scripts/tutorials/06_byok_azure_openai.py \
     --prompt "Summarise the BYOK pattern in 3 sentences."
 ```
 

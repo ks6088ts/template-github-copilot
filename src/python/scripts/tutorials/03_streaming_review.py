@@ -6,13 +6,13 @@ What you will learn:
     - How to structure a code-review prompt around a unified diff
     - How real-time output differs from waiting for the full response
 
-Usage:
-    python 03_streaming_review.py
-    python 03_streaming_review.py --diff path/to/changes.diff
-    python 03_streaming_review.py --cli-url localhost:3000
+Usage (run from ``src/python``):
+    uv run python scripts/tutorials/03_streaming_review.py
+    uv run python scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
+    uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 
 Prerequisites:
-    pip install github-copilot-sdk
+    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
 
     Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
         npm install -g @github/copilot            # or: gh copilot (downloads on first run)
@@ -26,6 +26,17 @@ import argparse
 import asyncio
 import sys
 from pathlib import Path
+
+from copilot import CopilotClient
+from copilot.generated.session_events import SessionEventType
+from copilot.types import (
+    CopilotClientOptions,
+    MessageOptions,
+    PermissionRequest,
+    PermissionRequestResult,
+    SessionConfig,
+    SystemMessageReplaceConfig,
+)
 
 # ---------------------------------------------------------------------------
 # Sample diff (embedded so the script runs without external files)
@@ -78,17 +89,6 @@ def parse_args() -> argparse.Namespace:
 
 
 async def run(cli_url: str | None, diff_text: str) -> None:
-    from copilot import CopilotClient
-    from copilot.generated.session_events import SessionEventType
-    from copilot.types import (
-        CopilotClientOptions,
-        MessageOptions,
-        PermissionRequest,
-        PermissionRequestResult,
-        SessionConfig,
-        SystemMessageReplaceConfig,
-    )
-
     def approve_all(
         request: PermissionRequest,
         context: dict,

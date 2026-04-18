@@ -1,0 +1,2635 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://ks6088ts-labs.github.io/template-github-copilot/copilot_report_forge/overview/architecture/">
+      
+      
+        <link rel="prev" href="../problem_and_solution/">
+      
+      
+        <link rel="next" href="../../guide/getting_started/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../../ja/copilot_report_forge/overview/architecture/" hreflang="ja">
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Architecture - template-github-copilot</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-0ZTKFXVQ5K"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-0ZTKFXVQ5K",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-0ZTKFXVQ5K",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architecture" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="template-github-copilot" class="md-header__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            template-github-copilot
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Architecture
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../../ja/copilot_report_forge/overview/architecture/" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ks6088ts/template-github-copilot" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="template-github-copilot" class="md-nav__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    template-github-copilot
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ks6088ts/template-github-copilot" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copilot SDK Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Copilot SDK Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/tutorials/01_chat_bot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: CLI Chatbot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/tutorials/02_custom_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Custom Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/tutorials/03_streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/tutorials/04_skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/tutorials/05_hooks_permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: Hooks & Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/tutorials/06_byok/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: BYOK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../copilot_sdk_tutorial/appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CopilotReportForge
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CopilotReportForge
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../problem_and_solution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem & Solution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Philosophy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-model-why-github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Model: Why GitHub Actions?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution Model: Why GitHub Actions?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ephemeral-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ephemeral Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-data-flow-report-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Data Flow: Report Generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agentic-data-flow-domain-specific-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agentic Data Flow: Domain-Specific Evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-oidc-federation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why OIDC Federation?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbac-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBAC Roles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#infrastructure-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#application-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Application Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions Workflows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-provider-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM Provider Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Provider Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Extensibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-copilot-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Copilot Tools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Copilot Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-custom-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a Custom Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extensibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technology Stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/web_ui_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web UI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/industry_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Industry Use Case Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guide/github_oauth_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub OAuth App Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/container_local_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Containers Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/responsible_ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#design-philosophy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Design Philosophy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-model-why-github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Execution Model: Why GitHub Actions?
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution Model: Why GitHub Actions?">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ephemeral-isolation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ephemeral Isolation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment Consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#system-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        System Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="System Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#component-responsibilities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Component Responsibilities
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-data-flow-report-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Data Flow: Report Generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agentic-data-flow-domain-specific-evaluation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agentic Data Flow: Domain-Specific Evaluation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#why-oidc-federation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why OIDC Federation?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rbac-roles" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        RBAC Roles
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#infrastructure-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Infrastructure Architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#application-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Application Architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Application Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#web-application" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Web Application
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitHub Actions Workflows
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#llm-provider-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LLM Provider Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LLM Provider Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#provider-extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Provider Extensibility
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-copilot-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Copilot Tools
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Copilot Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in Tools
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adding-a-custom-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a Custom Tool
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Extensibility
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#technology-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technology Stack
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="architecture">Architecture</h1>
+<hr />
+<h2 id="design-philosophy">Design Philosophy</h2>
+<p>CopilotReportForge is built on four principles that directly address the <a href="../problem_and_solution/">problems identified in enterprise AI adoption</a>:</p>
+<table>
+<thead>
+<tr>
+<th>Principle</th>
+<th>What It Means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Composability</strong></td>
+<td>Every building block (LLM query, AI agent, storage, notification) is independent. Swap a system prompt to change domains; add a tool to add capabilities.</td>
+</tr>
+<tr>
+<td><strong>Zero-Infrastructure AI</strong></td>
+<td>Consume hosted LLMs through the Copilot SDK. No GPU provisioning, no model management, no inference servers.</td>
+</tr>
+<tr>
+<td><strong>Security by Default</strong></td>
+<td>OIDC federation, scoped RBAC, time-limited sharing URLs, and ephemeral execution environments. No long-lived secrets anywhere.</td>
+</tr>
+<tr>
+<td><strong>Auditable Execution</strong></td>
+<td>Every run is recorded with full input/output context, execution metadata, and provenance — by default, not by configuration.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="execution-model-why-github-actions">Execution Model: Why GitHub Actions?</h2>
+<p>A key architectural decision is that <strong>all AI agent execution runs within GitHub Actions runners</strong> rather than on developers' local machines. This choice solves three problems simultaneously:</p>
+<h3 id="ephemeral-isolation">Ephemeral Isolation</h3>
+<p>Each workflow execution spins up a fresh, sandboxed environment and discards it upon completion. Secrets, intermediate files, and model outputs exist only for the duration of the run. This is fundamentally more secure than running AI agents on developer workstations, where credentials can leak through shell history, file system artifacts, or malware.</p>
+<h3 id="environment-consistency">Environment Consistency</h3>
+<p>Every team member, every workflow, and every domain uses the same runner configuration. This eliminates "works on my machine" issues, prevents environment drift across teams, and ensures that AI evaluation results are reproducible regardless of who triggers them.</p>
+<h3 id="built-in-governance">Built-in Governance</h3>
+<p>GitHub Actions natively records who executed what, when, for how long, and with what inputs/outputs. Full execution logs are retained and searchable. For organizations, all workflow activity is captured in the enterprise audit log — providing compliance-ready audit trails without any additional tooling.</p>
+<hr />
+<h2 id="system-architecture">System Architecture</h2>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    USER(["👤 User / Scheduler"])
+
+    subgraph GHA["⚙️ GitHub Actions Runner"]
+        direction TB
+        SDK["🤖 Copilot SDK"]
+        TOOLS["🔧 AI Tools"]
+        SDK &lt;--&gt; TOOLS
+    end
+
+    subgraph AI["🧠 AI Models"]
+        direction TB
+        LLM["💬 GPT-5 / Claude"]
+        FOUNDRY["📚 Foundry Agents"]
+    end
+
+    subgraph AZ["☁️ Azure"]
+        direction TB
+        AUTH["🔐 Entra ID"]
+        STORAGE[("📦 Blob Storage")]
+    end
+
+    USER -- "① Submit" --&gt; SDK
+    SDK -- "② Parallel queries" --&gt; LLM
+    TOOLS -- "③ Delegate" --&gt; FOUNDRY
+    FOUNDRY -. "④ Reference data" .-&gt; STORAGE
+    SDK -- "⑤ Upload report" --&gt; STORAGE
+    STORAGE -- "⑥ Secure URL" --&gt; USER
+    USER -. "OIDC" .-&gt; AUTH
+    AUTH -. "Token" .-&gt; SDK
+
+    style GHA fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style AI fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style AZ fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0</code></pre>
+<h3 id="component-responsibilities">Component Responsibilities</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Copilot SDK Client</strong></td>
+<td>Manages LLM sessions, sends queries in parallel, handles tool calls, aggregates results</td>
+</tr>
+<tr>
+<td><strong>Hosted LLMs</strong></td>
+<td>Provide text generation capabilities (GPT-5-mini, GPT-5, Claude Sonnet/Opus 4.6) — no self-hosting required</td>
+</tr>
+<tr>
+<td><strong>AI Foundry Agents</strong></td>
+<td>Domain-specific AI personas with access to reference data (documents, images, specifications)</td>
+</tr>
+<tr>
+<td><strong>Entra ID</strong></td>
+<td>Issues short-lived access tokens via OIDC federation — no stored credentials</td>
+</tr>
+<tr>
+<td><strong>Blob Storage</strong></td>
+<td>Stores reports and reference data; generates time-limited sharing URLs</td>
+</tr>
+<tr>
+<td><strong>GitHub Actions</strong></td>
+<td>Provides ephemeral execution, OIDC authentication, and audit logging</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="core-data-flow-report-generation">Core Data Flow: Report Generation</h2>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor User as 👤 User
+    participant RT as ⚙️ Runtime
+    participant LLM as 🧠 LLMs
+    participant ST as 📦 Storage
+
+    User-&gt;&gt;RT: ① Submit persona + queries
+    activate RT
+
+    rect rgba(26, 54, 93, 0.5)
+        note over RT,LLM: Parallel Execution
+        par Query 1
+            RT-&gt;&gt;LLM: Prompt
+            LLM--&gt;&gt;RT: Response
+        and Query 2
+            RT-&gt;&gt;LLM: Prompt
+            LLM--&gt;&gt;RT: Response
+        and Query N
+            RT-&gt;&gt;LLM: Prompt
+            LLM--&gt;&gt;RT: Response
+        end
+    end
+
+    RT-&gt;&gt;RT: ② Aggregate results
+    RT-&gt;&gt;ST: ③ Upload report (JSON)
+    ST--&gt;&gt;RT: Secure URL
+    RT--&gt;&gt;User: ④ Return secure URL
+    deactivate RT</code></pre>
+<p><strong>Key properties of this flow:</strong>
+- Each query executes in an <strong>independent session</strong> — no conversational cross-contamination between personas.
+- Results are <strong>typed and validated</strong> — the output schema tracks total queries, successes, and failures.
+- The report is <strong>immutable</strong> once uploaded — providing a point-in-time record of the evaluation.</p>
+<hr />
+<h2 id="agentic-data-flow-domain-specific-evaluation">Agentic Data Flow: Domain-Specific Evaluation</h2>
+<p>For evaluations that require access to reference data (floor plans, product specs, clinical guidelines), the platform integrates AI Foundry Agents:</p>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    actor User as 👤 User
+    participant SDK as 🤖 Copilot Session
+    participant Agent as 📚 Domain Agent
+    participant Data as 📦 Reference Data
+
+    User-&gt;&gt;SDK: ① Domain-specific query
+    activate SDK
+
+    rect rgba(116, 66, 16, 0.4)
+        note over SDK,Data: Agent Orchestration
+        SDK-&gt;&gt;SDK: ② Route to specialist
+        SDK-&gt;&gt;Agent: ③ Invoke agent
+        activate Agent
+        Agent-&gt;&gt;Data: ④ Fetch documents
+        Data--&gt;&gt;Agent: Content
+        Agent--&gt;&gt;SDK: ⑤ Structured evaluation
+        deactivate Agent
+    end
+
+    SDK--&gt;&gt;User: ⑥ Agent-enriched report
+    deactivate SDK</code></pre>
+<p>The Copilot session autonomously decides when to delegate to a Foundry Agent based on the query context. This enables <strong>multi-agent orchestration</strong> within a single session — the user submits a high-level query, and the system routes to the appropriate domain specialist.</p>
+<hr />
+<h2 id="authentication-model">Authentication Model</h2>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+sequenceDiagram
+    participant GHA as ⚙️ GitHub Actions
+    participant OIDC as 🔑 OIDC Provider
+    participant Entra as 🛡️ Entra ID
+    participant AZ as ☁️ Azure
+
+    rect rgba(26, 54, 93, 0.5)
+        note over GHA,Entra: Passwordless Authentication
+        GHA-&gt;&gt;OIDC: ① Request JWT
+        OIDC--&gt;&gt;GHA: ② Signed JWT (short-lived)
+        GHA-&gt;&gt;Entra: ③ Exchange JWT
+        Entra--&gt;&gt;GHA: ④ Scoped access token
+    end
+
+    GHA-&gt;&gt;AZ: ⑤ Access resources (least privilege)
+    note right of AZ: Token expires in minutes</code></pre>
+<h3 id="why-oidc-federation">Why OIDC Federation?</h3>
+<p>Traditional CI/CD authentication stores long-lived API keys as repository secrets. These keys are difficult to rotate, easy to leak, and grant broad access. OIDC federation eliminates this pattern entirely:</p>
+<ul>
+<li><strong>No stored secrets for Azure access</strong> — Tokens are issued per workflow run and expire within minutes.</li>
+<li><strong>Least-privilege scoping</strong> — Each token is scoped to specific RBAC roles (see below).</li>
+<li><strong>Zero rotation overhead</strong> — There are no credentials to rotate.</li>
+</ul>
+<h3 id="rbac-roles">RBAC Roles</h3>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contributor</td>
+<td>Manage Azure resources via Terraform</td>
+</tr>
+<tr>
+<td>Storage Blob Data Contributor</td>
+<td>Read/write report and reference data</td>
+</tr>
+<tr>
+<td>Storage Blob Delegator</td>
+<td>Generate user delegation keys for secure sharing URLs</td>
+</tr>
+<tr>
+<td>Cognitive Services OpenAI User</td>
+<td>Access hosted model endpoints</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="infrastructure-architecture">Infrastructure Architecture</h2>
+<p>All infrastructure is managed as code via Terraform, organized into reusable modules and deployment scenarios.</p>
+<pre class="mermaid"><code>%%{init: {'theme': 'dark'}}%%
+flowchart LR
+    subgraph Step1["① OIDC Setup"]
+        S1["🔐 Identity &amp; Trust"]
+        P1["Entra ID App\nService Principal\nFederated Credential\nRBAC Roles"]
+    end
+
+    subgraph Step2["② GitHub Secrets"]
+        S2["🔒 Environment Config"]
+        P2["GitHub Environment\nEncrypted Secrets"]
+    end
+
+    subgraph Step3["③ AI Foundry"]
+        S3["🧠 AI Infrastructure"]
+        P3["AI Hub + Models\nStorage Account\nAI Search"]
+    end
+
+    subgraph Step4["④ Container Apps"]
+        S4["🐳 Standalone Deploy"]
+        P4["Container Apps Env\nMonolith Container"]
+    end
+
+    S1 --&gt; P1
+    S2 --&gt; P2
+    S3 --&gt; P3
+    S4 --&gt; P4
+
+    Step1 -- "credentials" --&gt; Step2
+    Step2 -- "enables workflows" --&gt; Step3
+
+    style Step1 fill:#1a365d,stroke:#63b3ed,stroke-width:2px,color:#e2e8f0
+    style Step2 fill:#702459,stroke:#f687b3,stroke-width:2px,color:#e2e8f0
+    style Step3 fill:#744210,stroke:#f6ad55,stroke-width:2px,color:#e2e8f0
+    style Step4 fill:#22543d,stroke:#68d391,stroke-width:2px,color:#e2e8f0</code></pre>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Purpose</th>
+<th>Key Resources</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>azure_github_oidc</code></td>
+<td>Establish passwordless trust between GitHub and Azure</td>
+<td>Entra ID app, service principal, federated credential, RBAC roles</td>
+</tr>
+<tr>
+<td><code>github_secrets</code></td>
+<td>Automate GitHub environment configuration</td>
+<td>GitHub environment, encrypted secrets</td>
+</tr>
+<tr>
+<td><code>azure_microsoft_foundry</code></td>
+<td>Deploy AI capabilities and storage</td>
+<td>AI Hub, model deployments, Storage Account, optional AI Search</td>
+</tr>
+<tr>
+<td><code>azure_container_apps</code></td>
+<td>Deploy monolith service to Azure</td>
+<td>Resource group, Container Apps Environment, monolith container (Copilot CLI + API)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>The first three scenarios must be deployed in order: OIDC → Secrets → Foundry. The Container Apps scenario is standalone. See <a href="../../operations/deployment/">Deployment</a> for step-by-step instructions.</p>
+</blockquote>
+<hr />
+<h2 id="application-architecture">Application Architecture</h2>
+<p>The platform provides three interfaces for interacting with the AI execution pipeline:</p>
+<h3 id="cli-tools">CLI Tools</h3>
+<p>Command-line interfaces for chat, report generation, agent management, storage operations, and notifications. All CLIs follow the same pattern: configure via environment variables, execute via typed commands.</p>
+<h3 id="web-application">Web Application</h3>
+<p>A browser-based interface with GitHub OAuth login, interactive chat, and a parallel report generation panel. Users authenticate with their GitHub identity, and the application makes Copilot requests on their behalf.</p>
+<h3 id="github-actions-workflows">GitHub Actions Workflows</h3>
+<p>Automated workflows triggered by schedule, manual dispatch, or API call. These are the primary production execution path, providing ephemeral environments with full audit trails.</p>
+<table>
+<thead>
+<tr>
+<th>Interface</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLI</td>
+<td>Local development, scripting, automation</td>
+</tr>
+<tr>
+<td>Web UI</td>
+<td>Interactive exploration, ad-hoc evaluations</td>
+</tr>
+<tr>
+<td>GitHub Actions</td>
+<td>Production execution, scheduled reports, governed workflows</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="llm-provider-model">LLM Provider Model</h2>
+<p>The platform supports multiple LLM backend configurations through a unified provider interface:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Authentication</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Copilot</strong> (default)</td>
+<td>GitHub token via Copilot CLI</td>
+<td>Standard usage — access hosted models without API key management</td>
+</tr>
+<tr>
+<td><strong>API Key</strong></td>
+<td>Static API key</td>
+<td>Direct model API access when Copilot is not available</td>
+</tr>
+<tr>
+<td><strong>Entra ID</strong></td>
+<td>Azure Entra ID bearer token</td>
+<td>Enterprise deployments with private endpoints and managed identity</td>
+</tr>
+</tbody>
+</table>
+<p>Switching between modes requires changing a configuration parameter, not code. This enables deployment across environments with different security requirements — from open-internet development to air-gapped corporate networks.</p>
+<h3 id="provider-extensibility">Provider Extensibility</h3>
+<p>The provider system is implemented in <code>template_github_copilot/providers.py</code> with three components:</p>
+<ul>
+<li><strong><code>AuthMethod</code> enum</strong> — Defines available authentication methods: <code>GITHUB_COPILOT</code>, <code>API_KEY</code>, <code>FOUNDRY_ENTRA_ID</code>.</li>
+<li><strong><code>create_provider()</code> factory</strong> — Returns a <code>ProviderResult</code> containing the <code>ProviderConfig</code> (for BYOK modes, or <code>None</code> for the default Copilot backend) and the target model name, based on the selected <code>AuthMethod</code>.</li>
+<li><strong><code>register_provider()</code> hook</strong> — Allows adding custom provider builders without modifying the core code. Register a callable that accepts the same arguments and returns a <code>ProviderResult</code>.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">template_github_copilot.providers</span><span class="w"> </span><span class="kn">import</span> <span class="n">AuthMethod</span><span class="p">,</span> <span class="n">register_provider</span><span class="p">,</span> <span class="n">ProviderResult</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">my_custom_provider</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProviderResult</span><span class="p">:</span>
+    <span class="c1"># Build your custom ProviderConfig / model here</span>
+    <span class="o">...</span>
+
+<span class="c1"># Note: register_provider requires an AuthMethod enum value, not a string</span>
+<span class="n">register_provider</span><span class="p">(</span><span class="n">AuthMethod</span><span class="o">.</span><span class="n">API_KEY</span><span class="p">,</span> <span class="n">my_custom_provider</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="custom-copilot-tools">Custom Copilot Tools</h2>
+<p>The platform supports custom tools that extend the Copilot SDK session with additional capabilities. Tools are defined in <code>template_github_copilot/tools/</code> and automatically registered when a Copilot session is created.</p>
+<h3 id="built-in-tools">Built-in Tools</h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+<th>Input</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_foundry_agents</code></td>
+<td>List all available agents on Microsoft Foundry</td>
+<td><code>endpoint</code> (optional; defaults to env)</td>
+</tr>
+<tr>
+<td><code>call_foundry_agent</code></td>
+<td>Call a named Foundry agent with a user message</td>
+<td><code>agent_name</code>, <code>user_message</code>, <code>conversation_id</code> (optional), <code>endpoint</code> (optional)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="adding-a-custom-tool">Adding a Custom Tool</h3>
+<ol>
+<li>Create a new file in <code>template_github_copilot/tools/</code> (e.g., <code>my_tool.py</code>).</li>
+<li>Define a Pydantic input model and implement the tool function using the <code>@define_tool</code> decorator from <code>copilot.tools</code>.</li>
+<li>Export the tool in <code>template_github_copilot/tools/__init__.py</code> via <code>get_custom_tools()</code>.</li>
+</ol>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">copilot.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">define_tool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MyToolInput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;The query to process&quot;</span><span class="p">)</span>
+
+<span class="nd">@define_tool</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Description visible to the LLM&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">my_tool</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="n">MyToolInput</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Processed: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">query</span><span class="si">}</span><span class="s2">&quot;</span>
+</code></pre></div>
+<p>The Copilot SDK session will automatically discover the tool and invoke it when the LLM determines it is relevant to the user's query.</p>
+<hr />
+<h2 id="extensibility">Extensibility</h2>
+<p>The architecture is designed for extension at five levels:</p>
+<table>
+<thead>
+<tr>
+<th>Extension Point</th>
+<th>How to Extend</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>New domain</strong></td>
+<td>Change system prompt and queries</td>
+<td>Adapt from product evaluation to clinical guideline review</td>
+</tr>
+<tr>
+<td><strong>New AI capability</strong></td>
+<td>Add a Copilot tool in <code>tools/</code></td>
+<td>Web scraper, database lookup, calculation engine</td>
+</tr>
+<tr>
+<td><strong>New AI agent</strong></td>
+<td>Create a Foundry Agent with domain instructions</td>
+<td>Specialized real estate appraiser with access to floor plan data</td>
+</tr>
+<tr>
+<td><strong>New LLM provider</strong></td>
+<td>Register via <code>register_provider()</code></td>
+<td>Custom model endpoint with proprietary auth</td>
+</tr>
+<tr>
+<td><strong>New output channel</strong></td>
+<td>Post-process the report JSON</td>
+<td>Send to Slack, email, dashboard, or PowerBI</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="technology-stack">Technology Stack</h2>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>Python 3.13+</td>
+</tr>
+<tr>
+<td>AI SDK</td>
+<td>GitHub Copilot SDK, Azure AI Projects SDK</td>
+</tr>
+<tr>
+<td>LLM Client</td>
+<td>OpenAI Python SDK</td>
+</tr>
+<tr>
+<td>Web Framework</td>
+<td>FastAPI</td>
+</tr>
+<tr>
+<td>HTTP Client</td>
+<td>httpx</td>
+</tr>
+<tr>
+<td>Data Validation</td>
+<td>Pydantic, pydantic-settings</td>
+</tr>
+<tr>
+<td>CLI Framework</td>
+<td>Typer</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td>python-dotenv</td>
+</tr>
+<tr>
+<td>Cloud Storage</td>
+<td>Azure Blob Storage</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>Azure Identity (OIDC, DefaultAzureCredential)</td>
+</tr>
+<tr>
+<td>Infrastructure</td>
+<td>Terraform</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions</td>
+</tr>
+<tr>
+<td>Containerization</td>
+<td>Docker, Docker Compose</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>pytest, pytest-cov</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/in/ks6088ts/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ks6088ts" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/ks6088ts" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

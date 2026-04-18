@@ -29,14 +29,17 @@ import sys
 import time
 from typing import Any
 
-from copilot import CopilotClient
-from copilot.generated.session_events import SessionEventType
-from copilot.types import (
-    CopilotClientOptions,
-    MessageOptions,
+from copilot import (
+    CopilotClient,
+    ExternalServerConfig,
+    SubprocessConfig,
+)
+from copilot.generated.session_events import (
+    SessionEventType,
     PermissionRequest,
+)
+from copilot.session import (
     PermissionRequestResult,
-    SessionConfig,
     SystemMessageAppendConfig,
 )
 
@@ -105,21 +108,19 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
     # Session setup
     # ------------------------------------------------------------------
 
-    client_options: CopilotClientOptions = (
-        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
+    client_options: ExternalServerConfig | SubprocessConfig = (
+        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
     )
-    client = CopilotClient(options=client_options)
+    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
-        SessionConfig(
-            on_permission_request=permission_handler,
-            tools=[],
-            streaming=False,
-            system_message=SystemMessageAppendConfig(
-                content="You are a helpful assistant."
-            ),
-        )
+        on_permission_request=permission_handler,
+        tools=[],
+        streaming=False,
+        system_message=SystemMessageAppendConfig(
+            content="You are a helpful assistant."
+        ),
     )
 
     # ------------------------------------------------------------------
@@ -150,7 +151,7 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
     session.on(on_event)
 
     record("SEND", prompt[:80])
-    reply = await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    reply = await session.send_and_wait(prompt, timeout=300)
     content = reply.data.content if reply else "(no response)"
 
     print("=== Response ===")

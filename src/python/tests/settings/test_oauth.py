@@ -14,7 +14,7 @@ def test_oauth_settings_defaults(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("API_PORT", raising=False)
     monkeypatch.delenv("COPILOT_CLI_URL", raising=False)
     monkeypatch.delenv("SESSION_SECRET", raising=False)
-    settings = OAuthSettings(_env_file=None)  # type: ignore[call-arg]
+    settings = OAuthSettings(_env_file=None)  # type: ignore[call-arg]  # ty: ignore[unknown-argument]
     assert settings.github_client_id == ""
     assert settings.github_client_secret == ""
     assert settings.api_host == "127.0.0.1"
@@ -31,7 +31,7 @@ def test_oauth_settings_from_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("API_PORT", "9999")
     monkeypatch.setenv("COPILOT_CLI_URL", "localhost:4000")
     monkeypatch.setenv("SESSION_SECRET", "my-session-secret")
-    settings = OAuthSettings(_env_file=None)  # type: ignore[call-arg]
+    settings = OAuthSettings(_env_file=None)  # type: ignore[call-arg]  # ty: ignore[unknown-argument]
     assert settings.github_client_id == "Ov23liXXXXX"
     assert settings.github_client_secret == "secret123"
     assert settings.api_host == "0.0.0.0"

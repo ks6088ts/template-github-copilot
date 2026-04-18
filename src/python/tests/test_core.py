@@ -8,8 +8,7 @@ from typing import cast
 from unittest.mock import MagicMock
 
 import typer
-from copilot.generated.session_events import SessionEventType
-from copilot.types import PermissionRequest
+from copilot.generated.session_events import PermissionRequest, SessionEventType
 
 from template_github_copilot.core import (
     _default_writer,

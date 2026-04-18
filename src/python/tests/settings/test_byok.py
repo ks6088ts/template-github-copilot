@@ -13,7 +13,7 @@ def test_byok_settings_defaults(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("BYOK_API_KEY", raising=False)
     monkeypatch.delenv("BYOK_MODEL", raising=False)
     monkeypatch.delenv("BYOK_WIRE_API", raising=False)
-    settings = ByokSettings(_env_file=None)  # type: ignore[call-arg]
+    settings = ByokSettings(_env_file=None)  # type: ignore[call-arg]  # ty: ignore[unknown-argument]
     assert settings.byok_provider_type == "openai"
     assert settings.byok_model == "gpt-5"
     assert settings.byok_wire_api == "responses"
@@ -28,7 +28,7 @@ def test_byok_settings_from_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("BYOK_API_KEY", "test-key-123")
     monkeypatch.setenv("BYOK_MODEL", "gpt-5")
     monkeypatch.setenv("BYOK_WIRE_API", "completions")
-    settings = ByokSettings(_env_file=None)  # type: ignore[call-arg]
+    settings = ByokSettings(_env_file=None)  # type: ignore[call-arg]  # ty: ignore[unknown-argument]
     assert settings.byok_provider_type == "azure"
     assert settings.byok_base_url == "https://my-resource.openai.azure.com/openai/v1/"
     assert settings.byok_api_key == "test-key-123"

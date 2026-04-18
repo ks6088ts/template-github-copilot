@@ -195,12 +195,14 @@ class TestChat:
     @patch("template_github_copilot.services.apis.app.create_copilot_client")
     @patch(
         "template_github_copilot.services.apis.app.create_message_options",
-        return_value="opts",
+        return_value={"prompt": "hi"},
     )
     @patch("template_github_copilot.services.apis.app.create_event_handler")
     @patch("template_github_copilot.services.apis.app.create_session_config")
+    @patch("template_github_copilot.services.apis.app.create_session")
     def test_chat_authenticated(
         self,
+        mock_create_session,
         mock_create_session_config,
         mock_create_event_handler,
         mock_create_message_options,
@@ -224,8 +226,8 @@ class TestChat:
 
         mock_client = AsyncMock()
         mock_client.start = AsyncMock()
-        mock_client.create_session = AsyncMock(return_value=mock_session)
         mock_create_copilot_client.return_value = mock_client
+        mock_create_session.return_value = mock_session
 
         resp = client.post("/api/chat", json={"message": "hi"})
 

@@ -52,7 +52,7 @@ class AzureBlobStorageClient:
         try:
             blob_client = self.container_client.get_blob_client(blob_name)
             download_stream = blob_client.download_blob()
-            data: bytes = download_stream.readall()  # type: ignore[assignment]
+            data: bytes = download_stream.readall()  # type: ignore[assignment]  # ty: ignore[invalid-assignment]
             logger.info(f"Blob '{blob_name}' downloaded successfully")
             return data
         except Exception as e:

@@ -35,15 +35,18 @@ import os
 import sys
 
 from azure.identity import DefaultAzureCredential
-from copilot import CopilotClient
-from copilot.generated.session_events import SessionEventType
-from copilot.types import (
-    CopilotClientOptions,
-    MessageOptions,
+from copilot import (
+    CopilotClient,
+    ExternalServerConfig,
+    SubprocessConfig,
+)
+from copilot.generated.session_events import (
+    SessionEventType,
     PermissionRequest,
+)
+from copilot.session import (
     PermissionRequestResult,
     ProviderConfig,
-    SessionConfig,
     SystemMessageAppendConfig,
 )
 
@@ -145,23 +148,21 @@ async def run(
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client_options: CopilotClientOptions = (
-        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
+    client_options: ExternalServerConfig | SubprocessConfig = (
+        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
     )
-    client = CopilotClient(options=client_options)
+    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
-        SessionConfig(
-            on_permission_request=approve_all,
-            tools=[],
-            streaming=True,
-            model=model,
-            provider=provider,
-            system_message=SystemMessageAppendConfig(
-                content="You are a helpful assistant powered by Azure OpenAI."
-            ),
-        )
+        on_permission_request=approve_all,
+        tools=[],
+        streaming=True,
+        model=model,
+        provider=provider,
+        system_message=SystemMessageAppendConfig(
+            content="You are a helpful assistant powered by Azure OpenAI."
+        ),
     )
 
     print(f"\nYou: {prompt}\nCopilot: ", end="")
@@ -174,7 +175,7 @@ async def run(
 
     session.on(on_event)
 
-    await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    await session.send_and_wait(prompt, timeout=300)
     print()
 
 

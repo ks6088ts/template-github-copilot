@@ -28,17 +28,20 @@ import json
 import sys
 from typing import Any, TypedDict
 
-from copilot import CopilotClient
-from copilot.generated.session_events import SessionEventType
-from copilot.tools import define_tool
-from copilot.types import (
-    CopilotClientOptions,
-    MessageOptions,
+from copilot import (
+    CopilotClient,
+    ExternalServerConfig,
+    SubprocessConfig,
+)
+from copilot.generated.session_events import (
     PermissionRequest,
+    SessionEventType,
+)
+from copilot.session import (
     PermissionRequestResult,
-    SessionConfig,
     SystemMessageReplaceConfig,
 )
+from copilot.tools import define_tool
 from pydantic import BaseModel
 
 
@@ -172,28 +175,26 @@ async def run(cli_url: str | None) -> None:
     ) -> PermissionRequestResult:
         return PermissionRequestResult(kind="approved", rules=[])
 
-    client_options: CopilotClientOptions = (
-        CopilotClientOptions(cli_url=cli_url) if cli_url else CopilotClientOptions()
+    client_options: ExternalServerConfig | SubprocessConfig = (
+        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
     )
-    client = CopilotClient(options=client_options)
+    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
-        SessionConfig(
-            on_permission_request=approve_all,
-            tools=[list_issues, label_issue],
-            streaming=False,
-            system_message=SystemMessageReplaceConfig(
-                mode="replace",
-                content=(
-                    "You are an expert GitHub issue triage assistant. "
-                    "Use list_issues to fetch open issues, classify each one "
-                    "as 'bug', 'enhancement', or 'documentation', then call "
-                    "label_issue to apply the appropriate label. "
-                    "After triaging all issues, summarise your actions."
-                ),
+        on_permission_request=approve_all,
+        tools=[list_issues, label_issue],
+        streaming=False,
+        system_message=SystemMessageReplaceConfig(
+            mode="replace",
+            content=(
+                "You are an expert GitHub issue triage assistant. "
+                "Use list_issues to fetch open issues, classify each one "
+                "as 'bug', 'enhancement', or 'documentation', then call "
+                "label_issue to apply the appropriate label. "
+                "After triaging all issues, summarise your actions."
             ),
-        )
+        ),
     )
 
     def on_event(event: Any) -> None:
@@ -205,7 +206,7 @@ async def run(cli_url: str | None) -> None:
     session.on(on_event)
 
     prompt = "Please triage all open issues and apply the appropriate labels."
-    reply = await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+    reply = await session.send_and_wait(prompt, timeout=300)
     content = reply.data.content if reply else "(no response)"
 
     print("=== Triage Summary ===")

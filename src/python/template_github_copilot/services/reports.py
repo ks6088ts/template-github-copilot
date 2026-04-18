@@ -1,7 +1,7 @@
 import asyncio
 
 from copilot import CopilotClient
-from copilot.types import ProviderConfig, SystemMessageReplaceConfig
+from copilot.session import ProviderConfig, SystemMessageReplaceConfig
 from pydantic import BaseModel, Field
 
 from template_github_copilot.core import (
@@ -10,6 +10,7 @@ from template_github_copilot.core import (
     create_copilot_client,
     create_event_handler,
     create_message_options,
+    create_session,
     create_session_config,
     send_and_wait,
 )
@@ -79,7 +80,7 @@ async def run_parallel_chat(
                 ),
                 **extra_kwargs,
             )
-            session = await client.create_session(session_config)
+            session = await create_session(client, session_config)
             handler = create_event_handler(writer=writer)
             session.on(handler)
 

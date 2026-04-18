@@ -9,7 +9,7 @@ from template_github_copilot.settings.microsoft_foundry import (
 def test_microsoft_foundry_settings_defaults(monkeypatch: pytest.MonkeyPatch):
     """MicrosoftFoundrySettings should have empty-string default."""
     monkeypatch.delenv("MICROSOFT_FOUNDRY_PROJECT_ENDPOINT", raising=False)
-    settings = MicrosoftFoundrySettings(_env_file=None)  # type: ignore[call-arg]
+    settings = MicrosoftFoundrySettings(_env_file=None)  # type: ignore[call-arg]  # ty: ignore[unknown-argument]
     assert settings.microsoft_foundry_project_endpoint == ""
 
 
@@ -18,7 +18,7 @@ def test_microsoft_foundry_settings_from_env(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv(
         "MICROSOFT_FOUNDRY_PROJECT_ENDPOINT", "https://foundry.example.com"
     )
-    settings = MicrosoftFoundrySettings(_env_file=None)  # type: ignore[call-arg]
+    settings = MicrosoftFoundrySettings(_env_file=None)  # type: ignore[call-arg]  # ty: ignore[unknown-argument]
     assert settings.microsoft_foundry_project_endpoint == "https://foundry.example.com"
 
 

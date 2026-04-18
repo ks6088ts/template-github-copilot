@@ -190,7 +190,7 @@ def run_agent(
     """
     try:
         # The get_openai_client method is added by azure.ai.projects._patch at runtime
-        openai_client = client.get_openai_client()  # type: ignore[unresolved-attribute]
+        openai_client = client.get_openai_client()  # type: ignore[unresolved-attribute]  # ty: ignore[unresolved-attribute]
 
         if conversation_id is None:
             conversation = openai_client.conversations.create()

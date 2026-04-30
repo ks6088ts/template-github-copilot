@@ -2,7 +2,7 @@
 name = "template-github-copilot"
 version = "0.1.0"
 description = "A comprehensive templates for GitHub Copilot"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "azure-ai-projects>=2.0.0b3",
     "azure-identity>=1.25.2",

@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
 """Document Generation using GitHub Copilot SDK Skills (SKILL.md).
 
-What you will learn:
-    - What Agent Skills are and how to structure a SKILL.md file
-    - How to point the Copilot SDK to a local skills directory
-    - How to invoke a skill to auto-generate docstrings for Python code
-
-Usage (run from ``src/python``):
-    uv run python scripts/tutorials/04_skills_docgen.py
-    uv run python scripts/tutorials/04_skills_docgen.py --skills-dir ./skills
-    uv run python scripts/tutorials/04_skills_docgen.py --cli-url localhost:3000
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/04_skills.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/04_skills.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/04_skills.ja.md  (日本語)
 """
 
 import argparse
@@ -29,9 +13,9 @@ from pathlib import Path
 
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
 )
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
     PermissionRequest,
@@ -104,12 +88,13 @@ async def run(cli_url: str | None, skills_dir: str) -> None:
         request: PermissionRequest,
         context: dict,
     ) -> PermissionRequestResult:
-        return PermissionRequestResult(kind="approved", rules=[])
+        return PermissionDecisionApproveOnce()
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session_config: dict = {

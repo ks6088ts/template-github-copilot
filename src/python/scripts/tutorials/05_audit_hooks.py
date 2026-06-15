@@ -1,25 +1,14 @@
 #!/usr/bin/env python3
 """Audit Logging using GitHub Copilot SDK Session Hooks and Permission Handling.
 
-What you will learn:
-    - How to intercept all session events via session.on()
-    - How to implement a custom permission handler (approve / deny)
-    - How to build a simple structured audit log from event stream
+A custom ``delete_record`` tool models a destructive operation that an audit
+policy may want to block. Run with ``--deny-tools`` to see the permission
+handler reject the call — the tool implementation never runs and the audit log
+records the denial.
 
-Usage (run from ``src/python``):
-    uv run python scripts/tutorials/05_audit_hooks.py --prompt "List 3 interesting Python tips"
-    uv run python scripts/tutorials/05_audit_hooks.py --deny-tools
-    uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.ja.md  (日本語)
 """
 
 import argparse
@@ -31,8 +20,11 @@ from typing import Any
 
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
+)
+from copilot.generated.rpc import (
+    PermissionDecisionApproveOnce,
+    PermissionDecisionReject,
 )
 from copilot.generated.session_events import (
     SessionEventType,
@@ -40,8 +32,25 @@ from copilot.generated.session_events import (
 )
 from copilot.session import (
     PermissionRequestResult,
-    SystemMessageAppendConfig,
+    SystemMessageReplaceConfig,
 )
+from copilot.tools import define_tool
+from pydantic import BaseModel
+
+
+# ---------------------------------------------------------------------------
+# Custom tool — a destructive action an audit policy may want to block
+# ---------------------------------------------------------------------------
+
+
+class DeleteRecordInput(BaseModel):
+    record_id: int
+
+
+class DeleteRecordOutput(BaseModel):
+    success: bool
+    record_id: int
+    message: str
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,7 +62,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--prompt",
         "-p",
-        default="What are 3 best practices for writing secure Python code?",
+        default="Delete the customer record with ID 42 using the delete_record tool, then confirm what happened.",
         help="Prompt to send to Copilot",
     )
     parser.add_argument(
@@ -87,7 +96,28 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
         )
 
     # ------------------------------------------------------------------
-    # Permission handler — either approve all or deny all tool calls
+    # Custom tool — records which records were actually deleted so the
+    # caller can observe whether the permission handler allowed the call
+    # ------------------------------------------------------------------
+
+    deleted_records: list[int] = []
+
+    @define_tool(
+        name="delete_record",
+        description="Permanently delete a customer record by its numeric ID.",
+    )
+    def delete_record(input: DeleteRecordInput) -> DeleteRecordOutput:
+        deleted_records.append(input.record_id)
+        return DeleteRecordOutput(
+            success=True,
+            record_id=input.record_id,
+            message=f"Record {input.record_id} permanently deleted.",
+        )
+
+    # ------------------------------------------------------------------
+    # Permission handler — either approve all or deny all tool calls.
+    # This fires because the session registers a custom tool below; with
+    # no tools the handler would never be invoked.
     # ------------------------------------------------------------------
 
     def permission_handler(
@@ -98,28 +128,36 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
         if deny_tools:
             record("PERMISSION_DENIED", f"tool={tool_name}")
             print(f"[Permission] DENIED tool execution: {tool_name}", file=sys.stderr)
-            return PermissionRequestResult(
-                kind="denied-interactively-by-user", rules=[]
+            return PermissionDecisionReject(
+                feedback="Tool execution denied by audit policy"
             )
         record("PERMISSION_APPROVED", f"tool={tool_name}")
-        return PermissionRequestResult(kind="approved", rules=[])
+        print(f"[Permission] APPROVED tool execution: {tool_name}", file=sys.stderr)
+        return PermissionDecisionApproveOnce()
 
     # ------------------------------------------------------------------
     # Session setup
     # ------------------------------------------------------------------
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
         on_permission_request=permission_handler,
-        tools=[],
+        tools=[delete_record],
         streaming=False,
-        system_message=SystemMessageAppendConfig(
-            content="You are a helpful assistant."
+        system_message=SystemMessageReplaceConfig(
+            mode="replace",
+            content=(
+                "You are an operations assistant with access to a delete_record tool. "
+                "When asked to delete a record, call the delete_record tool. "
+                "If a tool call is denied, clearly state that the action was blocked "
+                "by policy and do not retry."
+            ),
         ),
     )
 
@@ -152,10 +190,12 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
 
     record("SEND", prompt[:80])
     reply = await session.send_and_wait(prompt, timeout=300)
-    content = reply.data.content if reply else "(no response)"
+    content = getattr(reply.data, "content", None) if reply else "(no response)"
 
     print("=== Response ===")
     print(content)
+    print("\n=== Deleted Records ===")
+    print(deleted_records if deleted_records else "(none — tool was not executed)")
     print("\n=== Audit Log ===")
     print(json.dumps(audit_log, indent=2))
 

@@ -8,6 +8,7 @@ from typing import cast
 from unittest.mock import MagicMock
 
 import typer
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import PermissionRequest, SessionEventType
 
 from template_github_copilot.core import (
@@ -78,8 +79,7 @@ def test_approve_all():
     """approve_all should return an approved result."""
     request = cast(PermissionRequest, MagicMock())
     result = approve_all(request, {})
-    assert result.kind == "approved"
-    assert result.rules == []
+    assert isinstance(result, PermissionDecisionApproveOnce)
 
 
 # ---------------------------------------------------------------------------

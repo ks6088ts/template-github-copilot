@@ -8,7 +8,7 @@
 
 - What Agent Skills are and how they differ from Custom Tools
 - How to write a `SKILL.md` file
-- How to configure a skills directory in `CopilotClientOptions`
+- How to configure a skills directory when creating a session
 - How to use a skill for automatic docstring generation
 
 ---
@@ -29,7 +29,7 @@
 | Input/Output | Pydantic models | Unstructured text |
 | Best for | Structured data, API calls, DB queries | Prompt engineering, reusable agent personas |
 
-**Skills** are Markdown files that give the agent **persistent instructions and context**. They are loaded at server startup and available for all sessions on that server.
+**Skills** are Markdown files that give the agent **persistent instructions and context**. They are loaded **per session** from the skills directories you pass to `create_session`.
 
 ---
 
@@ -66,26 +66,23 @@ Key elements of a good SKILL.md:
 
 ## Step 2 — Configure the skills directory
 
-Skill directories are attached **per session** via `SessionConfig.skill_directories`:
+Skill directories are attached **per session** via the `skill_directories` argument of `create_session`:
 
 ```python
 from copilot import CopilotClient
-from copilot.types import SessionConfig
 
 client = CopilotClient()
 await client.start()
 
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        skill_directories=["/path/to/skills"],   # ← list of directories
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content="You are a Python documentation specialist.",
-        ),
-    )
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    skill_directories=["/path/to/skills"],   # ← list of directories
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content="You are a Python documentation specialist.",
+    ),
 )
 ```
 
@@ -107,18 +104,16 @@ You don't call skills explicitly — you prompt the agent and the Copilot server
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content=(
-                "You are a Python documentation specialist. "
-                "Generate Google-style docstrings for all functions."
-            ),
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content=(
+            "You are a Python documentation specialist. "
+            "Generate Google-style docstrings for all functions."
         ),
-    )
+    ),
 )
 
 prompt = (
@@ -131,7 +126,7 @@ prompt = (
     "```"
 )
 
-await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+await session.send_and_wait(prompt, timeout=300)
 ```
 
 ---
@@ -170,7 +165,7 @@ uv run python scripts/tutorials/04_skills_docgen.py --skills-dir /nonexistent
 
 - Skills are Markdown files (`SKILL.md`) that give the agent persistent instructions
 - Each skill lives in its own subdirectory under a configured skill directory
-- Configure `SessionConfig(skill_directories=[...])` to load skills for a session
+- Pass `skill_directories=[...]` to `create_session` to load skills for a session
 - The agent automatically uses the most relevant skill based on the task
 - Skills complement custom tools: skills define **how** to behave, tools provide **what** to call
 

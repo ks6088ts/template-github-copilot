@@ -82,7 +82,84 @@ gh copilot -- --version
 > export COPILOT_CLI_PATH="/absolute/path/to/copilot"
 > ```
 
-The tutorial scripts do **not** require a separately running Copilot CLI server — the SDK starts one for you on demand via stdio. An optional `--cli-url host:port` flag is provided if you already have a Copilot CLI running in TCP mode.
+The tutorial scripts do **not** require a separately running Copilot CLI server — the SDK starts one for you on demand via stdio. An optional `--cli-url host:port` flag is provided if you already have a Copilot CLI running in TCP mode. See **Run the Copilot CLI in Server Mode** below for how to start one.
+
+### Update the Copilot CLI
+
+The CLI is distributed as the npm package `@github/copilot`. Keep it current to pick up the latest SDK-compatible features and fixes.
+
+```bash
+# Update to the latest version
+npm install -g @github/copilot@latest
+
+# Pin a specific version (replace @latest with @<version>)
+npm install -g @github/copilot@0.0.339
+```
+
+Helpful checks:
+
+```bash
+copilot --version                          # show the installed version
+npm view @github/copilot versions --json   # list all available versions
+```
+
+> **Tip:** While the CLI is running, the `/update` slash command also checks for and applies updates.
+
+---
+
+## Run the Copilot CLI in Server Mode (optional)
+
+> For a complete reference — flag-by-flag explanation, log levels, permission
+> scoping, securing the server with `COPILOT_CONNECTION_TOKEN`, and Docker
+> deployment — see [CLI Server Mode](server_mode.md).
+
+By default the SDK spawns the `copilot` CLI for you over stdio, so **you do not
+need to start anything manually**. If you prefer to run the CLI once as a
+long-lived **TCP server** and have every script connect to it, start it in
+server mode:
+
+```bash
+# Authenticate first (see "Authenticate with GitHub" above)
+export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+
+# Start the Copilot CLI as a TCP server on port 3000
+copilot \
+  --server \
+  --port 3000 \
+  --log-level all \
+  --allow-all-tools --allow-all-paths --allow-all-urls \
+  --model gpt-5-mini
+```
+
+From the repository, the same command is wrapped in a Make target:
+
+```bash
+cd src/python
+export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+make copilot           # runs `copilot --server --port 3000 ...`
+```
+
+| Flag | Purpose |
+|------|---------|
+| `--server` | Run the CLI as a long-lived server instead of an interactive session |
+| `--port 3000` | TCP port the server listens on |
+| `--log-level all` | Verbose logging (handy while learning) |
+| `--allow-all-tools` / `--allow-all-paths` / `--allow-all-urls` | Pre-approve tool, file, and network access so the server runs unattended |
+| `--model gpt-5-mini` | Default model the server uses (override with `COPILOT_MODEL`) |
+
+Then point any tutorial script at the running server with `--cli-url`:
+
+```bash
+# In another terminal
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py \
+  --prompt "What is GitHub Copilot?" \
+  --cli-url localhost:3000
+```
+
+> **Heads up:** `--allow-all-*` disables interactive permission prompts. Use it
+> for local experimentation only — never expose this server to an untrusted
+> network.
 
 ---
 

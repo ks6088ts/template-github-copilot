@@ -79,7 +79,79 @@ gh copilot -- --version
 > export COPILOT_CLI_PATH="/absolute/path/to/copilot"
 > ```
 
-チュートリアルスクリプトは独立した Copilot CLI サーバーを起動する**必要はありません** — SDK が stdio 経由でオンデマンドに起動します。既に TCP モードで動く Copilot CLI がある場合は、オプションとして `--cli-url host:port` フラグを使えます。
+チュートリアルスクリプトは独立した Copilot CLI サーバーを起動する**必要はありません** — SDK が stdio 経由でオンデマンドに起動します。既に TCP モードで動く Copilot CLI がある場合は、オプションとして `--cli-url host:port` フラグを使えます。起動方法は後述の **「Copilot CLI をサーバーモードで起動する」** を参照してください。
+
+### Copilot CLI の更新
+
+CLI は npm パッケージ `@github/copilot` として配布されています。最新の SDK 互換機能や修正を取り込むため、常に最新の状態に保ちましょう。
+
+```bash
+# 最新バージョンに更新
+npm install -g @github/copilot@latest
+
+# 特定のバージョンに固定（@latest を @<version> に置き換える）
+npm install -g @github/copilot@0.0.339
+```
+
+便利な確認コマンド:
+
+```bash
+copilot --version                          # インストール済みのバージョンを表示
+npm view @github/copilot versions --json   # 利用可能なバージョン一覧を表示
+```
+
+> **ヒント:** CLI の実行中は `/update` スラッシュコマンドでも更新を確認・適用できます。
+
+---
+
+## Copilot CLI をサーバーモードで起動する（任意）
+
+> フラグごとの詳細説明、ログレベル、パーミッションの限定、`COPILOT_CONNECTION_TOKEN`
+> によるサーバーの保護、Docker デプロイまでを網羅した完全なリファレンスは
+> [CLI サーバーモード](server_mode.md) を参照してください。
+
+デフォルトでは SDK が `copilot` CLI を stdio 経由で自動起動するため、**手動で何かを起動する必要はありません**。CLI を長時間稼働する **TCP サーバー** として一度だけ起動し、各スクリプトからそこへ接続したい場合は、サーバーモードで起動します。
+
+```bash
+# 先に認証しておく（上記「GitHub 認証」を参照）
+export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+
+# Copilot CLI をポート 3000 の TCP サーバーとして起動
+copilot \
+  --server \
+  --port 3000 \
+  --log-level all \
+  --allow-all-tools --allow-all-paths --allow-all-urls \
+  --model gpt-5-mini
+```
+
+リポジトリ内では、同じコマンドが Make ターゲットとして用意されています。
+
+```bash
+cd src/python
+export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
+make copilot           # `copilot --server --port 3000 ...` を実行
+```
+
+| フラグ | 用途 |
+|--------|------|
+| `--server` | 対話セッションではなく長時間稼働のサーバーとして CLI を起動 |
+| `--port 3000` | サーバーが待ち受ける TCP ポート |
+| `--log-level all` | 詳細ログ（学習中に便利） |
+| `--allow-all-tools` / `--allow-all-paths` / `--allow-all-urls` | ツール・ファイル・ネットワークアクセスを事前承認し、無人で動作させる |
+| `--model gpt-5-mini` | サーバーが使用するデフォルトモデル（`COPILOT_MODEL` で変更可能） |
+
+その後、`--cli-url` で任意のチュートリアルスクリプトを起動中のサーバーに接続します。
+
+```bash
+# 別のターミナルで
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py \
+  --prompt "What is GitHub Copilot?" \
+  --cli-url localhost:3000
+```
+
+> **注意:** `--allow-all-*` は対話的なパーミッション確認を無効化します。ローカルでの実験用途のみに使用し、信頼できないネットワークにこのサーバーを公開しないでください。
 
 ---
 

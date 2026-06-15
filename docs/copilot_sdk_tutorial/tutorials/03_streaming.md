@@ -6,7 +6,7 @@
 
 ## What You Will Learn
 
-- How to enable streaming in a `SessionConfig`
+- How to enable streaming when creating a session
 - How to consume `ASSISTANT_MESSAGE_DELTA` events for real-time output
 - How to structure a code-review prompt around a unified diff
 - The difference between streaming and non-streaming responses
@@ -30,22 +30,20 @@
 
 ---
 
-## Step 1 — Enable streaming in SessionConfig
+## Step 1 — Enable streaming when creating the session
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,     # ← enable streaming
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content=(
-                "You are a senior software engineer conducting a thorough code review. "
-                "For each change in the diff: identify bugs, security issues, and style problems."
-            ),
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,     # ← enable streaming
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content=(
+            "You are a senior software engineer conducting a thorough code review. "
+            "For each change in the diff: identify bugs, security issues, and style problems."
         ),
-    )
+    ),
 )
 ```
 
@@ -85,7 +83,7 @@ diff --git a/src/auth.py b/src/auth.py
 
 prompt = f"Please review the following diff and provide feedback:\n\n```diff\n{diff_text}\n```"
 
-await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+await session.send_and_wait(prompt, timeout=300)
 print()  # Newline after streaming output ends
 ```
 
@@ -155,7 +153,7 @@ uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 
 ## Key Takeaways
 
-- Set `streaming=True` in `SessionConfig` to receive incremental tokens
+- Set `streaming=True` when creating the session to receive incremental tokens
 - Handle `ASSISTANT_MESSAGE_DELTA` events to print tokens as they arrive
 - Use `end=""` and `flush=True` for seamless streaming output
 - `send_and_wait` still waits for the full response; streaming is about **when** you get the tokens

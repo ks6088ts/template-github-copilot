@@ -10,6 +10,7 @@ nav:
       - Home: copilot_sdk_tutorial/index.md
       - Architecture: copilot_sdk_tutorial/architecture.md
       - Getting Started: copilot_sdk_tutorial/getting_started.md
+      - CLI Server Mode: copilot_sdk_tutorial/server_mode.md
       - Tutorials:
           - "01: CLI Chatbot": copilot_sdk_tutorial/tutorials/01_chat_bot.md
           - "02: Custom Tools": copilot_sdk_tutorial/tutorials/02_custom_tools.md

@@ -4,22 +4,26 @@ from typing import Any, TypedDict
 import typer
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
 )
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     PermissionRequest,
     SessionEventType,
 )
 from copilot.session import (
     PermissionRequestResult,
-    SessionConfig,
     SystemMessageAppendConfig,
     SystemMessageConfig,
 )
 from copilot.tools import Tool
 
 from template_github_copilot.tools import get_custom_tools
+
+# ``SessionConfig`` is a plain mapping of keyword arguments forwarded to
+# ``CopilotClient.create_session``. The Copilot SDK no longer exports a
+# dedicated ``SessionConfig`` type, so we model it as a kwargs dict.
+SessionConfig = dict[str, Any]
 
 
 class MessageOptions(TypedDict):
@@ -58,7 +62,7 @@ def approve_all(
     request: PermissionRequest, context: dict[str, str]
 ) -> PermissionRequestResult:
     """Permission handler that approves all requests."""
-    return PermissionRequestResult(kind="approved", rules=[])
+    return PermissionDecisionApproveOnce()
 
 
 def create_event_handler(
@@ -160,19 +164,13 @@ def create_copilot_client(
         A configured ``CopilotClient`` instance.
     """
     if cli_url:
-        return CopilotClient(
-            ExternalServerConfig(url=cli_url),
-        )
+        return CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
     if github_token:
         return CopilotClient(
-            SubprocessConfig(
-                github_token=github_token,
-                use_logged_in_user=False,
-            ),
+            github_token=github_token,
+            use_logged_in_user=False,
         )
-    return CopilotClient(
-        ExternalServerConfig(url="localhost:3000"),
-    )
+    return CopilotClient(connection=RuntimeConnection.for_uri("localhost:3000"))
 
 
 def create_session_config(
@@ -196,12 +194,12 @@ def create_session_config(
     Returns:
         A configured ``SessionConfig`` instance.
     """
-    config = SessionConfig(
-        on_permission_request=on_permission_request,
-        tools=tools if tools is not None else [],
-        streaming=streaming,
+    config: SessionConfig = {
+        "on_permission_request": on_permission_request,
+        "tools": tools if tools is not None else [],
+        "streaming": streaming,
         **kwargs,
-    )
+    }
     if system_message is not None:
         config["system_message"] = system_message
     return config

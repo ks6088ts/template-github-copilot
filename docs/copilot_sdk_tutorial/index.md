@@ -101,4 +101,5 @@ For detailed setup instructions, see [Getting Started](getting_started.md).
 |----------|-------------|
 | [Architecture](architecture.md) | How the SDK, CLI server, and Copilot API interact |
 | [Getting Started](getting_started.md) | Environment setup and first run |
+| [CLI Server Mode](server_mode.md) | Run the Copilot CLI as a standalone TCP server |
 | [References](appendix/references.md) | API reference and external links |

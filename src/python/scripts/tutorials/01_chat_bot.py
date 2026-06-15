@@ -1,34 +1,9 @@
 #!/usr/bin/env python3
 """CLI Chatbot using the GitHub Copilot SDK.
 
-What you will learn:
-    - How to create a CopilotClient and start a session
-    - How to send a single prompt and receive a response
-    - How to run an interactive chat loop
-    - How to handle session events
-
-Usage (run from ``src/python``):
-    # Single prompt (SDK auto-launches the copilot CLI via stdio)
-    uv run python scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
-
-    # Interactive loop
-    uv run python scripts/tutorials/01_chat_bot.py --loop
-
-    # Connect to an externally running CLI server over TCP
-    uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-    If the copilot binary is not on PATH, set:
-        export COPILOT_CLI_PATH=/path/to/copilot
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/01_chat_bot.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/01_chat_bot.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/01_chat_bot.ja.md  (日本語)
 """
 
 import argparse
@@ -37,9 +12,9 @@ import sys
 
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
 )
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
     PermissionRequest,
@@ -87,12 +62,13 @@ async def run_single(cli_url: str | None, prompt: str) -> None:
         request: PermissionRequest,
         context: dict,
     ) -> PermissionRequestResult:
-        return PermissionRequestResult(kind="approved", rules=[])
+        return PermissionDecisionApproveOnce()
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
@@ -113,7 +89,7 @@ async def run_single(cli_url: str | None, prompt: str) -> None:
     session.on(on_event)
 
     reply = await session.send_and_wait(prompt, timeout=300)
-    content = reply.data.content if reply else None
+    content = getattr(reply.data, "content", None) if reply else None
     # Ensure a newline after streaming output
     print()
     if not content:
@@ -127,12 +103,13 @@ async def run_loop(cli_url: str | None) -> None:
         request: PermissionRequest,
         context: dict,
     ) -> PermissionRequestResult:
-        return PermissionRequestResult(kind="approved", rules=[])
+        return PermissionDecisionApproveOnce()
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(

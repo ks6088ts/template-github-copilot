@@ -96,20 +96,18 @@ def label_issue(input: LabelIssueInput) -> LabelIssueOutput:
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[list_issues, label_issue],  # ← register here
-        streaming=False,
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content=(
-                "You are an expert GitHub issue triage assistant. "
-                "Use list_issues to fetch open issues, classify each one "
-                "as 'bug', 'enhancement', or 'documentation', then call "
-                "label_issue to apply the appropriate label."
-            ),
+    on_permission_request=approve_all,
+    tools=[list_issues, label_issue],  # ← register here
+    streaming=False,
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content=(
+            "You are an expert GitHub issue triage assistant. "
+            "Use list_issues to fetch open issues, classify each one "
+            "as 'bug', 'enhancement', or 'documentation', then call "
+            "label_issue to apply the appropriate label."
         ),
-    )
+    ),
 )
 ```
 
@@ -121,10 +119,11 @@ Note `SystemMessageReplaceConfig` — this **replaces** the default system messa
 
 ```python
 reply = await session.send_and_wait(
-    MessageOptions(prompt="Please triage all open issues and apply the appropriate labels."),
+    "Please triage all open issues and apply the appropriate labels.",
     timeout=300,
 )
-print(reply.data.content)
+content = getattr(reply.data, "content", None) if reply else "(no response)"
+print(content)
 ```
 
 The agent will:
@@ -168,7 +167,7 @@ I've triaged all 3 open issues...
 
 - `@define_tool(name, description)` registers a function as a callable tool
 - Pydantic `BaseModel` defines strongly-typed input/output contracts
-- Tools are registered per-session in `SessionConfig(tools=[...])`
+- Tools are registered per-session via `create_session(tools=[...])`
 - The LLM decides **when** to call tools based on the task and the description strings
 - `SystemMessageReplaceConfig` gives the agent a dedicated persona for the task
 

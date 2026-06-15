@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
 """Streaming Code Review using GitHub Copilot SDK.
 
-What you will learn:
-    - How to enable streaming and consume ASSISTANT_MESSAGE_DELTA events
-    - How to structure a code-review prompt around a unified diff
-    - How real-time output differs from waiting for the full response
-
-Usage (run from ``src/python``):
-    uv run python scripts/tutorials/03_streaming_review.py
-    uv run python scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
-    uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/03_streaming.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/03_streaming.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/03_streaming.ja.md  (日本語)
 """
 
 import argparse
@@ -29,9 +13,9 @@ from pathlib import Path
 
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
 )
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
     PermissionRequest,
@@ -96,12 +80,13 @@ async def run(cli_url: str | None, diff_text: str) -> None:
         request: PermissionRequest,
         context: dict,
     ) -> PermissionRequestResult:
-        return PermissionRequestResult(kind="approved", rules=[])
+        return PermissionDecisionApproveOnce()
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(

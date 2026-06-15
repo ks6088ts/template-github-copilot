@@ -101,4 +101,5 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 |-------------|------|
 | [アーキテクチャ](architecture.md) | SDK、CLI サーバー、Copilot API の相互作用 |
 | [はじめに](getting_started.md) | 環境構築と最初の実行 |
+| [CLI サーバーモード](server_mode.md) | Copilot CLI を単独 TCP サーバーとして起動する |
 | [参考文献](appendix/references.md) | API リファレンスと外部リンク |

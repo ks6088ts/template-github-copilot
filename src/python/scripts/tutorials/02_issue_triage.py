@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
 """Issue Triage Bot using GitHub Copilot SDK Custom Tools (@define_tool).
 
-What you will learn:
-    - How to register custom tools with @define_tool
-    - How to pass structured input/output via Pydantic models
-    - How to build a simple issue-triage agent that classifies and labels issues
-
-Usage (run from ``src/python``):
-    uv run python scripts/tutorials/02_issue_triage.py
-    uv run python scripts/tutorials/02_issue_triage.py --cli-url localhost:3000
-    uv run python scripts/tutorials/02_issue_triage.py --help
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk and pydantic (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/02_custom_tools.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/02_custom_tools.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/02_custom_tools.ja.md  (日本語)
 """
 
 import argparse
@@ -30,9 +14,9 @@ from typing import Any, TypedDict
 
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
 )
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     PermissionRequest,
     SessionEventType,
@@ -173,12 +157,13 @@ async def run(cli_url: str | None) -> None:
         request: PermissionRequest,
         context: dict,
     ) -> PermissionRequestResult:
-        return PermissionRequestResult(kind="approved", rules=[])
+        return PermissionDecisionApproveOnce()
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
@@ -207,7 +192,7 @@ async def run(cli_url: str | None) -> None:
 
     prompt = "Please triage all open issues and apply the appropriate labels."
     reply = await session.send_and_wait(prompt, timeout=300)
-    content = reply.data.content if reply else "(no response)"
+    content = getattr(reply.data, "content", None) if reply else "(no response)"
 
     print("=== Triage Summary ===")
     print(content)

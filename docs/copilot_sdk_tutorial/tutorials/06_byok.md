@@ -52,7 +52,7 @@ BYOK is useful when you need:
 ### API Key authentication
 
 ```python
-from copilot.types import ProviderConfig
+from copilot.session import ProviderConfig
 
 provider = ProviderConfig(
     type="azure",
@@ -65,7 +65,7 @@ provider = ProviderConfig(
 
 ```python
 from azure.identity import DefaultAzureCredential
-from copilot.types import ProviderConfig
+from copilot.session import ProviderConfig
 
 credential = DefaultAzureCredential()
 token = credential.get_token("https://cognitiveservices.azure.com/.default").token
@@ -79,20 +79,18 @@ provider = ProviderConfig(
 
 ---
 
-## Step 2 — Pass the provider and model to SessionConfig
+## Step 2 — Pass the provider and model to the session
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        model="gpt-4o",            # ← must match your deployment name
-        provider=provider,          # ← BYOK provider config
-        system_message=SystemMessageAppendConfig(
-            content="You are a helpful assistant powered by Azure OpenAI."
-        ),
-    )
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    model="gpt-4o",            # ← must match your deployment name
+    provider=provider,          # ← BYOK provider config
+    system_message=SystemMessageAppendConfig(
+        content="You are a helpful assistant powered by Azure OpenAI."
+    ),
 )
 ```
 
@@ -106,10 +104,11 @@ The rest of the flow is identical to the standard chatbot:
 
 ```python
 reply = await session.send_and_wait(
-    MessageOptions(prompt="Hello from Azure OpenAI!"),
+    "Hello from Azure OpenAI!",
     timeout=300,
 )
-print(reply.data.content)
+content = getattr(reply.data, "content", None) if reply else "(no response)"
+print(content)
 ```
 
 ---
@@ -165,7 +164,7 @@ uv run python scripts/tutorials/06_byok_azure_openai.py \
 
 - BYOK lets you use Azure OpenAI (or another provider) instead of the default Copilot backend
 - Build a `ProviderConfig` with `type`, `base_url`, and either `api_key` or `bearer_token`
-- Pass `provider` and `model` to `SessionConfig` to activate BYOK for that session
+- Pass `provider` and `model` to `create_session` to activate BYOK for that session
 - The rest of the SDK API (streaming, tools, hooks) works exactly the same
 - Use `DefaultAzureCredential` for passwordless Entra ID authentication
 

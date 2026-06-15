@@ -81,6 +81,27 @@ gh copilot -- --version
 
 チュートリアルスクリプトは独立した Copilot CLI サーバーを起動する**必要はありません** — SDK が stdio 経由でオンデマンドに起動します。既に TCP モードで動く Copilot CLI がある場合は、オプションとして `--cli-url host:port` フラグを使えます。
 
+### Copilot CLI の更新
+
+CLI は npm パッケージ `@github/copilot` として配布されています。最新の SDK 互換機能や修正を取り込むため、常に最新の状態に保ちましょう。
+
+```bash
+# 最新バージョンに更新
+npm install -g @github/copilot@latest
+
+# 特定のバージョンに固定（@latest を @<version> に置き換える）
+npm install -g @github/copilot@0.0.339
+```
+
+便利な確認コマンド:
+
+```bash
+copilot --version                          # インストール済みのバージョンを表示
+npm view @github/copilot versions --json   # 利用可能なバージョン一覧を表示
+```
+
+> **ヒント:** CLI の実行中は `/update` スラッシュコマンドでも更新を確認・適用できます。
+
 ---
 
 ## 最初のスクリプトを実行する

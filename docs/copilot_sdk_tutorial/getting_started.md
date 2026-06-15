@@ -84,6 +84,27 @@ gh copilot -- --version
 
 The tutorial scripts do **not** require a separately running Copilot CLI server — the SDK starts one for you on demand via stdio. An optional `--cli-url host:port` flag is provided if you already have a Copilot CLI running in TCP mode.
 
+### Update the Copilot CLI
+
+The CLI is distributed as the npm package `@github/copilot`. Keep it current to pick up the latest SDK-compatible features and fixes.
+
+```bash
+# Update to the latest version
+npm install -g @github/copilot@latest
+
+# Pin a specific version (replace @latest with @<version>)
+npm install -g @github/copilot@0.0.339
+```
+
+Helpful checks:
+
+```bash
+copilot --version                          # show the installed version
+npm view @github/copilot versions --json   # list all available versions
+```
+
+> **Tip:** While the CLI is running, the `/update` slash command also checks for and applies updates.
+
 ---
 
 ## Run Your First Script

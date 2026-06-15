@@ -30,9 +30,9 @@ from typing import Any, TypedDict
 
 from copilot import (
     CopilotClient,
-    ExternalServerConfig,
-    SubprocessConfig,
+    RuntimeConnection,
 )
+from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     PermissionRequest,
     SessionEventType,
@@ -173,12 +173,13 @@ async def run(cli_url: str | None) -> None:
         request: PermissionRequest,
         context: dict,
     ) -> PermissionRequestResult:
-        return PermissionRequestResult(kind="approved", rules=[])
+        return PermissionDecisionApproveOnce()
 
-    client_options: ExternalServerConfig | SubprocessConfig = (
-        ExternalServerConfig(url=cli_url) if cli_url else SubprocessConfig()
+    client = (
+        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
+        if cli_url
+        else CopilotClient()
     )
-    client = CopilotClient(client_options)
     await client.start()
 
     session = await client.create_session(
@@ -207,7 +208,7 @@ async def run(cli_url: str | None) -> None:
 
     prompt = "Please triage all open issues and apply the appropriate labels."
     reply = await session.send_and_wait(prompt, timeout=300)
-    content = reply.data.content if reply else "(no response)"
+    content = getattr(reply.data, "content", None) if reply else "(no response)"
 
     print("=== Triage Summary ===")
     print(content)

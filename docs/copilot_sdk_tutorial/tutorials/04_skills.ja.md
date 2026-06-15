@@ -8,7 +8,7 @@
 
 - エージェントスキルとは何か、カスタムツールとの違い
 - `SKILL.md` ファイルの書き方
-- `CopilotClientOptions` でスキルディレクトリを設定する方法
+- セッション作成時にスキルディレクトリを設定する方法
 - スキルを使って docstring を自動生成する方法
 
 ---
@@ -29,7 +29,7 @@
 | 入出力 | Pydantic モデル | 非構造化テキスト |
 | 適したユースケース | 構造化データ、API 呼び出し、DB クエリ | プロンプトエンジニアリング、再利用可能なエージェントペルソナ |
 
-**スキル**はエージェントに**永続的な指示とコンテキスト**を与える Markdown ファイルです。サーバー起動時に読み込まれ、そのサーバー上のすべてのセッションで利用可能です。
+**スキル**はエージェントに**永続的な指示とコンテキスト**を与える Markdown ファイルです。`create_session` に渡したスキルディレクトリから**セッションごとに**読み込まれます。
 
 ---
 
@@ -66,26 +66,23 @@ for every function and class that does not already have one.
 
 ## ステップ 2 — スキルディレクトリを設定する
 
-スキルディレクトリは `SessionConfig.skill_directories` で**セッションごとに**設定します:
+スキルディレクトリは `create_session` の `skill_directories` 引数で**セッションごとに**設定します:
 
 ```python
 from copilot import CopilotClient
-from copilot.types import SessionConfig
 
 client = CopilotClient()
 await client.start()
 
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        skill_directories=["/path/to/skills"],   # ← ディレクトリのリスト
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content="You are a Python documentation specialist.",
-        ),
-    )
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    skill_directories=["/path/to/skills"],   # ← ディレクトリのリスト
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content="You are a Python documentation specialist.",
+    ),
 )
 ```
 
@@ -107,18 +104,16 @@ skills/
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content=(
-                "You are a Python documentation specialist. "
-                "Generate Google-style docstrings for all functions."
-            ),
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content=(
+            "You are a Python documentation specialist. "
+            "Generate Google-style docstrings for all functions."
         ),
-    )
+    ),
 )
 
 prompt = (
@@ -131,7 +126,7 @@ prompt = (
     "```"
 )
 
-await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+await session.send_and_wait(prompt, timeout=300)
 ```
 
 ---
@@ -170,7 +165,7 @@ uv run python scripts/tutorials/04_skills_docgen.py --skills-dir /nonexistent
 
 - スキルはエージェントに永続的な指示を与える Markdown ファイル（`SKILL.md`）
 - 各スキルは設定したスキルディレクトリ配下の独自のサブディレクトリに配置される
-- セッションでスキルを読み込むには `SessionConfig(skill_directories=[...])` を設定する
+- セッションでスキルを読み込むには `skill_directories=[...]` を `create_session` に渡す
 - エージェントはタスクに基づいて最も関連するスキルを自動的に使用する
 - スキルはカスタムツールを補完する — スキルは**どのように**振る舞うかを定義し、ツールは**何を**呼び出すかを提供する
 

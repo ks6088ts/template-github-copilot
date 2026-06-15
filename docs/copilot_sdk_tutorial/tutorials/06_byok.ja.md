@@ -52,7 +52,7 @@ BYOK が有用なケース:
 ### API キー認証
 
 ```python
-from copilot.types import ProviderConfig
+from copilot.session import ProviderConfig
 
 provider = ProviderConfig(
     type="azure",
@@ -65,7 +65,7 @@ provider = ProviderConfig(
 
 ```python
 from azure.identity import DefaultAzureCredential
-from copilot.types import ProviderConfig
+from copilot.session import ProviderConfig
 
 credential = DefaultAzureCredential()
 token = credential.get_token("https://cognitiveservices.azure.com/.default").token
@@ -79,20 +79,18 @@ provider = ProviderConfig(
 
 ---
 
-## ステップ 2 — SessionConfig にプロバイダーとモデルを渡す
+## ステップ 2 — セッションにプロバイダーとモデルを渡す
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        model="gpt-4o",            # ← デプロイ名と一致する必要がある
-        provider=provider,          # ← BYOK プロバイダー設定
-        system_message=SystemMessageAppendConfig(
-            content="You are a helpful assistant powered by Azure OpenAI."
-        ),
-    )
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    model="gpt-4o",            # ← デプロイ名と一致する必要がある
+    provider=provider,          # ← BYOK プロバイダー設定
+    system_message=SystemMessageAppendConfig(
+        content="You are a helpful assistant powered by Azure OpenAI."
+    ),
 )
 ```
 
@@ -106,10 +104,11 @@ session = await client.create_session(
 
 ```python
 reply = await session.send_and_wait(
-    MessageOptions(prompt="Hello from Azure OpenAI!"),
+    "Hello from Azure OpenAI!",
     timeout=300,
 )
-print(reply.data.content)
+content = getattr(reply.data, "content", None) if reply else "(no response)"
+print(content)
 ```
 
 ---
@@ -165,7 +164,7 @@ uv run python scripts/tutorials/06_byok_azure_openai.py \
 
 - BYOK を使うとデフォルトの Copilot バックエンドの代わりに Azure OpenAI（または他のプロバイダー）を使用できる
 - `type`、`base_url`、`api_key` または `bearer_token` で `ProviderConfig` を構築する
-- セッションの BYOK を有効にするために `SessionConfig` に `provider` と `model` を渡す
+- セッションの BYOK を有効にするために `create_session` に `provider` と `model` を渡す
 - SDK の残りの API（ストリーミング、ツール、フック）はまったく同じように動作する
 - パスワードレスの Entra ID 認証には `DefaultAzureCredential` を使用する
 

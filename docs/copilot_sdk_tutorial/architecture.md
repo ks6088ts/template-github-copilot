@@ -32,17 +32,16 @@ graph TD
 
 ### CopilotClient
 
-The `CopilotClient` class is the entry point of the SDK. By default, it spawns the `copilot` CLI as a subprocess and communicates over **JSON-RPC on stdio**. Alternatively, it can connect to an already-running Copilot CLI over a **TCP socket** (for example `localhost:3000`) via the `cli_url` option.
+The `CopilotClient` class is the entry point of the SDK. By default, it spawns the `copilot` CLI as a subprocess and communicates over **JSON-RPC on stdio**. Alternatively, it can connect to an already-running Copilot CLI over a **TCP socket** (for example `localhost:3000`) via a `RuntimeConnection`.
 
 ```python
-from copilot import CopilotClient
-from copilot.types import CopilotClientOptions
+from copilot import CopilotClient, RuntimeConnection
 
 # Default: stdio subprocess
 client = CopilotClient()
 
 # Optional: connect to an external CLI server over TCP
-# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+# client = CopilotClient(connection=RuntimeConnection.for_uri("localhost:3000"))
 
 await client.start()
 ```
@@ -58,7 +57,12 @@ A **session** is a stateful conversation context. Each session has its own:
 - Optional provider override (for BYOK)
 
 ```python
-session = await client.create_session(SessionConfig(...))
+session = await client.create_session(
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    system_message=...,
+)
 ```
 
 ### Copilot CLI Server
@@ -82,11 +86,11 @@ Tools extend the agent's capabilities. There are two kinds:
 | Built-in | Provided by the Copilot CLI server | File system, web search |
 | Custom | `@define_tool` decorator | GitHub API calls, database queries |
 
-Custom tools are registered per-session in `SessionConfig(tools=[...])`.
+Custom tools are registered per-session via `create_session(tools=[...])`.
 
 ### Skills
 
-Skills are Markdown files (`SKILL.md`) that define specialized agent behaviours. They are loaded from a **skills directory** configured in `CopilotClientOptions`.
+Skills are Markdown files (`SKILL.md`) that define specialized agent behaviours. They are loaded from a **skills directory** passed to `create_session` via the `skill_directories` argument.
 
 ```
 skills/
@@ -137,7 +141,7 @@ graph LR
     style OAI fill:#412991,color:#fff
 ```
 
-The `ProviderConfig` is passed in the `SessionConfig` and tells the CLI server which endpoint and credentials to use.
+The `ProviderConfig` is passed to `create_session` and tells the CLI server which endpoint and credentials to use.
 
 ---
 

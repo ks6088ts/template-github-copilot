@@ -96,20 +96,18 @@ def label_issue(input: LabelIssueInput) -> LabelIssueOutput:
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[list_issues, label_issue],  # ← ここで登録
-        streaming=False,
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content=(
-                "You are an expert GitHub issue triage assistant. "
-                "Use list_issues to fetch open issues, classify each one "
-                "as 'bug', 'enhancement', or 'documentation', then call "
-                "label_issue to apply the appropriate label."
-            ),
+    on_permission_request=approve_all,
+    tools=[list_issues, label_issue],  # ← ここで登録
+    streaming=False,
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content=(
+            "You are an expert GitHub issue triage assistant. "
+            "Use list_issues to fetch open issues, classify each one "
+            "as 'bug', 'enhancement', or 'documentation', then call "
+            "label_issue to apply the appropriate label."
         ),
-    )
+    ),
 )
 ```
 
@@ -121,10 +119,11 @@ session = await client.create_session(
 
 ```python
 reply = await session.send_and_wait(
-    MessageOptions(prompt="Please triage all open issues and apply the appropriate labels."),
+    "Please triage all open issues and apply the appropriate labels.",
     timeout=300,
 )
-print(reply.data.content)
+content = getattr(reply.data, "content", None) if reply else "(no response)"
+print(content)
 ```
 
 エージェントは以下を実行します:
@@ -168,7 +167,7 @@ I've triaged all 3 open issues...
 
 - `@define_tool(name, description)` は関数を呼び出し可能なツールとして登録する
 - Pydantic の `BaseModel` は強く型付けされた入出力コントラクトを定義する
-- ツールは `SessionConfig(tools=[...])` でセッションごとに登録される
+- ツールは `create_session(tools=[...])` でセッションごとに登録される
 - LLM はタスクと説明文字列に基づいて**いつ**ツールを呼び出すかを判断する
 - `SystemMessageReplaceConfig` はエージェントにタスク専用のペルソナを与える
 

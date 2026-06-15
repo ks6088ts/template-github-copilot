@@ -7,7 +7,7 @@
 ## 学べること
 
 - `CopilotClient` を作成して CLI サーバーに接続する方法
-- システムメッセージとパーミッションハンドラを含む `SessionConfig` の作成方法
+- システムメッセージとパーミッションハンドラを含むセッションの作成方法
 - 単一プロンプトを送信してレスポンスを受信する方法
 - `ASSISTANT_MESSAGE_DELTA` を通じてストリーミングトークンを受信する方法
 - インタラクティブチャットループの実行方法
@@ -23,17 +23,16 @@
 
 ## ステップ 1 — クライアントの作成と起動
 
-`CopilotClient` はメインのエントリーポイントです。デフォルトでは `copilot` バイナリをサブプロセスとして起動し、stdio 経由で通信します。TCP モードで既に Copilot CLI が動く場合に限り `cli_url` を渡します:
+`CopilotClient` はメインのエントリーポイントです。デフォルトでは `copilot` バイナリをサブプロセスとして起動し、stdio 経由で通信します。TCP モードで既に Copilot CLI が動く場合に限り `RuntimeConnection` を渡します:
 
 ```python
-from copilot import CopilotClient
-from copilot.types import CopilotClientOptions
+from copilot import CopilotClient, RuntimeConnection
 
 # デフォルト: SDK が CLI を stdio で起動
 client = CopilotClient()
 
 # オプション: 既に起動している CLI サーバーに接続
-# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+# client = CopilotClient(connection=RuntimeConnection.for_uri("localhost:3000"))
 
 await client.start()
 ```
@@ -44,28 +43,23 @@ await client.start()
 
 ## ステップ 2 — セッションの設定
 
-`SessionConfig` は単一の会話に関連するすべてをグループ化します:
+`create_session` は単一の会話に関連するすべてをグループ化するキーワード引数を受け取ります:
 
 ```python
-from copilot.types import (
-    PermissionRequest,
-    PermissionRequestResult,
-    SessionConfig,
-    SystemMessageAppendConfig,
-)
+from copilot.generated.rpc import PermissionDecisionApproveOnce
+from copilot.generated.session_events import PermissionRequest
+from copilot.session import PermissionRequestResult, SystemMessageAppendConfig
 
 def approve_all(request: PermissionRequest, context: dict) -> PermissionRequestResult:
-    return PermissionRequestResult(kind="approved", rules=[])
+    return PermissionDecisionApproveOnce()
 
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        system_message=SystemMessageAppendConfig(
-            content="You are a helpful assistant."
-        ),
-    )
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    system_message=SystemMessageAppendConfig(
+        content="You are a helpful assistant."
+    ),
 )
 ```
 
@@ -73,7 +67,7 @@ session = await client.create_session(
 
 | フィールド | 説明 |
 |----------|------|
-| `on_permission_request` | 各ツール実行前に呼び出される — `approved` または `denied` を返す |
+| `on_permission_request` | 各ツール実行前に呼び出される — `PermissionDecisionApproveOnce()` または `PermissionDecisionReject(feedback=...)` を返す |
 | `tools` | 登録するカスタムツールのリスト（プレーンチャットセッションの場合は空） |
 | `streaming` | トークンを逐次受信するか（`True`）、完全なレスポンスを待つか（`False`） |
 | `system_message` | アシスタントのペルソナを設定 |
@@ -113,13 +107,11 @@ session.on(on_event)
 ## ステップ 4 — プロンプトの送信
 
 ```python
-from copilot.types import MessageOptions
-
 reply = await session.send_and_wait(
-    MessageOptions(prompt="What is GitHub Copilot?"),
+    "What is GitHub Copilot?",
     timeout=300,
 )
-content = reply.data.content if reply else "(no response)"
+content = getattr(reply.data, "content", None) if reply else "(no response)"
 print(content)
 ```
 
@@ -138,7 +130,7 @@ while True:
     if not user_input:
         continue
     print("Copilot: ", end="")
-    await session.send_and_wait(MessageOptions(prompt=user_input), timeout=300)
+    await session.send_and_wait(user_input, timeout=300)
     print()
 ```
 
@@ -166,7 +158,7 @@ uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 ## まとめ
 
 - `CopilotClient` → `create_session` → `send_and_wait` が基本パターン
-- `SessionConfig` はペルソナ、ツール、ストリーミング、パーミッションを制御する
+- `create_session` のパラメータがペルソナ、ツール、ストリーミング、パーミッションを制御する
 - `session.on(handler)` はストリーミングデルタを含むすべてのイベントを受信する
 - セッションはマルチターンの会話に再利用できる
 - `send_and_wait` はレスポンスが完了するまでブロックする

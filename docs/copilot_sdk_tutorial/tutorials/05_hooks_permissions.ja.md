@@ -9,6 +9,7 @@
 - `session.on()` を通じてすべてのセッションイベントをインターセプトする方法
 - カスタム `on_permission_request` ハンドラの実装方法
 - 特定のツール実行を承認または拒否する方法
+- セッションがツールを登録したときにのみパーミッションハンドラが発火する理由
 - イベントストリームから構造化された監査ログを構築する方法
 
 ---
@@ -74,12 +75,50 @@ session.on(on_event)
 
 ---
 
-## ステップ 2 — パーミッションハンドラを実装する
+## ステップ 2 — ツールとパーミッションハンドラを登録する
 
-`on_permission_request` コールバックは**すべての**ツール実行前に呼び出されます。ポリシーに基づいて `approved` または `denied` を返します:
+`on_permission_request` コールバックは**すべてのツール実行前**に呼び出されます — したがってセッションがツールを一つも登録していなければハンドラは一度も発火しません。このチュートリアルでは、監査ポリシーがブロックしたい破壊的なアクションをモデル化した `delete_record` ツールを登録します:
 
 ```python
-from copilot.types import PermissionRequest, PermissionRequestResult
+from copilot.tools import define_tool
+from pydantic import BaseModel
+
+
+class DeleteRecordInput(BaseModel):
+    record_id: int
+
+
+class DeleteRecordOutput(BaseModel):
+    success: bool
+    record_id: int
+    message: str
+
+
+deleted_records: list[int] = []
+
+
+@define_tool(
+    name="delete_record",
+    description="Permanently delete a customer record by its numeric ID.",
+)
+def delete_record(input: DeleteRecordInput) -> DeleteRecordOutput:
+    deleted_records.append(input.record_id)
+    return DeleteRecordOutput(
+        success=True,
+        record_id=input.record_id,
+        message=f"Record {input.record_id} permanently deleted.",
+    )
+```
+
+ハンドラは呼び出しを許可する場合は `PermissionDecisionApproveOnce()` を、ブロックする場合は `PermissionDecisionReject(feedback=...)` を返します。後で確認できるように決定を監査ログに記録します:
+
+```python
+from copilot.generated.rpc import (
+    PermissionDecisionApproveOnce,
+    PermissionDecisionReject,
+)
+from copilot.generated.session_events import PermissionRequest
+from copilot.session import PermissionRequestResult
 
 def permission_handler(
     request: PermissionRequest,
@@ -88,22 +127,27 @@ def permission_handler(
     tool_name = getattr(request, "tool_name", "unknown")
 
     # 例: すべてのツール呼び出しを拒否（読み取り専用の監査に有用）
-    if should_deny(tool_name):
+    if deny_tools:
+        record("PERMISSION_DENIED", f"tool={tool_name}")
         print(f"[Permission] DENIED: {tool_name}")
-        return PermissionRequestResult(kind="denied-interactively-by-user", rules=[])
+        return PermissionDecisionReject(feedback="Tool execution denied by audit policy")
 
+    record("PERMISSION_APPROVED", f"tool={tool_name}")
     print(f"[Permission] APPROVED: {tool_name}")
-    return PermissionRequestResult(kind="approved", rules=[])
+    return PermissionDecisionApproveOnce()
 ```
 
-セッション設定に登録します:
+セッション作成時にツールとハンドラを登録します:
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=permission_handler,
-        ...
-    )
+    on_permission_request=permission_handler,
+    tools=[delete_record],
+    streaming=False,
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content="You are an operations assistant with access to a delete_record tool.",
+    ),
 )
 ```
 
@@ -112,24 +156,29 @@ session = await client.create_session(
 ## ステップ 3 — 実行して監査ログを確認する
 
 ```python
-reply = await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
-print(reply.data.content)
+reply = await session.send_and_wait(prompt, timeout=300)
+content = getattr(reply.data, "content", None) if reply else "(no response)"
+print(content)
 
 print("\n=== Audit Log ===")
 print(json.dumps(audit_log, indent=2))
 ```
 
-サンプルの監査ログ出力:
+サンプルの監査ログ出力（デフォルト — ポリシーが `delete_record` 呼び出しを**承認**）:
 
 ```json
 [
-  {"ts": 0.001, "event": "SEND", "detail": "What are 3 best practices..."},
-  {"ts": 0.012, "event": "TURN_START", "detail": ""},
-  {"ts": 0.015, "event": "INTENT", "detail": "answer_question"},
-  {"ts": 2.341, "event": "TURN_END", "detail": ""},
-  {"ts": 2.342, "event": "SESSION_IDLE", "detail": ""}
+  {"ts": 1.584, "event": "SEND", "detail": "Delete the customer record with ID 42..."},
+  {"ts": 4.085, "event": "TURN_START", "detail": ""},
+  {"ts": 6.8, "event": "TOOL_START", "detail": "delete_record"},
+  {"ts": 6.8, "event": "PERMISSION_APPROVED", "detail": "tool=delete_record"},
+  {"ts": 6.82, "event": "TOOL_COMPLETE", "detail": "error=None"},
+  {"ts": 6.82, "event": "TURN_END", "detail": ""},
+  {"ts": 9.615, "event": "SESSION_IDLE", "detail": ""}
 ]
 ```
+
+`--deny-tools` を指定するとハンドラは `PermissionDecisionReject(...)` を返します。`delete_record` の実装は一度も実行されず、監査ログには `PERMISSION_DENIED` が記録され、アシスタントはアクションがポリシーでブロックされたことを報告します。
 
 ---
 
@@ -137,8 +186,8 @@ print(json.dumps(audit_log, indent=2))
 
 | パターン | ユースケース |
 |---------|------------|
-| すべて `approved` | 開発 / 信頼された環境 |
-| すべて `denied` | 読み取り専用の監査モード — 副作用なし |
+| すべて `PermissionDecisionApproveOnce()` | 開発 / 信頼された環境 |
+| すべて `PermissionDecisionReject(...)` | 読み取り専用の監査モード — 副作用なし |
 | ツール名で承認 | 安全なツールのみ許可、リスクのあるものは拒否 |
 | ユーザーに確認 | 機密アクションへのインタラクティブな承認 |
 | ログ後に承認 | すべてのツール呼び出しをブロックせずに記録 |
@@ -150,12 +199,15 @@ print(json.dumps(audit_log, indent=2))
 ```bash
 cd src/python
 
-# すべてのツールを承認（デフォルト）
-uv run python scripts/tutorials/05_audit_hooks.py \
-    --prompt "What are best practices for Python error handling?"
+# delete_record ツールを承認（デフォルト） — レコードが削除される
+uv run python scripts/tutorials/05_audit_hooks.py
 
-# すべてのツール呼び出しを拒否
+# すべてのツール呼び出しを拒否 — delete_record 呼び出しがブロックされ、実行されない
 uv run python scripts/tutorials/05_audit_hooks.py --deny-tools
+
+# 独自のプロンプトを送信
+uv run python scripts/tutorials/05_audit_hooks.py \
+    --prompt "Delete the customer record with ID 7 using the delete_record tool."
 
 # カスタム CLI サーバー（オプション）
 uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
@@ -167,9 +219,10 @@ uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
 
 - `session.on(handler)` はすべてのセッションイベントをインターセプト — ログ、モニタリング、テストに使用
 - `on_permission_request` はすべてのツール実行前に呼び出され、実行するかどうかを制御する
+- ハンドラはセッションがツールを登録したときにのみ発火する — `tools=[]` の場合は一度も呼び出されない
 - 両方のフックはリッチなイベントデータ（ツール名、インテント、エラー詳細など）を受け取る
 - タイムスタンプ付きの監査ログを構築してセッション全体のエージェントの動作を追跡する
-- パーミッションハンドラからの `denied` レスポンスはセッションの継続を妨げない
+- `PermissionDecisionReject(...)` レスポンスはツールをブロックするが、セッションは継続させる
 
 ---
 

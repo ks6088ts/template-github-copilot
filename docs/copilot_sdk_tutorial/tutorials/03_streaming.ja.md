@@ -6,7 +6,7 @@
 
 ## 学べること
 
-- `SessionConfig` でストリーミングを有効にする方法
+- セッション作成時にストリーミングを有効にする方法
 - リアルタイム出力のために `ASSISTANT_MESSAGE_DELTA` イベントを受信する方法
 - 統合差分（unified diff）をもとにコードレビュープロンプトを構造化する方法
 - ストリーミングと非ストリーミングのレスポンスの違い
@@ -30,22 +30,20 @@
 
 ---
 
-## ステップ 1 — SessionConfig でストリーミングを有効にする
+## ステップ 1 — セッション作成時にストリーミングを有効にする
 
 ```python
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,     # ← ストリーミングを有効化
-        system_message=SystemMessageReplaceConfig(
-            mode="replace",
-            content=(
-                "You are a senior software engineer conducting a thorough code review. "
-                "For each change in the diff: identify bugs, security issues, and style problems."
-            ),
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,     # ← ストリーミングを有効化
+    system_message=SystemMessageReplaceConfig(
+        mode="replace",
+        content=(
+            "You are a senior software engineer conducting a thorough code review. "
+            "For each change in the diff: identify bugs, security issues, and style problems."
         ),
-    )
+    ),
 )
 ```
 
@@ -85,7 +83,7 @@ diff --git a/src/auth.py b/src/auth.py
 
 prompt = f"Please review the following diff and provide feedback:\n\n```diff\n{diff_text}\n```"
 
-await session.send_and_wait(MessageOptions(prompt=prompt), timeout=300)
+await session.send_and_wait(prompt, timeout=300)
 print()  # ストリーミング出力終了後の改行
 ```
 
@@ -155,7 +153,7 @@ uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
 
 ## まとめ
 
-- `SessionConfig` で `streaming=True` を設定すると逐次トークンを受信できる
+- セッション作成時に `streaming=True` を設定すると逐次トークンを受信できる
 - `ASSISTANT_MESSAGE_DELTA` イベントを処理してトークンが届くたびに出力する
 - シームレスなストリーミング出力のために `end=""` と `flush=True` を使用する
 - `send_and_wait` は完全なレスポンスを待つ — ストリーミングはトークンをいつ取得するかの問題

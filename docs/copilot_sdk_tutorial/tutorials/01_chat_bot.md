@@ -7,7 +7,7 @@
 ## What You Will Learn
 
 - How to create a `CopilotClient` and connect to the CLI server
-- How to create a `SessionConfig` with a system message and permission handler
+- How to create a session with a system message and permission handler
 - How to send a single prompt and receive a response
 - How to consume streaming tokens via `ASSISTANT_MESSAGE_DELTA`
 - How to run an interactive chat loop
@@ -26,14 +26,13 @@
 The `CopilotClient` is the main entry point. By default it launches the `copilot` binary as a subprocess and talks to it over stdio. Pass `cli_url` only if you already have a Copilot CLI running in TCP mode:
 
 ```python
-from copilot import CopilotClient
-from copilot.types import CopilotClientOptions
+from copilot import CopilotClient, RuntimeConnection
 
 # Default: SDK launches the CLI over stdio
 client = CopilotClient()
 
 # Optional: connect to an already-running CLI server
-# client = CopilotClient(options=CopilotClientOptions(cli_url="localhost:3000"))
+# client = CopilotClient(connection=RuntimeConnection.for_uri("localhost:3000"))
 
 await client.start()
 ```
@@ -44,28 +43,23 @@ await client.start()
 
 ## Step 2 — Configure the session
 
-A `SessionConfig` groups everything related to a single conversation:
+`create_session` accepts keyword arguments that group everything related to a single conversation:
 
 ```python
-from copilot.types import (
-    PermissionRequest,
-    PermissionRequestResult,
-    SessionConfig,
-    SystemMessageAppendConfig,
-)
+from copilot.generated.rpc import PermissionDecisionApproveOnce
+from copilot.generated.session_events import PermissionRequest
+from copilot.session import PermissionRequestResult, SystemMessageAppendConfig
 
 def approve_all(request: PermissionRequest, context: dict) -> PermissionRequestResult:
-    return PermissionRequestResult(kind="approved", rules=[])
+    return PermissionDecisionApproveOnce()
 
 session = await client.create_session(
-    SessionConfig(
-        on_permission_request=approve_all,
-        tools=[],
-        streaming=True,
-        system_message=SystemMessageAppendConfig(
-            content="You are a helpful assistant."
-        ),
-    )
+    on_permission_request=approve_all,
+    tools=[],
+    streaming=True,
+    system_message=SystemMessageAppendConfig(
+        content="You are a helpful assistant."
+    ),
 )
 ```
 
@@ -73,7 +67,7 @@ session = await client.create_session(
 
 | Field | Description |
 |-------|-------------|
-| `on_permission_request` | Called before each tool execution — return `approved` or `denied` |
+| `on_permission_request` | Called before each tool execution — return `PermissionDecisionApproveOnce()` or `PermissionDecisionReject(feedback=...)` |
 | `tools` | List of custom tools to register (empty for a plain chat session) |
 | `streaming` | Whether to receive tokens incrementally (`True`) or wait for the full response (`False`) |
 | `system_message` | Sets the assistant's persona |
@@ -113,13 +107,11 @@ session.on(on_event)
 ## Step 4 — Send a prompt
 
 ```python
-from copilot.types import MessageOptions
-
 reply = await session.send_and_wait(
-    MessageOptions(prompt="What is GitHub Copilot?"),
+    "What is GitHub Copilot?",
     timeout=300,
 )
-content = reply.data.content if reply else "(no response)"
+content = getattr(reply.data, "content", None) if reply else "(no response)"
 print(content)
 ```
 
@@ -138,7 +130,7 @@ while True:
     if not user_input:
         continue
     print("Copilot: ", end="")
-    await session.send_and_wait(MessageOptions(prompt=user_input), timeout=300)
+    await session.send_and_wait(user_input, timeout=300)
     print()
 ```
 
@@ -164,10 +156,76 @@ uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
 
 ---
 
+## Connecting to a Standalone CLI Server (TCP)
+
+By default the SDK launches the `copilot` CLI as a subprocess and talks to it
+over stdio. Alternatively, you can run the CLI as a long-lived TCP server and
+connect to it from one or more SDK clients via `--cli-url`. This is useful when
+you want to share a single authenticated CLI process across multiple runs.
+
+### Step 1 — Start the CLI server
+
+In a separate terminal, start the CLI in headless TCP mode:
+
+```bash
+copilot --headless --no-auto-update --log-level info --port 3000
+```
+
+When startup succeeds you will see:
+
+```text
+CLI server listening on port 3000
+```
+
+> **Note:** `--headless` and `--port` are not shown in `copilot --help`, but
+> they are the same arguments the SDK uses internally when spawning a TCP
+> runtime, and they work as expected.
+
+### Step 2 — Connect from the SDK client
+
+In another terminal, point the script at the running server:
+
+```bash
+cd src/python
+
+# Single prompt
+uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --prompt "Reply with exactly: connection ok"
+
+# Interactive loop
+uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
+```
+
+A successful run returns the assistant's response (e.g. `connection ok`).
+
+### Troubleshooting & notes
+
+- **`Session was not created with authentication info or custom provider`** —
+  This happens when the server is started with `--no-auto-login`, leaving it
+  without credentials. **Do not pass `--no-auto-login`** for this scenario; let
+  the server reuse your logged-in user (already authenticated via
+  `gh auth login` or the `copilot` login flow).
+- **`No COPILOT_CONNECTION_TOKEN was set` warning** — Without a token the server
+  accepts connections from any client. This is fine for local testing. To
+  restrict access, set `COPILOT_CONNECTION_TOKEN` in the server's environment
+  and pass the same token from the client:
+
+  ```python
+  from copilot import CopilotClient, RuntimeConnection
+
+  client = CopilotClient(
+      connection=RuntimeConnection.for_uri(
+          "localhost:3000",
+          connection_token="your-shared-secret",
+      )
+  )
+  ```
+
+---
+
 ## Key Takeaways
 
 - `CopilotClient` → `create_session` → `send_and_wait` is the basic pattern
-- `SessionConfig` controls the persona, tools, streaming, and permissions
+- `create_session` parameters control the persona, tools, streaming, and permissions
 - `session.on(handler)` receives all events including streaming deltas
 - A session can be reused for multi-turn conversations
 - `send_and_wait` blocks until the response is complete

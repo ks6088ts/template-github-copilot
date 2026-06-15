@@ -1,34 +1,9 @@
 #!/usr/bin/env python3
 """CLI Chatbot using the GitHub Copilot SDK.
 
-What you will learn:
-    - How to create a CopilotClient and start a session
-    - How to send a single prompt and receive a response
-    - How to run an interactive chat loop
-    - How to handle session events
-
-Usage (run from ``src/python``):
-    # Single prompt (SDK auto-launches the copilot CLI via stdio)
-    uv run python scripts/tutorials/01_chat_bot.py --prompt "What is GitHub Copilot?"
-
-    # Interactive loop
-    uv run python scripts/tutorials/01_chat_bot.py --loop
-
-    # Connect to an externally running CLI server over TCP
-    uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000 --loop
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-    If the copilot binary is not on PATH, set:
-        export COPILOT_CLI_PATH=/path/to/copilot
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/01_chat_bot.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/01_chat_bot.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/01_chat_bot.ja.md  (日本語)
 """
 
 import argparse

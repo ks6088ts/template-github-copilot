@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
 """Streaming Code Review using GitHub Copilot SDK.
 
-What you will learn:
-    - How to enable streaming and consume ASSISTANT_MESSAGE_DELTA events
-    - How to structure a code-review prompt around a unified diff
-    - How real-time output differs from waiting for the full response
-
-Usage (run from ``src/python``):
-    uv run python scripts/tutorials/03_streaming_review.py
-    uv run python scripts/tutorials/03_streaming_review.py --diff path/to/changes.diff
-    uv run python scripts/tutorials/03_streaming_review.py --cli-url localhost:3000
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/03_streaming.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/03_streaming.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/03_streaming.ja.md  (日本語)
 """
 
 import argparse

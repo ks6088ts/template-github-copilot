@@ -1,32 +1,9 @@
 #!/usr/bin/env python3
 """BYOK (Bring Your Own Key) — Use Azure OpenAI with the GitHub Copilot SDK.
 
-What you will learn:
-    - How to configure a ProviderConfig to point to Azure OpenAI
-    - How to pass an API key or bearer token to the Copilot SDK
-    - How BYOK differs from the default Copilot backend
-
-Usage (run from ``src/python``):
-    # API-key authentication
-    export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
-    export BYOK_API_KEY="<your-azure-openai-api-key>"
-    export BYOK_MODEL="gpt-4o"
-    uv run python scripts/tutorials/06_byok_azure_openai.py --prompt "Hello from Azure OpenAI!"
-
-    # Bearer-token authentication (Entra ID / Managed Identity)
-    export BYOK_BASE_URL="https://<resource>.openai.azure.com/openai/deployments/<deploy>"
-    export BYOK_MODEL="gpt-4o"
-    uv run python scripts/tutorials/06_byok_azure_openai.py --auth entra --prompt "Hello from Entra ID!"
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk and azure-identity (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/06_byok.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/06_byok.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/06_byok.ja.md  (日本語)
 """
 
 import argparse

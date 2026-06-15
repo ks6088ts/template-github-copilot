@@ -1,25 +1,9 @@
 #!/usr/bin/env python3
 """Audit Logging using GitHub Copilot SDK Session Hooks and Permission Handling.
 
-What you will learn:
-    - How to intercept all session events via session.on()
-    - How to implement a custom permission handler (approve / deny)
-    - How to build a simple structured audit log from event stream
-
-Usage (run from ``src/python``):
-    uv run python scripts/tutorials/05_audit_hooks.py --prompt "List 3 interesting Python tips"
-    uv run python scripts/tutorials/05_audit_hooks.py --deny-tools
-    uv run python scripts/tutorials/05_audit_hooks.py --cli-url localhost:3000
-
-Prerequisites:
-    uv sync   # installs github-copilot-sdk (declared in pyproject.toml)
-
-    Install and authenticate the GitHub Copilot CLI so the SDK can launch it:
-        npm install -g @github/copilot            # or: gh copilot (downloads on first run)
-        gh auth login                             # or: export COPILOT_GITHUB_TOKEN=...
-
-Corresponding doc:
-    docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.md
+See the tutorial for learning goals, prerequisites, and usage:
+    docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.md     (English)
+    docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.ja.md  (日本語)
 """
 
 import argparse

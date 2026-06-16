@@ -220,6 +220,55 @@ A successful run returns the assistant's response (e.g. `connection ok`).
 
 ---
 
+## Run in GitHub Actions (CI Smoke Test)
+
+The repository ships a ready-made workflow,
+[`.github/workflows/go-run.yaml`](https://github.com/ks6088ts/template-github-copilot/blob/main/.github/workflows/go-run.yaml),
+that runs this `chat-bot` subcommand as a manual smoke test. It builds the Go
+CLI, installs the Copilot CLI, and sends a single prompt to the agent.
+
+### Trigger it
+
+1. Open the repository's **Actions** tab → **go-run** workflow.
+2. Click **Run workflow** — this is a manually triggered [`workflow_dispatch`](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch) workflow.
+3. Optionally edit the **prompt** input (default: `Hello`), then run.
+
+The job runs the same command you use locally — the SDK launches the `copilot`
+CLI over stdio, so no separate server is needed:
+
+```bash
+./dist/template-github-copilot-go tutorial chat-bot --verbose --prompt "<your prompt>"
+```
+
+### Configure the `COPILOT_GITHUB_TOKEN` secret
+
+The workflow runs in the `dev`
+[environment](https://docs.github.com/en/actions/deployment/targeting-different-environments/managing-environments-for-deployment)
+and reads a `COPILOT_GITHUB_TOKEN`
+[secret](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) —
+a GitHub Personal Access Token belonging to an account with an active Copilot
+subscription. Pick one of the following:
+
+- **Manually (UI):** Repository **Settings → Environments → New environment**, name it `dev`, then add an **environment secret** named `COPILOT_GITHUB_TOKEN`. See [Creating secrets for an environment](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-an-environment).
+- **With Terraform:** Use the repo's [GitHub Secrets scenario](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/github_secrets/README.md) to provision the `dev` environment and its secrets reproducibly.
+
+> Create the token under **GitHub → Settings → Developer settings → Personal access tokens** with Copilot access — see [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens). Store it **only** as an encrypted secret; never commit it to the repository.
+>
+> **Security note:** The workflow passes the `prompt` input to the step through an environment variable instead of interpolating it directly into the shell command, which mitigates [script injection from untrusted inputs](https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks).
+
+### References
+
+| Resource | Link |
+|----------|------|
+| GitHub Copilot SDK for Go (API reference) | [pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go) |
+| GitHub Copilot SDK (monorepo) | [github/copilot-sdk](https://github.com/github/copilot-sdk) |
+| `workflow_dispatch` event | [docs.github.com](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch) |
+| Using secrets in GitHub Actions | [docs.github.com](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) |
+| Managing environments for deployment | [docs.github.com](https://docs.github.com/en/actions/deployment/targeting-different-environments/managing-environments-for-deployment) |
+| Managing your personal access tokens | [docs.github.com](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) |
+
+---
+
 ## Next Steps
 
 - Browse the full Go API on [pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go)

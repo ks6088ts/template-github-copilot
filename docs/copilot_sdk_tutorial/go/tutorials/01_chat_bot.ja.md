@@ -220,6 +220,56 @@ cd src/go
 
 ---
 
+## GitHub Actions で実行する（CI スモークテスト）
+
+本リポジトリには、この `chat-bot` サブコマンドを手動のスモークテストとして実行する
+ワークフロー
+[`.github/workflows/go-run.yaml`](https://github.com/ks6088ts/template-github-copilot/blob/main/.github/workflows/go-run.yaml)
+が同梱されています。Go CLI をビルドし、Copilot CLI をインストールして、エージェントに
+単一のプロンプトを送信します。
+
+### 実行方法
+
+1. リポジトリの **Actions** タブ → **go-run** ワークフローを開きます。
+2. **Run workflow** をクリックします（手動トリガーの [`workflow_dispatch`](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch) ワークフローです）。
+3. 必要に応じて **prompt** 入力（デフォルト: `Hello`）を編集して実行します。
+
+ジョブはローカルと同じコマンドを実行します。SDK が `copilot` CLI を stdio 経由で
+起動するため、別途サーバーを起動する必要はありません。
+
+```bash
+./dist/template-github-copilot-go tutorial chat-bot --verbose --prompt "<あなたのプロンプト>"
+```
+
+### `COPILOT_GITHUB_TOKEN` シークレットの設定
+
+このワークフローは `dev`
+[環境（environment）](https://docs.github.com/en/actions/deployment/targeting-different-environments/managing-environments-for-deployment)
+で実行され、`COPILOT_GITHUB_TOKEN`
+[シークレット](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+（有効な Copilot サブスクリプションを持つアカウントの GitHub Personal Access Token）を
+読み取ります。次のいずれかの方法で設定してください。
+
+- **手動（UI）:** リポジトリの **Settings → Environments → New environment** で `dev` という名前の環境を作成し、**environment secret** として `COPILOT_GITHUB_TOKEN` を追加します。[Creating secrets for an environment](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#creating-secrets-for-an-environment) を参照してください。
+- **Terraform で:** リポジトリの [GitHub Secrets シナリオ](https://github.com/ks6088ts/template-github-copilot/blob/main/infra/scenarios/github_secrets/README.md) を使うと、`dev` 環境とそのシークレットを再現可能な形でプロビジョニングできます。
+
+> トークンは **GitHub → Settings → Developer settings → Personal access tokens** から Copilot アクセス権付きで作成してください（[Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) を参照）。必ず暗号化シークレットとしてのみ保存し、リポジトリにコミットしないでください。
+>
+> **セキュリティ上の注意:** このワークフローは `prompt` 入力をシェルコマンドへ直接展開せず、環境変数経由でステップに渡します。これにより[信頼できない入力によるスクリプトインジェクション](https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks)を緩和します。
+
+### 参考情報・出典
+
+| リソース | リンク |
+|----------|------|
+| GitHub Copilot SDK for Go（API リファレンス） | [pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go) |
+| GitHub Copilot SDK（モノレポ） | [github/copilot-sdk](https://github.com/github/copilot-sdk) |
+| `workflow_dispatch` イベント | [docs.github.com](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch) |
+| GitHub Actions でのシークレットの利用 | [docs.github.com](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets) |
+| デプロイ用環境の管理 | [docs.github.com](https://docs.github.com/en/actions/deployment/targeting-different-environments/managing-environments-for-deployment) |
+| Personal access token の管理 | [docs.github.com](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) |
+
+---
+
 ## 次のステップ
 
 - [pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go) で Go API 全体を参照する

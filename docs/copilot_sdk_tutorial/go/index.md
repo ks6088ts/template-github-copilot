@@ -16,11 +16,11 @@ Each tutorial pairs a **documentation page** with a **CLI subcommand** that you 
 | # | Tutorial | Subcommand | Status | What You Learn |
 |---|----------|------------|--------|----------------|
 | 1 | [CLI Chatbot](tutorials/01_chat_bot.md) | `tutorial chat-bot` | Available | Client/session creation, single prompt, streaming, interactive loop |
-| 2 | Issue Triage Bot | `tutorial issue-triage` | Planned | `DefineTool`, typed tool I/O, tool-calling agent |
-| 3 | Streaming Review | `tutorial streaming-review` | Planned | Streaming deltas, real-time output |
-| 4 | Skills Doc Generation | `tutorial skills-docgen` | Planned | `SkillDirectories`, `SKILL.md`, doc generation |
-| 5 | Audit Log | `tutorial audit-hooks` | Planned | Session hooks, permission handler, audit log |
-| 6 | BYOK Azure OpenAI | `tutorial byok-azure-openai` | Planned | `ProviderConfig`, Azure OpenAI API key & Entra ID |
+| 2 | [Issue Triage Bot](tutorials/02_issue_triage.md) | `tutorial issue-triage` | Available | `DefineTool`, typed tool I/O, tool-calling agent |
+| 3 | [Streaming Review](tutorials/03_streaming_review.md) | `tutorial streaming-review` | Available | Streaming deltas, real-time output |
+| 4 | [Skills Doc Generation](tutorials/04_skills_docgen.md) | `tutorial skills-docgen` | Available | `SkillDirectories`, `SKILL.md`, doc generation |
+| 5 | [Audit Log](tutorials/05_audit_hooks.md) | `tutorial audit-hooks` | Available | Session hooks, permission handler, audit log |
+| 6 | [BYOK Azure OpenAI](tutorials/06_byok_azure_openai.md) | `tutorial byok-azure-openai` | Available | `ProviderConfig`, Azure OpenAI API key & Entra ID |
 
 > All subcommands live in [`src/go/cmd/tutorial/`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/go/cmd/tutorial/).
 

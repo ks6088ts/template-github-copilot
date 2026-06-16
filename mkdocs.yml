@@ -26,6 +26,11 @@ nav:
           - Getting Started: copilot_sdk_tutorial/go/getting_started.md
           - Tutorials:
               - "01: CLI Chatbot": copilot_sdk_tutorial/go/tutorials/01_chat_bot.md
+              - "02: Issue Triage Bot": copilot_sdk_tutorial/go/tutorials/02_issue_triage.md
+              - "03: Streaming Review": copilot_sdk_tutorial/go/tutorials/03_streaming_review.md
+              - "04: Skills Doc Generation": copilot_sdk_tutorial/go/tutorials/04_skills_docgen.md
+              - "05: Audit Log": copilot_sdk_tutorial/go/tutorials/05_audit_hooks.md
+              - "06: BYOK Azure OpenAI": copilot_sdk_tutorial/go/tutorials/06_byok_azure_openai.md
       - Appendix:
           - References: copilot_sdk_tutorial/appendix/references.md
   - CopilotReportForge:

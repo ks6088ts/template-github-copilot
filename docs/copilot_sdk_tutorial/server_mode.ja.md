@@ -1,7 +1,7 @@
 # Copilot CLI を単独サーバーモードで起動する
 
 このページは、**GitHub Copilot CLI** を長時間稼働の単独 **TCP サーバー** として
-起動し、他のプロセス（Python SDK、API サーバー、独自クライアントなど）がソケット
+起動し、他のプロセス（任意の言語の SDK、API サーバー、独自クライアントなど）がソケット
 経由で接続するための詳細リファレンスです。
 
 基本となるコマンドは次のとおりです。
@@ -15,7 +15,7 @@ copilot --server --port 3000 --log-level all --allow-all-tools --allow-all-paths
 > フラグです。`copilot --help`（対話モードや `-p/--prompt` の利用を中心に説明）
 > には意図的に載っていませんが、完全にサポートされています。`--help` に表示される
 > よく似た `--acp` フラグは **Agent Client Protocol** サーバーを起動するもので、
-> プロトコルが異なり、SDK の `RuntimeConnection` が接続する先では **ありません**。
+> プロトコルが異なり、SDK のランタイム接続が接続する先では **ありません**。
 
 ---
 
@@ -35,7 +35,7 @@ copilot --server --port 3000 --log-level all --allow-all-tools --allow-all-paths
 ```mermaid
 graph LR
     subgraph クライアント
-        A[Python SDK スクリプト]
+        A[SDK クライアント]
         B[API サーバー]
         C[独自クライアント]
     end
@@ -139,28 +139,16 @@ nc -z -v 127.0.0.1 3000
 
 ---
 
-## SDK からの接続
+## クライアントからの接続
 
 SDK クライアントが stdio 経由で独自に CLI を起動する代わりに、起動中のサーバーへ
-向けます。`RuntimeConnection` を渡します。
+向けます。コードでは、デフォルトの stdio トランスポートの代わりに `host:port` を指す
+**ランタイム接続**でクライアントを構築します。
 
-```python
-from copilot import CopilotClient, RuntimeConnection
+各チュートリアル版はこれを `--cli-url host:port` フラグとして公開しています。
 
-client = CopilotClient(
-    connection=RuntimeConnection.for_uri("localhost:3000")
-)
-await client.start()
-```
-
-チュートリアルスクリプトはこれを `--cli-url` フラグとして公開しています。
-
-```bash
-cd src/python
-uv run python scripts/tutorials/01_chat_bot.py \
-  --prompt "What is GitHub Copilot?" \
-  --cli-url localhost:3000
-```
+- **Python:** `uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000` — [Python CLI チャットボットチュートリアル](python/tutorials/01_chat_bot.md) を参照
+- **Go:** `./dist/template-github-copilot-go tutorial chat-bot --cli-url localhost:3000` — [Go CLI チャットボットチュートリアル](go/tutorials/01_chat_bot.md) を参照
 
 API サーバーは同じ値を `COPILOT_CLI_URL` 環境変数から読み取ります
 （例: `COPILOT_CLI_URL=127.0.0.1:3000`）。
@@ -249,18 +237,9 @@ copilot --server --port 3000 --allow-all
    copilot --server --port 3000 --allow-all --model gpt-5-mini
    ```
 
-2. すべてのクライアントから **同じ** トークンを渡します。
-
-   ```python
-   from copilot import CopilotClient, RuntimeConnection
-
-   client = CopilotClient(
-       connection=RuntimeConnection.for_uri(
-           "localhost:3000",
-           connection_token="your-shared-secret",
-       )
-   )
-   ```
+2. すべてのクライアントから、ランタイム接続を構築する際に **同じ** トークンを渡します。
+   `host:port` の URL とともに接続トークン（例: Python の `connection_token`
+   オプションや Go の同等オプション）を指定します。
 
 追加の堅牢化:
 
@@ -278,7 +257,8 @@ copilot --server --port 3000 --allow-all
 
 ### Make ターゲット
 
-リポジトリではこのコマンドを Make ターゲットとして用意しています。
+このリポジトリの Python サービスでは、このコマンドを Make ターゲットとして用意して
+います（`copilot --server` コマンドはどの SDK が接続しても同じです）。
 
 ```bash
 cd src/python
@@ -360,9 +340,10 @@ docker compose down
 
 ## 関連項目
 
-- [はじめに](getting_started.md) — 環境構築と本セクションの簡易版。
+- [はじめに](getting_started.md) — 共通セットアップと本セクションの簡易版。
 - [アーキテクチャ](architecture.md) — SDK・CLI サーバー・Copilot API の連携。
-- [01: CLI チャットボット](tutorials/01_chat_bot.md) — 最初のスクリプト。`--cli-url`
-  の利用と接続トークンの注意点を含む。
+- CLI チャットボットチュートリアル — 最初のプログラム。`--cli-url` の利用と接続トークンの
+  注意点を含む: [Python](python/tutorials/01_chat_bot.md) ·
+  [Go](go/tutorials/01_chat_bot.md)。
 - `copilot help permissions`、`copilot help logging`、`copilot help monitoring`、
   `copilot help environment` — 組み込みのリファレンストピック。

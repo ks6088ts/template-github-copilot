@@ -1,20 +1,22 @@
 # GitHub Copilot SDK Tutorial
 
-A step-by-step guide to building real applications with the **GitHub Copilot SDK** for Python.
+A step-by-step guide to building real applications with the **GitHub Copilot SDK**, available in both **Python** and **Go** editions.
+
+> This page covers the language-agnostic concepts shared by every edition: what the SDK is, how it works, and how to set up the Copilot CLI. Pick a language below for the SDK-specific API, code, and run instructions.
 
 ---
 
 ## What Is the GitHub Copilot SDK?
 
-The GitHub Copilot SDK is a programmable interface to the same agent runtime that powers **GitHub Copilot CLI**. It lets you embed Copilot capabilities — LLM inference, tool calling, streaming, skill execution — directly into your own Python programs.
+The GitHub Copilot SDK is a programmable interface to the same agent runtime that powers **GitHub Copilot CLI**. It lets you embed Copilot capabilities — LLM inference, tool calling, streaming, skill execution — directly into your own programs.
 
 ```mermaid
 graph TD
-    A[Your Python Script] -->|SDK Client| B[CopilotClient]
+    A[Your Program] -->|SDK Client| B[Copilot Client]
     B -->|JSON-RPC over stdio| C[Copilot CLI Server]
     C -->|API Call| D[GitHub Copilot API]
     C -->|Tool Execution| E[Built-in Tools]
-    C -->|Custom Tool| F[User-defined Tools<br/>@define_tool]
+    C -->|Custom Tool| F[User-defined Tools]
     C -->|Skills| G[SKILL.md Files]
 
     style A fill:#e1f5fe
@@ -25,53 +27,45 @@ graph TD
 
 ### What it IS
 
-- A **Python library** (`github-copilot-sdk`) for integrating Copilot into your own code
+- A **library** for integrating Copilot into your own code (`github-copilot-sdk` for Python, `github.com/github/copilot-sdk/go` for Go)
 - A way to **programmatically** create sessions, send prompts, and receive responses
-- Support for **custom tools** (`@define_tool`), **skills** (SKILL.md), **streaming**, and **BYOK**
+- Support for **custom tools**, **skills** (SKILL.md), **streaming**, and **BYOK**
 - The same runtime used by the Copilot CLI — exposed as a reusable API
 
 ### What it is NOT
 
 - A replacement for the Copilot Chat UI or the GitHub.com Copilot interface
 - A way to fine-tune or host your own models
-- A general-purpose OpenAI-compatible HTTP client (use the `openai` library for that)
+- A general-purpose OpenAI-compatible HTTP client
 - A framework for building REST APIs or web applications
 
----
-
-## Tutorial Structure
-
-Each tutorial pairs a **documentation page** with a **self-contained CLI script** that you can run directly:
-
-| # | Tutorial | Script | What You Learn |
-|---|----------|--------|----------------|
-| 1 | [CLI Chatbot](tutorials/01_chat_bot.md) | [`01_chat_bot.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/01_chat_bot.py) | CopilotClient, sessions, single prompt, interactive loop |
-| 2 | [Issue Triage Bot](tutorials/02_custom_tools.md) | [`02_issue_triage.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/02_issue_triage.py) | Custom tools with `@define_tool`, Pydantic I/O |
-| 3 | [Streaming Review](tutorials/03_streaming.md) | [`03_streaming_review.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/03_streaming_review.py) | Streaming with `ASSISTANT_MESSAGE_DELTA` |
-| 4 | [Skills Doc Generation](tutorials/04_skills.md) | [`04_skills_docgen.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/04_skills_docgen.py) | Agent Skills via `SKILL.md` files |
-| 5 | [Audit Log](tutorials/05_hooks_permissions.md) | [`05_audit_hooks.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/05_audit_hooks.py) | Session hooks, permission handling |
-| 6 | [BYOK Azure OpenAI](tutorials/06_byok.md) | [`06_byok_azure_openai.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/06_byok_azure_openai.py) | Bring Your Own Key with Azure OpenAI |
-
-> All scripts live in [`src/python/scripts/tutorials/`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/).
+For a deeper look at the components and request flow, see [Architecture](architecture.md).
 
 ---
 
-## Quick Start
+## Choose Your Language
 
-```bash
-# 1. Install SDK and tutorial dependencies (uses src/python/pyproject.toml)
-cd src/python
-uv sync --all-groups
+The tutorials are mirrored across both editions — each recipe maps 1:1, so you can compare the same task in either language.
 
-# 2. Install and authenticate the Copilot CLI (the SDK launches it on demand)
-npm install -g @github/copilot       # or: gh copilot (downloads on first run)
-gh auth login                        # or: export COPILOT_GITHUB_TOKEN="<pat>"
+| Edition | Start here | Tutorials |
+|---------|------------|-----------|
+| **Python** | [Python Getting Started](python/getting_started.md) | [Python tutorials](python/index.md) — chatbots, custom tools, streaming, skills, hooks, BYOK |
+| **Go** | [Go Getting Started](go/getting_started.md) | [Go tutorials](go/index.md) — CLI chatbot, streaming, interactive sessions |
 
-# 3. Run your first tutorial script
-uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
-```
+> New to the SDK? Start with the **common setup** below, then jump into the edition of your choice.
 
-For detailed setup instructions, see [Getting Started](getting_started.md).
+---
+
+## Common Setup
+
+Every edition relies on the same **Copilot CLI** binary and GitHub authentication. Complete these shared steps once:
+
+1. [Install the Copilot CLI](getting_started.md#install-the-copilot-cli)
+2. [Authenticate with GitHub](getting_started.md#authenticate-with-github)
+
+Then follow your language edition's Getting Started for SDK installation and running the tutorials.
+
+See [Getting Started](getting_started.md) for the full common setup guide.
 
 ---
 
@@ -81,17 +75,15 @@ For detailed setup instructions, see [Getting Started](getting_started.md).
 
 - GitHub Copilot SDK concepts (what it is / is not)
 - Architecture and operation principles
-- Python SDK API design and interfaces
-- Sample code and step-by-step guides for concrete use cases
-- Agent Skills, Custom Tools, Session Hooks, Permission Handling, Streaming, BYOK
+- Per-language SDK API design, sample code, and step-by-step guides
+- Custom Tools, Skills, Session Hooks, Permission Handling, Streaming, BYOK
 
 **Out of scope:**
 
-- TypeScript / Go / .NET SDK details (see [References](appendix/references.md))
+- TypeScript / .NET SDK details (see [References](appendix/references.md))
 - Copilot CLI standalone usage guide
 - Production scaling and infrastructure
 - GitHub OAuth App authentication flow (see [CopilotReportForge docs](../copilot_report_forge/guide/github_oauth_app.md))
-- `template_github_copilot` package internals (tutorial scripts are self-contained)
 
 ---
 
@@ -99,7 +91,9 @@ For detailed setup instructions, see [Getting Started](getting_started.md).
 
 | Document | Description |
 |----------|-------------|
+| [Getting Started](getting_started.md) | Common setup: install the Copilot CLI and authenticate |
 | [Architecture](architecture.md) | How the SDK, CLI server, and Copilot API interact |
-| [Getting Started](getting_started.md) | Environment setup and first run |
 | [CLI Server Mode](server_mode.md) | Run the Copilot CLI as a standalone TCP server |
+| [Python Tutorial](python/index.md) | The Python edition |
+| [Go Tutorial](go/index.md) | The Go edition |
 | [References](appendix/references.md) | API reference and external links |

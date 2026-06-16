@@ -1,7 +1,7 @@
 # Running the Copilot CLI in Standalone Server Mode
 
 This page is a detailed reference for starting the **GitHub Copilot CLI** as a
-long-lived, standalone **TCP server** that other processes — the Python SDK,
+long-lived, standalone **TCP server** that other processes — any language SDK,
 the API server, or your own clients — connect to over a socket.
 
 The canonical command is:
@@ -16,7 +16,7 @@ copilot --server --port 3000 --log-level all --allow-all-tools --allow-all-paths
 > (which focuses on interactive and `-p/--prompt` usage), but they are fully
 > supported. The closely related `--acp` flag shown in `--help` starts an
 > **Agent Client Protocol** server instead, which is a different protocol and
-> is **not** what the SDK's `RuntimeConnection` connects to.
+> is **not** what the SDK's runtime connection connects to.
 
 ---
 
@@ -37,7 +37,7 @@ want to:
 ```mermaid
 graph LR
     subgraph Clients
-        A[Python SDK script]
+        A[SDK client]
         B[API server]
         C[Your own client]
     end
@@ -141,28 +141,16 @@ host, see [Running with Docker and Make](#running-with-docker-and-make) and
 
 ---
 
-## Connecting from the SDK
+## Connecting from a Client
 
 Point any SDK client at the running server instead of letting it spawn its own
-CLI over stdio. Pass a `RuntimeConnection`:
+CLI over stdio. In code, you construct the client with a **runtime connection**
+pointing at `host:port` instead of the default stdio transport.
 
-```python
-from copilot import CopilotClient, RuntimeConnection
+Each tutorial edition exposes this as a `--cli-url host:port` flag:
 
-client = CopilotClient(
-    connection=RuntimeConnection.for_uri("localhost:3000")
-)
-await client.start()
-```
-
-The tutorial scripts expose this as a `--cli-url` flag:
-
-```bash
-cd src/python
-uv run python scripts/tutorials/01_chat_bot.py \
-  --prompt "What is GitHub Copilot?" \
-  --cli-url localhost:3000
-```
+- **Python:** `uv run python scripts/tutorials/01_chat_bot.py --cli-url localhost:3000` — see the [Python CLI Chatbot tutorial](python/tutorials/01_chat_bot.md)
+- **Go:** `./dist/template-github-copilot-go tutorial chat-bot --cli-url localhost:3000` — see the [Go CLI Chatbot tutorial](go/tutorials/01_chat_bot.md)
 
 The API server reads the same value from the `COPILOT_CLI_URL` environment
 variable (e.g. `COPILOT_CLI_URL=127.0.0.1:3000`).
@@ -251,18 +239,9 @@ authentication:
    copilot --server --port 3000 --allow-all --model gpt-5-mini
    ```
 
-2. Pass the **same** token from every client:
-
-   ```python
-   from copilot import CopilotClient, RuntimeConnection
-
-   client = CopilotClient(
-       connection=RuntimeConnection.for_uri(
-           "localhost:3000",
-           connection_token="your-shared-secret",
-       )
-   )
-   ```
+2. Pass the **same** token from every client when constructing its runtime
+   connection — alongside the `host:port` URL, supply the connection token
+   (for example a `connection_token` option in Python or the equivalent in Go).
 
 Additional hardening:
 
@@ -279,7 +258,8 @@ Additional hardening:
 
 ### Make target
 
-The repository wraps the command in a Make target:
+The Python service in this repo wraps the command in a Make target (the same
+`copilot --server` command works regardless of which SDK connects):
 
 ```bash
 cd src/python
@@ -360,11 +340,12 @@ docker compose down
 
 ## See Also
 
-- [Getting Started](getting_started.md) — environment setup and the quick
+- [Getting Started](getting_started.md) — common setup and the quick
   version of this section.
 - [Architecture](architecture.md) — how the SDK, CLI server, and Copilot API
   interact.
-- [01: CLI Chatbot](tutorials/01_chat_bot.md) — first script, including
-  `--cli-url` usage and connection-token notes.
+- CLI Chatbot tutorial — first program, including `--cli-url` usage and
+  connection-token notes: [Python](python/tutorials/01_chat_bot.md) ·
+  [Go](go/tutorials/01_chat_bot.md).
 - `copilot help permissions`, `copilot help logging`, `copilot help monitoring`,
   `copilot help environment` — built-in reference topics.

@@ -1,20 +1,22 @@
 # GitHub Copilot SDK チュートリアル
 
-Python 向け **GitHub Copilot SDK** を使って実際のアプリケーションを構築するためのステップバイステップガイドです。
+**GitHub Copilot SDK** を使って実際のアプリケーションを構築するためのステップバイステップガイドです。**Python** 版と **Go** 版の両方を提供しています。
+
+> このページでは、すべての版に共通する言語非依存の概念（SDK とは何か、どのように動作するか、Copilot CLI のセットアップ方法）を扱います。SDK 固有の API・コード・実行手順は、下記から言語を選択してください。
 
 ---
 
 ## GitHub Copilot SDK とは？
 
-GitHub Copilot SDK は、**GitHub Copilot CLI** を動かすのと同じエージェントランタイムへのプログラマブルなインタフェースです。LLM 推論、ツール呼び出し、ストリーミング、スキル実行など Copilot の機能を独自の Python プログラムに直接組み込むことができます。
+GitHub Copilot SDK は、**GitHub Copilot CLI** を動かすのと同じエージェントランタイムへのプログラマブルなインタフェースです。LLM 推論、ツール呼び出し、ストリーミング、スキル実行など Copilot の機能を独自のプログラムに直接組み込むことができます。
 
 ```mermaid
 graph TD
-    A[Your Python Script] -->|SDK Client| B[CopilotClient]
+    A[Your Program] -->|SDK Client| B[Copilot Client]
     B -->|JSON-RPC over stdio| C[Copilot CLI Server]
     C -->|API Call| D[GitHub Copilot API]
     C -->|Tool Execution| E[Built-in Tools]
-    C -->|Custom Tool| F[User-defined Tools<br/>@define_tool]
+    C -->|Custom Tool| F[User-defined Tools]
     C -->|Skills| G[SKILL.md Files]
 
     style A fill:#e1f5fe
@@ -25,53 +27,45 @@ graph TD
 
 ### SDK であるもの
 
-- Copilot を独自コードに統合するための **Python ライブラリ**（`github-copilot-sdk`）
+- Copilot を独自コードに統合するための**ライブラリ**（Python は `github-copilot-sdk`、Go は `github.com/github/copilot-sdk/go`）
 - セッション作成、プロンプト送信、レスポンス受信を**プログラマブルに**行う手段
-- **カスタムツール**（`@define_tool`）、**スキル**（SKILL.md）、**ストリーミング**、**BYOK** のサポート
+- **カスタムツール**、**スキル**（SKILL.md）、**ストリーミング**、**BYOK** のサポート
 - Copilot CLI が使うのと同じランタイム — 再利用可能な API として公開
 
 ### SDK でないもの
 
 - Copilot Chat UI や GitHub.com の Copilot インタフェースの代替品
 - 独自モデルのファインチューニングやホスティング手段
-- 汎用的な OpenAI 互換 HTTP クライアント（それには `openai` ライブラリを使用）
+- 汎用的な OpenAI 互換 HTTP クライアント
 - REST API や Web アプリケーションを構築するためのフレームワーク
 
----
-
-## チュートリアル構成
-
-各チュートリアルは**解説ドキュメント**とそのまま実行できる**独立した CLI スクリプト**をペアで提供します。
-
-| # | チュートリアル | スクリプト | 学べること |
-|---|----------------|----------|------------|
-| 1 | [CLI チャットボット](tutorials/01_chat_bot.md) | [`01_chat_bot.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/01_chat_bot.py) | CopilotClient、セッション、プロンプト送信、インタラクティブループ |
-| 2 | [Issue トリアージボット](tutorials/02_custom_tools.md) | [`02_issue_triage.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/02_issue_triage.py) | `@define_tool` によるカスタムツール、Pydantic I/O |
-| 3 | [ストリーミングレビュー](tutorials/03_streaming.md) | [`03_streaming_review.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/03_streaming_review.py) | `ASSISTANT_MESSAGE_DELTA` によるストリーミング |
-| 4 | [スキルによるドキュメント生成](tutorials/04_skills.md) | [`04_skills_docgen.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/04_skills_docgen.py) | `SKILL.md` によるエージェントスキル |
-| 5 | [監査ログ](tutorials/05_hooks_permissions.md) | [`05_audit_hooks.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/05_audit_hooks.py) | セッションフック、パーミッションハンドラ |
-| 6 | [BYOK Azure OpenAI](tutorials/06_byok.md) | [`06_byok_azure_openai.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/06_byok_azure_openai.py) | Azure OpenAI を使った Bring Your Own Key |
-
-> すべてのスクリプトは [`src/python/scripts/tutorials/`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/) にあります。
+コンポーネントとリクエストフローの詳細は [アーキテクチャ](architecture.md) を参照してください。
 
 ---
 
-## クイックスタート
+## 言語を選択する
 
-```bash
-# 1. SDK とチュートリアルの依存関係をインストール（src/python/pyproject.toml を利用）
-cd src/python
-uv sync --all-groups
+チュートリアルは両版でミラーリングされており、各レシピが 1 対 1 で対応するため、同じタスクをどちらの言語でも比較できます。
 
-# 2. Copilot CLI をインストールして認証（SDK がオンデマンドで起動します）
-npm install -g @github/copilot       # または: gh copilot （初回実行時にダウンロード）
-gh auth login                        # または: export COPILOT_GITHUB_TOKEN="<pat>"
+| 版 | ここから始める | チュートリアル |
+|----|----------------|----------------|
+| **Python** | [Python はじめに](python/getting_started.md) | [Python チュートリアル](python/index.md) — チャットボット、カスタムツール、ストリーミング、スキル、フック、BYOK |
+| **Go** | [Go はじめに](go/getting_started.md) | [Go チュートリアル](go/index.md) — CLI チャットボット、ストリーミング、インタラクティブセッション |
 
-# 3. チュートリアルスクリプトを実行
-uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
-```
+> SDK が初めてですか？ まずは下記の**共通セットアップ**を済ませてから、お好みの版に進んでください。
 
-詳細なセットアップ手順については [はじめに](getting_started.md) を参照してください。
+---
+
+## 共通セットアップ
+
+どの版も、同じ **Copilot CLI** バイナリと GitHub 認証を使用します。[はじめに](getting_started.md) で次の共通手順を一度だけ完了してください。
+
+1. Copilot CLI のインストール
+2. GitHub で認証する
+
+その後、SDK のインストールとチュートリアルの実行については各言語版の「はじめに」に従ってください。
+
+共通セットアップの完全なガイドは [はじめに](getting_started.md) を参照してください。
 
 ---
 
@@ -81,17 +75,15 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 
 - GitHub Copilot SDK の概念説明（何であるか／何でないか）
 - アーキテクチャと動作原理
-- Python SDK の API 設計とインタフェース
-- 具体的なユースケースに基づくサンプルコードとステップバイステップガイド
-- Agent Skills、カスタムツール、セッションフック、パーミッションハンドリング、ストリーミング、BYOK
+- 言語ごとの SDK API 設計、サンプルコード、ステップバイステップガイド
+- カスタムツール、スキル、セッションフック、パーミッションハンドリング、ストリーミング、BYOK
 
 **含めないもの:**
 
-- TypeScript / Go / .NET SDK の詳細（[参考文献](appendix/references.md) を参照）
+- TypeScript / .NET SDK の詳細（[参考文献](appendix/references.md) を参照）
 - Copilot CLI 単体の使い方ガイド
 - 本番運用・スケーリング・インフラ構築の詳細
 - GitHub OAuth App 認証フロー（[CopilotReportForge ドキュメント](../copilot_report_forge/guide/github_oauth_app.md) を参照）
-- `template_github_copilot` パッケージ内部（チュートリアルスクリプトは自己完結）
 
 ---
 
@@ -99,7 +91,9 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 
 | ドキュメント | 説明 |
 |-------------|------|
+| [はじめに](getting_started.md) | 共通セットアップ: Copilot CLI のインストールと認証 |
 | [アーキテクチャ](architecture.md) | SDK、CLI サーバー、Copilot API の相互作用 |
-| [はじめに](getting_started.md) | 環境構築と最初の実行 |
 | [CLI サーバーモード](server_mode.md) | Copilot CLI を単独 TCP サーバーとして起動する |
+| [Python チュートリアル](python/index.md) | Python 版 |
+| [Go チュートリアル](go/index.md) | Go 版 |
 | [参考文献](appendix/references.md) | API リファレンスと外部リンク |

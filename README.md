@@ -17,7 +17,9 @@ A showcase repository for multiple use cases built on the **GitHub Copilot SDK**
 
 | Use Case | Description | Documentation |
 |---|---|---|
-| [GitHub Copilot SDK Tutorial](docs/copilot_sdk_tutorial/index.md) | Step-by-step tutorials for building Python applications with the GitHub Copilot SDK — chatbots, custom tools, streaming, skills, hooks, and BYOK | [Getting Started](docs/copilot_sdk_tutorial/getting_started.md) · [Architecture](docs/copilot_sdk_tutorial/architecture.md) · [Scripts](src/python/scripts/tutorials/README.md) |
+| [GitHub Copilot SDK Tutorial](docs/copilot_sdk_tutorial/index.md) | Language-agnostic overview of the GitHub Copilot SDK — what it is, installing the Copilot CLI, authenticating with GitHub, architecture, and CLI server mode | [Getting Started](docs/copilot_sdk_tutorial/getting_started.md) · [Architecture](docs/copilot_sdk_tutorial/architecture.md) · [CLI Server Mode](docs/copilot_sdk_tutorial/server_mode.md) |
+| [GitHub Copilot SDK Tutorial (Python)](docs/copilot_sdk_tutorial/python/index.md) | Step-by-step tutorials for building Python applications with the GitHub Copilot SDK — chatbots, custom tools, streaming, skills, hooks, and BYOK | [Getting Started](docs/copilot_sdk_tutorial/python/getting_started.md) · [Scripts](src/python/scripts/tutorials/README.md) |
+| [GitHub Copilot SDK Tutorial (Go)](docs/copilot_sdk_tutorial/go/index.md) | Step-by-step tutorials for building Go applications with the GitHub Copilot SDK — CLI chatbot, streaming, and interactive sessions | [Getting Started](docs/copilot_sdk_tutorial/go/getting_started.md) · [Subcommands](src/go/cmd/tutorial/README.md) |
 | [CopilotReportForge](docs/copilot_report_forge/index.md) | An extensible AI automation platform for parallel LLM query execution, structured report generation, and agentic AI workflows | [Getting Started](docs/copilot_report_forge/guide/getting_started.md) · [Architecture](docs/copilot_report_forge/overview/architecture.md) · [Deployment](docs/copilot_report_forge/operations/deployment.md) |
 
 ## Infrastructure (Terraform Scenarios)

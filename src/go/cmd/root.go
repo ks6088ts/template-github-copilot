@@ -23,14 +23,19 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/ks6088ts/template-github-copilot/src/go/cmd/sandbox"
+	"github.com/ks6088ts/template-github-copilot/src/go/cmd/tutorial"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	verbose bool
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -64,6 +69,7 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.template-github-copilot-go.yaml)")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose (debug) logging")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -75,6 +81,8 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
+	configureLogging()
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -97,8 +105,23 @@ func initConfig() {
 	}
 }
 
+// configureLogging configures the default slog logger.
+// When the global --verbose flag is set, the log level is lowered to Debug so
+// that slog.Debug messages across the application become visible.
+func configureLogging() {
+	level := slog.LevelInfo
+	if verbose {
+		level = slog.LevelDebug
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: level,
+	})))
+	slog.Debug("verbose logging enabled")
+}
+
 // registerSubCommands registers sub commands
 func registerSubCommands() {
 	rootCmd.AddCommand(sandbox.GetCommand())
+	rootCmd.AddCommand(tutorial.GetCommand())
 	// Add other sub commands here
 }

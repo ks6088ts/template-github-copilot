@@ -14,11 +14,14 @@ Copilot SDK は、内部で動作する Copilot CLI から
 ## 仕組み
 
 ```text
-Copilot CLI ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
+Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
 ```
 
 テレメトリは **環境変数によるオプトイン** です。エンドポイントを設定しない限り
-チュートリアルの挙動は従来どおり変わりません。
+チュートリアルの挙動は従来どおり変わりません（VS Code の Copilot Chat は
+`.vscode/settings.json` で別途設定します。
+[VS Code の Copilot Chat メトリックを可視化する](#vs-code-の-copilot-chat-メトリックを可視化する)
+を参照）。
 
 | 変数 | 説明 |
 |------|------|
@@ -96,6 +99,55 @@ docker compose -f docker/compose.yaml logs -f otel-collector
 ```bash
 docker compose -f docker/compose.yaml down
 ```
+
+---
+
+## VS Code の Copilot Chat メトリックを可視化する
+
+同じコレクターで、**VS Code 上の GitHub Copilot Chat** が出力する
+OpenTelemetry の**トレース・メトリック・ログ**もそのまま受信できます。追加の
+サービスや依存関係は不要で、現状の 2 コンテナ構成で充足します。
+
+本リポジトリには、ローカルのコレクターに接続済みの
+[`.vscode/settings.json`](https://github.com/ks6088ts/template-github-copilot/blob/main/.vscode/settings.json)
+を同梱しています:
+
+```json
+{
+  "github.copilot.chat.otel.enabled": true,
+  "github.copilot.chat.otel.exporterType": "otlp-http",
+  "github.copilot.chat.otel.otlpEndpoint": "http://localhost:4318",
+  "github.copilot.chat.otel.captureContent": false
+}
+```
+
+手順:
+
+1. スタックを起動: `docker compose -f docker/compose.yaml up -d`
+2. このフォルダーを VS Code で開く（上記のワークスペース設定が自動適用されます）。
+   既に Copilot が動作中の場合はウィンドウを再読み込みします。
+3. いつもどおり Copilot Chat / エージェントを利用すると、VS Code が OTLP を
+   コレクターにエクスポートします。
+4. Grafana（[http://localhost:3000](http://localhost:3000)、`admin`/`admin`）の
+   **Explore** を開きます:
+   - **Tempo** データソース → エージェントのトレース（`invoke_agent`、`chat`、
+     `execute_tool`）。
+   - **Prometheus** データソース → `github_copilot_agent_turn_count` や
+     `github_copilot_mcp_server_connection_count_total` などのメトリック。
+
+補足:
+
+- シグナル名は
+  [OTel GenAI Semantic Conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/gen-ai/)
+  に準拠し、`gen_ai.*` および `github.copilot.*` 名前空間で出力されます。
+- コレクターが**起動していない**場合、VS Code のエクスポートは静かに失敗
+  （接続拒否）し、Copilot は通常どおり動作します。
+- `captureContent` は既定で `false` です。プロンプト・応答・ツール引数の全文を
+  記録するため、信頼できる環境でのみ有効化してください。
+- **Azure** 構成（OTel Collector → Application Insights → Azure Managed Grafana）
+  については
+  [Grafana を使用して AI コーディング エージェントを監視する](https://learn.microsoft.com/ja-jp/azure/managed-grafana/grafana-opentelemetry-app-insights)
+  を参照してください。
 
 ---
 

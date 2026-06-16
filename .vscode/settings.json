@@ -1,0 +1,17 @@
+{
+  // GitHub Copilot Chat OpenTelemetry export.
+  // Sends traces/metrics/logs to the local OTel Collector so VS Code Copilot
+  // activity can be visualized in Grafana (via grafana-lgtm).
+  //
+  // Start the stack first:  docker compose -f docker/compose.yaml up -d
+  // Then open Grafana:      http://localhost:3000  (admin / admin)
+  //
+  // The collector ignores these signals harmlessly when it is not running.
+  // Docs: docs/copilot_sdk_tutorial/observability.md
+  // Ref:  https://code.visualstudio.com/docs/copilot/guides/monitoring-agents
+  "github.copilot.chat.otel.enabled": true,
+  "github.copilot.chat.otel.exporterType": "otlp-http",
+  "github.copilot.chat.otel.otlpEndpoint": "http://localhost:4318",
+  // Set to true to capture prompt/response content in spans (trusted environments only).
+  "github.copilot.chat.otel.captureContent": false
+}

@@ -52,6 +52,15 @@ is set, so they behave exactly as before when the stack is not running.
 The SDK passes the endpoint to the Copilot CLI process, which exports its
 spans over OTLP. The collector then fans them out to Grafana LGTM.
 
+## VS Code Copilot Chat metrics
+
+The same collector also accepts traces/metrics/logs from **GitHub Copilot Chat
+in VS Code** — no extra services. This repo's [`.vscode/settings.json`](../.vscode/settings.json)
+points Copilot at `http://localhost:4318`, so once the stack is up you can
+explore agent traces (Tempo) and metrics like `github_copilot_agent_turn_count`
+(Prometheus) in Grafana. See
+[Observability with OpenTelemetry](../docs/copilot_sdk_tutorial/observability.md#visualizing-vs-code-copilot-chat-metrics).
+
 ## Verifying without Grafana
 
 The collector also logs a summary via its `debug` exporter:

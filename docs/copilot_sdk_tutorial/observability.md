@@ -13,11 +13,13 @@ Reference:
 ## How it works
 
 ```text
-Copilot CLI ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
+Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
 ```
 
 Telemetry is **opt-in via environment variables**, so the tutorials behave
-exactly as before unless you configure an endpoint:
+exactly as before unless you configure an endpoint
+(VS Code Copilot Chat is wired separately via `.vscode/settings.json` — see
+[Visualizing VS Code Copilot Chat metrics](#visualizing-vs-code-copilot-chat-metrics)):
 
 | Variable | Description |
 |----------|-------------|
@@ -95,6 +97,51 @@ docker compose -f docker/compose.yaml logs -f otel-collector
 ```bash
 docker compose -f docker/compose.yaml down
 ```
+
+---
+
+## Visualizing VS Code Copilot Chat metrics
+
+The same collector can also receive OpenTelemetry **traces, metrics, and logs**
+emitted directly by **GitHub Copilot Chat in VS Code** — no extra services or
+dependencies, the existing two-container stack is enough.
+
+This repository ships [`.vscode/settings.json`](https://github.com/ks6088ts/template-github-copilot/blob/main/.vscode/settings.json)
+pre-wired to the local collector:
+
+```json
+{
+  "github.copilot.chat.otel.enabled": true,
+  "github.copilot.chat.otel.exporterType": "otlp-http",
+  "github.copilot.chat.otel.otlpEndpoint": "http://localhost:4318",
+  "github.copilot.chat.otel.captureContent": false
+}
+```
+
+Steps:
+
+1. Start the stack: `docker compose -f docker/compose.yaml up -d`.
+2. Open this folder in VS Code (the workspace settings above are applied
+   automatically). Reload the window if Copilot was already running.
+3. Use Copilot Chat / an agent as usual — VS Code exports OTLP to the collector.
+4. In Grafana ([http://localhost:3000](http://localhost:3000), `admin`/`admin`)
+   open **Explore**:
+   - **Tempo** data source → agent traces (`invoke_agent`, `chat`, `execute_tool`).
+   - **Prometheus** data source → metrics such as `github_copilot_agent_turn_count`
+     and `github_copilot_mcp_server_connection_count_total`.
+
+Notes:
+
+- Signal names follow the
+  [OTel GenAI Semantic Conventions](https://github.com/open-telemetry/semantic-conventions/blob/main/docs/gen-ai/)
+  under the `gen_ai.*` and `github.copilot.*` namespaces.
+- When the collector is **not** running, VS Code's export fails silently
+  (connection refused) and Copilot keeps working normally.
+- `captureContent` is `false` by default. Enable it only in trusted
+  environments — it records full prompts, responses, and tool arguments.
+- For the equivalent **Azure** pipeline (OTel Collector → Application Insights →
+  Azure Managed Grafana), see
+  [Monitor AI coding agents with Grafana](https://learn.microsoft.com/azure/managed-grafana/grafana-opentelemetry-app-insights).
 
 ---
 

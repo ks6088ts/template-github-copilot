@@ -1,15 +1,11 @@
-[![test](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/test.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/test.yaml?query=branch%3Amain)
-[![release](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/release.yaml)
+[![go-test](https://github.com/ks6088ts/template-github-copilot/actions/workflows/go-test.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/go-test.yaml?query=branch%3Amain)
+[![go-release](https://github.com/ks6088ts/template-github-copilot/actions/workflows/go-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/actions/workflows/go-release.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ks6088ts/template-github-copilot/src/go)](https://goreportcard.com/report/github.com/ks6088ts/template-github-copilot/src/go)
 [![Go Reference](https://pkg.go.dev/badge/github.com/ks6088ts/template-github-copilot/src/go.svg)](https://pkg.go.dev/github.com/ks6088ts/template-github-copilot/src/go)
 
-[![docker](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/docker.yaml/badge.svg?branch=main)](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/docker.yaml?query=branch%3Amain)
-[![docker-release](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/docker-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/docker-release.yaml)
-[![ghcr-release](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/ghcr-release.yaml/badge.svg)](https://github.com/ks6088ts/template-github-copilot/src/go/actions/workflows/ghcr-release.yaml)
-
 # template-github-copilot-go
 
-A GitHub template repository for Go
+A Go CLI that demonstrates the [GitHub Copilot SDK for Go](https://pkg.go.dev/github.com/github/copilot-sdk/go) through runnable tutorial subcommands. See the [tutorial subcommand reference](cmd/tutorial/README.md) and the [documentation site](https://ks6088ts.github.io/template-github-copilot/copilot_sdk_tutorial/go/).
 
 ## Prerequisites
 

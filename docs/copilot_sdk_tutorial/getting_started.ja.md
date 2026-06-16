@@ -92,6 +92,91 @@ export COPILOT_GITHUB_TOKEN="ghp_xxxxxxxxxxxxxxxxxxxx"
 
 `COPILOT_GITHUB_TOKEN`、`GH_TOKEN`、`GITHUB_TOKEN` はこの優先順位で参照されます。
 
+### オプション C: Fine-grained PAT（CI 向け推奨）
+
+**Copilot Requests** 権限を付与した **fine-grained パーソナルアクセストークン**は、GitHub Actions など非対話環境で認証する際の推奨方法です。
+
+1. [Fine-grained personal access tokens](https://github.com/settings/personal-access-tokens/new) を開く。
+2. **Resource owner** — **個人アカウント**を選択。**Organization は選ばない**こと: **Copilot Requests** 権限はユーザー所有トークンでのみ利用可能です。
+3. **Repository access** — タスクに応じて *Public repositories* / *All repositories* / *Only select repositories* を選択。
+4. **Permissions → Account → Add permissions → Copilot Requests**（Read-only — この権限はアクセスレベルが 1 つだけです）。
+5. **Generate token** でトークンを生成し、エクスポート:
+
+```bash
+export COPILOT_GITHUB_TOKEN="github_pat_xxxxxxxxxxxxxxxxxxxx"
+```
+
+> **補足:** CLI を*実行する*だけなら **Copilot Requests** だけで十分です。組み込みの GitHub MCP サーバー経由で Copilot に GitHub.com 上の操作をさせたい場合のみ **Repository** 権限を追加します（後述の「GitHub Actions（CI）で実行する」を参照）。
+
+---
+
+## GitHub Actions（CI）で実行する
+
+ワークフロー内で Copilot CLI を非対話的に実行できます。このリポジトリにはすぐ使えるワークフロー [`.github/workflows/github-copilot-cli.yaml`](https://github.com/ks6088ts/template-github-copilot/blob/main/.github/workflows/github-copilot-cli.yaml) が含まれています。
+
+### 1. トークンを作成する
+
+上記の「オプション C: Fine-grained PAT（CI 向け推奨）」に従います。
+
+> **なぜ `GITHUB_TOKEN` ではダメか?** Actions が自動提供する `secrets.GITHUB_TOKEN` では Copilot CLI を認証**できません**。**Copilot Requests** は*ユーザー所有*の fine-grained PAT でのみ付与できるためです。自分で PAT を作成し、Secret として保存する必要があります。
+
+### 2. 権限を選ぶ
+
+| 目的 | 付与する権限 | レベル |
+|------|------------|--------|
+| **Copilot CLI の実行**（必須） | Account → **Copilot Requests** | Read-only |
+| ファイル読み書き・ブランチ作成・push | Repository → Contents | Read and write |
+| Pull request の作成・更新 | Repository → Pull requests | Read and write |
+| Issue の作成・更新 | Repository → Issues | Read and write |
+| ワークフローファイルの編集 | Repository → Workflows | Read and write |
+| （Repository 権限を付けると自動追加） | Repository → Metadata | Read |
+
+> ランナー上にチェックアウトしたワークスペースを編集するプロンプトを実行するだけなら、**Copilot Requests だけで十分**です（Repository 権限は不要）。
+
+### 3. トークンを Secret に保存する
+
+リポジトリ（または Organization）の設定で、トークンを `COPILOT_GITHUB_TOKEN` という名前の Secret として追加します。
+
+### 4. ワークフローから参照する
+
+```yaml
+- name: Install GitHub Copilot CLI
+  run: |
+    curl -fsSL https://gh.io/copilot-install | VERSION="1.0.63" bash
+    echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+- name: Run GitHub Copilot CLI
+  env:
+    COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+  run: |
+    copilot \
+      --prompt "今週のコミットを要約して" \
+      --allow-all-tools --allow-all-paths --allow-all-urls \
+      --model gpt-5-mini
+```
+
+> **セキュリティ:** `--allow-all-tools`、`--allow-all-paths`、`--allow-all-urls` は、Copilot がランナー上で任意のシェルコマンドを承認なしに実行できるようにします。信頼できる CI に限定し、PAT には**必要最小限の権限**だけを与え、対象を **Only select repositories** に絞り、**短い有効期限**を設定してください。
+
+---
+
+## なぜ `GITHUB_TOKEN` や `gh auth login` では動作しないのか
+
+「静的な PAT を使わず、組み込みの `GITHUB_TOKEN`（やそれを使った `gh auth login`）で認証できないか?」というのはよくある疑問です。Copilot CLI/SDK では**これは動作しません**。しかもこれは設定ミスではなく、仕組み上の制約です。
+
+- **`GITHUB_TOKEN` は GitHub App のインストールトークンです。** リポジトリ操作（contents・issues・pull requests）にスコープされており、**ユーザーアカウントに紐づきません**。そのため **Copilot Requests** が表す Copilot のエンタイトルメントを持つことができません。
+- **`GITHUB_TOKEN` を使った `gh auth login` でも解決しません。** これは GitHub REST/GraphQL **API** の認証であって、Copilot サブスクリプションの認証ではありません。トークンの背後に課金対象となるユーザー ID が存在しないためです。
+- **トークンは読み込まれた上で拒否されます。** Copilot CLI は `COPILOT_GITHUB_TOKEN` → `GH_TOKEN` → `GITHUB_TOKEN` の順で認証情報を解決します。`GITHUB_TOKEN` を渡すと CLI は*読み込み*ますが、バックエンドが「Copilot へのアクセス権がない」としてリクエストを拒否します。
+
+### 「静的なトークンを使いたくない」場合
+
+気持ちは分かりますが、Copilot CLI/SDK では**ユーザー所有の fine-grained PAT が現時点で唯一サポートされる CI 認証情報**です。静的トークンを完全に排除することはできないため、代わりに影響範囲を最小化します。
+
+- `Copilot Requests` **のみ**を付与する（Repository 権限の追加は最小限に）。
+- トークンの対象を **Only select repositories** に絞る。
+- **短い有効期限**を設定し、定期的にローテーションする。
+
+> **単に LLM 推論をしたいだけなら?** `copilot` エージェントを動かすのではなく、モデルを呼び出したいだけであれば、[GitHub Models](https://docs.github.com/github-models) はジョブに `permissions: models: read` を追加することで組み込みの `GITHUB_TOKEN` から呼び出せます（静的 PAT 不要）。ただしこれは本チュートリアルが使う Copilot CLI/SDK（`copilot` バイナリを起動する方式）とは**別の API** であり、このリポジトリの構成にそのまま組み込めるものではありません。
+
 ---
 
 ## 共通の環境変数

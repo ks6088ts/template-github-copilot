@@ -54,12 +54,12 @@ The scripts do **not** require a separately running Copilot CLI server. Use `--c
 
 | Script | Tutorial | What it demonstrates |
 |--------|----------|----------------------|
-| `01_chat_bot.py` | [01 — CLI Chatbot](../../../../docs/copilot_sdk_tutorial/tutorials/01_chat_bot.md) | CopilotClient, session creation, single prompt, interactive loop |
-| `02_issue_triage.py` | [02 — Custom Tools](../../../../docs/copilot_sdk_tutorial/tutorials/02_custom_tools.md) | `@define_tool`, Pydantic I/O, tool-calling agent |
-| `03_streaming_review.py` | [03 — Streaming](../../../../docs/copilot_sdk_tutorial/tutorials/03_streaming.md) | `ASSISTANT_MESSAGE_DELTA`, real-time streaming output |
-| `04_skills_docgen.py` | [04 — Skills](../../../../docs/copilot_sdk_tutorial/tutorials/04_skills.md) | `SKILL.md` files, skills directory, doc generation |
-| `05_audit_hooks.py` | [05 — Hooks & Permissions](../../../../docs/copilot_sdk_tutorial/tutorials/05_hooks_permissions.md) | `session.on()`, permission handler, audit log |
-| `06_byok_azure_openai.py` | [06 — BYOK](../../../../docs/copilot_sdk_tutorial/tutorials/06_byok.md) | `ProviderConfig`, Azure OpenAI API key & Entra ID |
+| `01_chat_bot.py` | [01 — CLI Chatbot](../../../../docs/copilot_sdk_tutorial/python/tutorials/01_chat_bot.md) | CopilotClient, session creation, single prompt, interactive loop |
+| `02_issue_triage.py` | [02 — Custom Tools](../../../../docs/copilot_sdk_tutorial/python/tutorials/02_custom_tools.md) | `@define_tool`, Pydantic I/O, tool-calling agent |
+| `03_streaming_review.py` | [03 — Streaming](../../../../docs/copilot_sdk_tutorial/python/tutorials/03_streaming.md) | `ASSISTANT_MESSAGE_DELTA`, real-time streaming output |
+| `04_skills_docgen.py` | [04 — Skills](../../../../docs/copilot_sdk_tutorial/python/tutorials/04_skills.md) | `SKILL.md` files, skills directory, doc generation |
+| `05_audit_hooks.py` | [05 — Hooks & Permissions](../../../../docs/copilot_sdk_tutorial/python/tutorials/05_hooks_permissions.md) | `session.on()`, permission handler, audit log |
+| `06_byok_azure_openai.py` | [06 — BYOK](../../../../docs/copilot_sdk_tutorial/python/tutorials/06_byok.md) | `ProviderConfig`, Azure OpenAI API key & Entra ID |
 
 ---
 
@@ -109,4 +109,4 @@ skills/
     └── SKILL.md          # Coding standards checker
 ```
 
-See [04 — Skills](../../../../docs/copilot_sdk_tutorial/tutorials/04_skills.md) for details.
+See [04 — Skills](../../../../docs/copilot_sdk_tutorial/python/tutorials/04_skills.md) for details.

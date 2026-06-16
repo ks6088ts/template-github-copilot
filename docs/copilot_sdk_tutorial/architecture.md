@@ -1,6 +1,6 @@
 # Architecture
 
-This page explains how the GitHub Copilot SDK, the Copilot CLI server, and the GitHub Copilot API interact with each other — and how your Python scripts fit into the picture.
+This page explains how the GitHub Copilot SDK, the Copilot CLI server, and the GitHub Copilot API interact with each other. These concepts are the same regardless of which language SDK you use; concrete code appears in each edition's tutorials.
 
 ---
 
@@ -8,16 +8,14 @@ This page explains how the GitHub Copilot SDK, the Copilot CLI server, and the G
 
 ```mermaid
 graph TD
-    A[Tutorial Reader] -->|python script.py| S[src/python/scripts/tutorials/*.py]
-    S -->|SDK Client| B[CopilotClient]
+    A[Your Program] -->|SDK Client| B[Copilot Client]
     B -->|JSON-RPC over stdio| C[Copilot CLI Server]
     C -->|HTTPS API Call| D[GitHub Copilot API]
     C -->|Tool Execution| E[Built-in Tools]
-    C -->|Custom Tool| F[User-defined Tools<br/>@define_tool]
+    C -->|Custom Tool| F[User-defined Tools]
     C -->|Skills| G[SKILL.md Files]
 
     style A fill:#e1f5fe
-    style S fill:#c8e6c9
     style B fill:#bbdefb
     style C fill:#90caf9
     style D fill:#64b5f6
@@ -30,21 +28,11 @@ graph TD
 
 ## Components
 
-### CopilotClient
+### Copilot Client
 
-The `CopilotClient` class is the entry point of the SDK. By default, it spawns the `copilot` CLI as a subprocess and communicates over **JSON-RPC on stdio**. Alternatively, it can connect to an already-running Copilot CLI over a **TCP socket** (for example `localhost:3000`) via a `RuntimeConnection`.
+The **client** is the entry point of the SDK (`CopilotClient` in Python, `copilot.Client` in Go). By default, it spawns the `copilot` CLI as a subprocess and communicates over **JSON-RPC on stdio**. Alternatively, it can connect to an already-running Copilot CLI over a **TCP socket** (for example `localhost:3000`).
 
-```python
-from copilot import CopilotClient, RuntimeConnection
-
-# Default: stdio subprocess
-client = CopilotClient()
-
-# Optional: connect to an external CLI server over TCP
-# client = CopilotClient(connection=RuntimeConnection.for_uri("localhost:3000"))
-
-await client.start()
-```
+See each edition's CLI Chatbot tutorial (linked under [See Also](#see-also)) for the exact client construction and startup call.
 
 ### Session
 
@@ -56,14 +44,7 @@ A **session** is a stateful conversation context. Each session has its own:
 - Streaming configuration
 - Optional provider override (for BYOK)
 
-```python
-session = await client.create_session(
-    on_permission_request=approve_all,
-    tools=[],
-    streaming=True,
-    system_message=...,
-)
-```
+A session is created from the client and is where prompts are sent and events are received.
 
 ### Copilot CLI Server
 
@@ -84,15 +65,15 @@ Tools extend the agent's capabilities. There are two kinds:
 | Type | How to define | Example |
 |------|--------------|---------|
 | Built-in | Provided by the Copilot CLI server | File system, web search |
-| Custom | `@define_tool` decorator | GitHub API calls, database queries |
+| Custom | A custom-tool API (`@define_tool` in Python, `DefineTool` in Go) | GitHub API calls, database queries |
 
-Custom tools are registered per-session via `create_session(tools=[...])`.
+Custom tools are registered per-session when the session is created.
 
 ### Skills
 
-Skills are Markdown files (`SKILL.md`) that define specialized agent behaviours. They are loaded from a **skills directory** passed to `create_session` via the `skill_directories` argument.
+Skills are Markdown files (`SKILL.md`) that define specialized agent behaviours. They are loaded from a **skills directory** passed to the session at creation time.
 
-```
+```text
 skills/
 ├── docgen/
 │   └── SKILL.md
@@ -106,21 +87,21 @@ skills/
 
 ```mermaid
 sequenceDiagram
-    participant Script as Python Script
-    participant SDK as CopilotClient
+    participant Script as Your Program
+    participant SDK as Copilot Client
     participant CLI as Copilot CLI Server
     participant API as GitHub Copilot API
 
-    Script->>SDK: client.create_session(config)
+    Script->>SDK: create session (config)
     SDK->>CLI: JSON-RPC: create_session
     CLI-->>SDK: session_id
 
-    Script->>SDK: session.send_and_wait(prompt)
+    Script->>SDK: send prompt and wait
     SDK->>CLI: JSON-RPC: send_message
     CLI->>API: LLM inference request
     API-->>CLI: streaming tokens
-    CLI-->>SDK: SessionEvents (delta, tool_call, ...)
-    SDK-->>Script: events via session.on(handler)
+    CLI-->>SDK: session events (delta, tool_call, ...)
+    SDK-->>Script: events via session handler
     CLI-->>SDK: SESSION_IDLE (final)
     SDK-->>Script: reply object
 ```
@@ -133,7 +114,7 @@ When BYOK is used, the Copilot CLI server routes requests to **your** model endp
 
 ```mermaid
 graph LR
-    SDK[CopilotClient] --> CLI[Copilot CLI Server]
+    SDK[Copilot Client] --> CLI[Copilot CLI Server]
     CLI -->|ProviderConfig: type=azure| AOAI[Azure OpenAI]
     CLI -->|ProviderConfig: type=openai| OAI[OpenAI API]
 
@@ -141,16 +122,25 @@ graph LR
     style OAI fill:#412991,color:#fff
 ```
 
-The `ProviderConfig` is passed to `create_session` and tells the CLI server which endpoint and credentials to use.
+A provider configuration is passed when the session is created and tells the CLI server which endpoint and credentials to use.
 
 ---
 
 ## Key Design Principles
 
-1. **Out-of-process execution** — The Copilot CLI server runs in a separate process; the SDK communicates via IPC. This isolates credentials and authentication from your script.
+1. **Out-of-process execution** — The Copilot CLI server runs in a separate process; the SDK communicates via IPC. This isolates credentials and authentication from your program.
 
-2. **Event-driven** — All session activity is modelled as events (`SessionEventType`). Your handler receives events as they arrive — enabling real-time streaming.
+2. **Event-driven** — All session activity is modelled as events. Your handler receives events as they arrive — enabling real-time streaming.
 
-3. **Permission gates** — Every tool execution passes through `on_permission_request`. You control whether to approve or deny each operation.
+3. **Permission gates** — Every tool execution passes through a permission handler. You control whether to approve or deny each operation.
 
 4. **Session isolation** — Each session is independent. Multiple sessions can run concurrently in the same process (useful for parallel workloads).
+
+---
+
+## See Also
+
+- [Getting Started](getting_started.md) — common setup (install the CLI, authenticate)
+- [CLI Server Mode](server_mode.md) — run the Copilot CLI as a standalone TCP server
+- Python edition: [CLI Chatbot tutorial](python/tutorials/01_chat_bot.md)
+- Go edition: [CLI Chatbot tutorial](go/tutorials/01_chat_bot.md)

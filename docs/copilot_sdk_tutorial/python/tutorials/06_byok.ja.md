@@ -174,4 +174,4 @@ uv run python scripts/tutorials/06_byok_azure_openai.py \
 
 - [Azure OpenAI Service ドキュメント](https://learn.microsoft.com/azure/ai-services/openai/)
 - [DefaultAzureCredential](https://learn.microsoft.com/python/api/azure-identity/azure.identity.defaultazurecredential)
-- [GitHub Copilot SDK API リファレンス](../appendix/references.md)
+- [GitHub Copilot SDK API リファレンス](../../appendix/references.md)

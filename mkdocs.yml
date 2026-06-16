@@ -8,16 +8,29 @@ nav:
   - Home: index.md
   - Copilot SDK Tutorial:
       - Home: copilot_sdk_tutorial/index.md
-      - Architecture: copilot_sdk_tutorial/architecture.md
       - Getting Started: copilot_sdk_tutorial/getting_started.md
+      - Architecture: copilot_sdk_tutorial/architecture.md
       - CLI Server Mode: copilot_sdk_tutorial/server_mode.md
-      - Tutorials:
-          - "01: CLI Chatbot": copilot_sdk_tutorial/tutorials/01_chat_bot.md
-          - "02: Custom Tools": copilot_sdk_tutorial/tutorials/02_custom_tools.md
-          - "03: Streaming": copilot_sdk_tutorial/tutorials/03_streaming.md
-          - "04: Skills": copilot_sdk_tutorial/tutorials/04_skills.md
-          - "05: Hooks & Permissions": copilot_sdk_tutorial/tutorials/05_hooks_permissions.md
-          - "06: BYOK": copilot_sdk_tutorial/tutorials/06_byok.md
+      - Python:
+          - Home: copilot_sdk_tutorial/python/index.md
+          - Getting Started: copilot_sdk_tutorial/python/getting_started.md
+          - Tutorials:
+              - "01: CLI Chatbot": copilot_sdk_tutorial/python/tutorials/01_chat_bot.md
+              - "02: Custom Tools": copilot_sdk_tutorial/python/tutorials/02_custom_tools.md
+              - "03: Streaming": copilot_sdk_tutorial/python/tutorials/03_streaming.md
+              - "04: Skills": copilot_sdk_tutorial/python/tutorials/04_skills.md
+              - "05: Hooks & Permissions": copilot_sdk_tutorial/python/tutorials/05_hooks_permissions.md
+              - "06: BYOK": copilot_sdk_tutorial/python/tutorials/06_byok.md
+      - Go:
+          - Home: copilot_sdk_tutorial/go/index.md
+          - Getting Started: copilot_sdk_tutorial/go/getting_started.md
+          - Tutorials:
+              - "01: CLI Chatbot": copilot_sdk_tutorial/go/tutorials/01_chat_bot.md
+              - "02: Issue Triage Bot": copilot_sdk_tutorial/go/tutorials/02_issue_triage.md
+              - "03: Streaming Review": copilot_sdk_tutorial/go/tutorials/03_streaming_review.md
+              - "04: Skills Doc Generation": copilot_sdk_tutorial/go/tutorials/04_skills_docgen.md
+              - "05: Audit Log": copilot_sdk_tutorial/go/tutorials/05_audit_hooks.md
+              - "06: BYOK Azure OpenAI": copilot_sdk_tutorial/go/tutorials/06_byok_azure_openai.md
       - Appendix:
           - References: copilot_sdk_tutorial/appendix/references.md
   - CopilotReportForge:

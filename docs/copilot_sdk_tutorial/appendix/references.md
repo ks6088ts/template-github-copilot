@@ -8,9 +8,16 @@ External links and further reading for the GitHub Copilot SDK.
 
 | Resource | Link |
 |----------|------|
-| PyPI package | [github-copilot-sdk](https://pypi.org/project/github-copilot-sdk/) |
-| GitHub repository | [github/copilot-sdk](https://github.com/github/copilot-sdk) |
+| GitHub repository (monorepo) | [github/copilot-sdk](https://github.com/github/copilot-sdk) |
 | Changelog | See GitHub releases in the repository |
+
+### SDK Packages by Language
+
+| Language | Package | Link |
+|----------|---------|------|
+| Python | `github-copilot-sdk` | [PyPI](https://pypi.org/project/github-copilot-sdk/) |
+| Go | `github.com/github/copilot-sdk/go` | [pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go) |
+| TypeScript | `@github/copilot-sdk` | [npm](https://www.npmjs.com/package/@github/copilot-sdk) |
 
 ---
 
@@ -35,7 +42,9 @@ External links and further reading for the GitHub Copilot SDK.
 
 ---
 
-## Python Libraries Used in This Tutorial
+## Tutorial Libraries by Language
+
+**Python**
 
 | Library | Purpose | Link |
 |---------|---------|------|
@@ -43,14 +52,22 @@ External links and further reading for the GitHub Copilot SDK.
 | `pydantic` | Data validation and tool schemas | [pydantic.dev](https://docs.pydantic.dev/) |
 | `azure-identity` | Entra ID authentication (BYOK) | [PyPI](https://pypi.org/project/azure-identity/) |
 
+**Go**
+
+| Library | Purpose | Link |
+|---------|---------|------|
+| `github.com/github/copilot-sdk/go` | Copilot SDK for Go | [pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go) |
+| `github.com/spf13/cobra` | CLI command framework | [pkg.go.dev](https://pkg.go.dev/github.com/spf13/cobra) |
+| `github.com/spf13/viper` | Configuration and environment binding | [pkg.go.dev](https://pkg.go.dev/github.com/spf13/viper) |
+
 ---
 
-## SDKs in Other Languages
+## SDK Source and Releases
 
-| Language | Package | Repository |
-|----------|---------|------------|
-| TypeScript | `@github/copilot-sdk` | [github/copilot-sdk](https://github.com/github/copilot-sdk) |
-| Go | `github.com/github/copilot-sdk-go` | [github/copilot-sdk-go](https://github.com/github/copilot-sdk-go) |
+| Resource | Link |
+|----------|------|
+| Monorepo issues and discussions | [github/copilot-sdk/issues](https://github.com/github/copilot-sdk/issues) |
+| Releases | [github/copilot-sdk/releases](https://github.com/github/copilot-sdk/releases) |
 
 ---
 

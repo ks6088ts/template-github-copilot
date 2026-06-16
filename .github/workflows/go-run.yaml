@@ -1,0 +1,66 @@
+name: go-run
+
+# Simple smoke test that calls a GitHub Copilot SDK (Go) agent and chats with it.
+# It builds the Go CLI and runs the `tutorial chat-bot` subcommand, which sends a
+# single prompt to the agent and prints the streamed response.
+#
+# Primary sources:
+# - GitHub Copilot SDK for Go: https://pkg.go.dev/github.com/github/copilot-sdk/go
+# - GitHub Copilot SDK (monorepo): https://github.com/github/copilot-sdk
+# - workflow_dispatch event: https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_dispatch
+# - Using secrets in GitHub Actions: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        type: string
+        description: "The prompt/question to send to the Copilot SDK (Go) chat-bot agent."
+        required: true
+        default: "Hello"
+
+jobs:
+  run:
+    strategy:
+      matrix:
+        platform:
+          - "ubuntu-latest"
+        go-version:
+          - "1.26.x"
+        node-version:
+          - "22.12.0"
+        copilot-cli-version:
+          - "0.0.420"
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 10
+    environment: dev
+    steps:
+      - name: checkout
+        uses: actions/checkout@v6
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go-version }}
+          cache-dependency-path: src/go/go.sum
+      - name: Install GitHub Copilot CLI
+        run: |
+          curl -fsSL https://gh.io/copilot-install | VERSION="${{ matrix.copilot-cli-version }}" bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build the Go CLI
+        working-directory: src/go
+        run: |
+          make build
+      - name: Run Copilot SDK (Go) chat-bot
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          # Pass the untrusted input via an env var (not interpolated into the
+          # shell) to avoid script injection. See:
+          # https://docs.github.com/en/actions/reference/security/secure-use#good-practices-for-mitigating-script-injection-attacks
+          PROMPT: ${{ github.event.inputs.prompt }}
+        working-directory: src/go
+        run: |
+          ./dist/template-github-copilot-go tutorial chat-bot --verbose --prompt "$PROMPT"

@@ -44,3 +44,9 @@ log_cli = true
 log_cli_level = "INFO"
 log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
 log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+[tool.pyrefly]
+# Tutorial scripts run standalone (their own directory is on sys.path), so the
+# shared `_telemetry` helper is imported as a top-level module. Add the tutorials
+# directory as a search root so the static checker resolves it the same way.
+search-path = ["scripts/tutorials"]

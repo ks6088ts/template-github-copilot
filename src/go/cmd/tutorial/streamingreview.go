@@ -121,11 +121,9 @@ func init() {
 func runStreamingReview(ctx context.Context, cliURL, diffText string) error {
 	var client *copilot.Client
 	if cliURL != "" {
-		client = copilot.NewClient(&copilot.ClientOptions{
-			Connection: copilot.URIConnection{URL: cliURL},
-		})
+		client = copilot.NewClient(newClientOptions(cliURL))
 	} else {
-		client = copilot.NewClient(nil)
+		client = copilot.NewClient(newClientOptions(cliURL))
 	}
 
 	if err := client.Start(ctx); err != nil {

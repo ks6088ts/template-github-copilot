@@ -42,3 +42,23 @@ make build
 | `tutorial skills-docgen` | [`04_skills_docgen.py`](../../../python/scripts/tutorials/04_skills_docgen.py) | Available | [Tutorial 4: Skills Doc Generation](../../../../docs/copilot_sdk_tutorial/go/tutorials/04_skills_docgen.md) |
 | `tutorial audit-hooks` | [`05_audit_hooks.py`](../../../python/scripts/tutorials/05_audit_hooks.py) | Available | [Tutorial 5: Audit Log](../../../../docs/copilot_sdk_tutorial/go/tutorials/05_audit_hooks.md) |
 | `tutorial byok-azure-openai` | [`06_byok_azure_openai.py`](../../../python/scripts/tutorials/06_byok_azure_openai.py) | Available | [Tutorial 6: BYOK Azure OpenAI](../../../../docs/copilot_sdk_tutorial/go/tutorials/06_byok_azure_openai.md) |
+
+## Observability (OpenTelemetry)
+
+Every subcommand can export OpenTelemetry traces. Set `OTEL_EXPORTER_OTLP_ENDPOINT`
+to enable it (telemetry is wired via `newClientOptions()` in [`telemetry.go`](telemetry.go)):
+
+```bash
+# Start the collector + Grafana LGTM stack (from the repository root)
+docker compose -f docker/compose.yaml up -d
+
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_BSP_SCHEDULE_DELAY=500   # flush before the SDK kills the CLI
+./dist/template-github-copilot-go tutorial chat-bot --prompt "Hello!"
+
+# View traces in Grafana → Explore → Tempo
+open http://localhost:3000   # admin / admin
+```
+
+See [Observability with OpenTelemetry](../../../../docs/copilot_sdk_tutorial/observability.md)
+and [`docker/README.md`](../../../../docker/README.md) for details.

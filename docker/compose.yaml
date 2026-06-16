@@ -1,0 +1,32 @@
+# Minimal observability stack for the GitHub Copilot SDK tutorials.
+#
+#   Copilot CLI --OTLP/HTTP :4318--> otel-collector --OTLP/gRPC :4317--> grafana-lgtm
+#
+# Usage:
+#   docker compose -f docker/compose.yaml up -d
+#   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+#   # ...run a tutorial, then open Grafana at http://localhost:3000 (admin/admin)
+#
+# Docs: https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry
+name: copilot-sdk-observability
+
+services:
+  # OpenTelemetry Collector — single ingest endpoint for the Copilot CLI.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.154.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    depends_on:
+      - grafana-lgtm
+
+  # Grafana LGTM — all-in-one Loki, Grafana, Tempo, and Mimir/Prometheus.
+  # Provides the OTLP backend and the Grafana UI for exploring traces/metrics.
+  grafana-lgtm:
+    image: grafana/otel-lgtm:0.28.0
+    ports:
+      - "3000:3000" # Grafana UI
+    # OTLP receivers (4317/4318) stay internal; the collector forwards to them.

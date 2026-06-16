@@ -11,10 +11,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-from copilot import (
-    CopilotClient,
-    RuntimeConnection,
-)
+from _telemetry import make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
@@ -90,11 +87,7 @@ async def run(cli_url: str | None, skills_dir: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionDecisionApproveOnce()
 
-    client = (
-        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
-        if cli_url
-        else CopilotClient()
-    )
+    client = make_client(cli_url)
     await client.start()
 
     session_config: dict = {

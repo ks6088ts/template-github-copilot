@@ -18,10 +18,7 @@ import sys
 import time
 from typing import Any
 
-from copilot import (
-    CopilotClient,
-    RuntimeConnection,
-)
+from _telemetry import make_client
 from copilot.generated.rpc import (
     PermissionDecisionApproveOnce,
     PermissionDecisionReject,
@@ -139,11 +136,7 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
     # Session setup
     # ------------------------------------------------------------------
 
-    client = (
-        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
-        if cli_url
-        else CopilotClient()
-    )
+    client = make_client(cli_url)
     await client.start()
 
     session = await client.create_session(

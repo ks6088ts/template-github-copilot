@@ -26,11 +26,11 @@ jobs:
         platform:
           - "ubuntu-latest"
         go-version:
-          - "1.26.x"
+          - "1.26.1"
         node-version:
-          - "22.12.0"
+          - "24.10.0"
         copilot-cli-version:
-          - "0.0.420"
+          - "1.0.63"
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 10
     environment: dev

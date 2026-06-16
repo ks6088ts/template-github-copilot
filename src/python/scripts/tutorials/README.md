@@ -110,3 +110,25 @@ skills/
 ```
 
 See [04 — Skills](../../../../docs/copilot_sdk_tutorial/python/tutorials/04_skills.md) for details.
+
+---
+
+## Observability (OpenTelemetry)
+
+Every script can export OpenTelemetry traces. Set `OTEL_EXPORTER_OTLP_ENDPOINT`
+to enable it (telemetry is wired via `make_client()` in [`_telemetry.py`](_telemetry.py)):
+
+```bash
+# Start the collector + Grafana LGTM stack (from the repository root)
+docker compose -f docker/compose.yaml up -d
+
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+export OTEL_BSP_SCHEDULE_DELAY=500   # flush before the SDK kills the CLI
+uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello!"
+
+# View traces in Grafana → Explore → Tempo
+open http://localhost:3000   # admin / admin
+```
+
+See [Observability with OpenTelemetry](../../../../docs/copilot_sdk_tutorial/observability.md)
+and [`docker/README.md`](../../../../docker/README.md) for details.

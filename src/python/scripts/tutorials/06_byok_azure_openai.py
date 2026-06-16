@@ -12,10 +12,7 @@ import os
 import sys
 
 from azure.identity import DefaultAzureCredential
-from copilot import (
-    CopilotClient,
-    RuntimeConnection,
-)
+from _telemetry import make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
@@ -125,11 +122,7 @@ async def run(
     ) -> PermissionRequestResult:
         return PermissionDecisionApproveOnce()
 
-    client = (
-        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
-        if cli_url
-        else CopilotClient()
-    )
+    client = make_client(cli_url)
     await client.start()
 
     session = await client.create_session(

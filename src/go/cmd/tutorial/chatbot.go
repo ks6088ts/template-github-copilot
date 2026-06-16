@@ -105,13 +105,10 @@ func newChatSession(ctx context.Context, cliURL string) (*copilot.Client, *copil
 	var client *copilot.Client
 	if cliURL != "" {
 		slog.Debug("connecting to running Copilot CLI", "url", cliURL)
-		client = copilot.NewClient(&copilot.ClientOptions{
-			Connection: copilot.URIConnection{URL: cliURL},
-		})
 	} else {
 		slog.Debug("launching bundled Copilot CLI over stdio")
-		client = copilot.NewClient(nil)
 	}
+	client = copilot.NewClient(newClientOptions(cliURL))
 
 	if err := client.Start(ctx); err != nil {
 		return nil, nil, fmt.Errorf("failed to start Copilot client: %w", err)

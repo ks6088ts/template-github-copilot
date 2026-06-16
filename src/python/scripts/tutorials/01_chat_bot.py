@@ -10,10 +10,7 @@ import argparse
 import asyncio
 import sys
 
-from copilot import (
-    CopilotClient,
-    RuntimeConnection,
-)
+from _telemetry import make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
@@ -64,11 +61,7 @@ async def run_single(cli_url: str | None, prompt: str) -> None:
     ) -> PermissionRequestResult:
         return PermissionDecisionApproveOnce()
 
-    client = (
-        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
-        if cli_url
-        else CopilotClient()
-    )
+    client = make_client(cli_url)
     await client.start()
 
     session = await client.create_session(
@@ -105,11 +98,7 @@ async def run_loop(cli_url: str | None) -> None:
     ) -> PermissionRequestResult:
         return PermissionDecisionApproveOnce()
 
-    client = (
-        CopilotClient(connection=RuntimeConnection.for_uri(cli_url))
-        if cli_url
-        else CopilotClient()
-    )
+    client = make_client(cli_url)
     await client.start()
 
     session = await client.create_session(

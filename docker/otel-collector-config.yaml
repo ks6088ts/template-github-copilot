@@ -1,0 +1,41 @@
+# OpenTelemetry Collector configuration for the Copilot SDK tutorials.
+#
+# Receives OTLP (gRPC 4317 / HTTP 4318) from the Copilot CLI and forwards
+# traces, metrics, and logs to the bundled Grafana LGTM stack.
+# Docs: https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+
+exporters:
+  # Forward everything to the all-in-one Grafana LGTM container (OTLP gRPC).
+  otlp/lgtm:
+    endpoint: grafana-lgtm:4317
+    tls:
+      insecure: true
+  # Echo a short summary to the collector logs so `docker compose logs` shows
+  # that spans are flowing without opening Grafana.
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/lgtm, debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/lgtm, debug]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/lgtm, debug]

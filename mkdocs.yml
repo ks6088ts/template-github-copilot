@@ -108,6 +108,12 @@ markdown_extensions:
   - admonition
   - attr_list
   - pymdownx.keys
+  - toc:
+      # Unicode-aware slugify so non-Latin (e.g. Japanese) headings get readable,
+      # stable anchors instead of being stripped to empty/auto-generated ids.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

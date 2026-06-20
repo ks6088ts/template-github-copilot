@@ -6,6 +6,23 @@ repo_name: ks6088ts/template-github-copilot
 docs_dir: docs
 nav:
   - Home: index.md
+  - Copilot CLI Tutorial:
+      - Home: copilot_cli_tutorial/index.md
+      - Getting Started: copilot_cli_tutorial/getting_started.md
+      - Access Methods: copilot_cli_tutorial/access_methods.md
+      - Feature Deep Dive: copilot_cli_tutorial/features.md
+      - Demo Scenarios:
+          - Overview: copilot_cli_tutorial/demos/index.md
+          - "01: Issue to PR": copilot_cli_tutorial/demos/01_issue_to_pr.md
+          - "02: Code Review": copilot_cli_tutorial/demos/02_code_review.md
+          - "03: Onboarding": copilot_cli_tutorial/demos/03_onboarding.md
+          - "04: CI/CD Automation": copilot_cli_tutorial/demos/04_cicd_automation.md
+          - "05: MCP Integration": copilot_cli_tutorial/demos/05_mcp_integration.md
+          - "06: Custom Agents & Skills": copilot_cli_tutorial/demos/06_custom_agents_skills.md
+          - "07: Batch Refactor": copilot_cli_tutorial/demos/07_batch_refactor.md
+          - "08: Release Notes": copilot_cli_tutorial/demos/08_release_notes.md
+      - Appendix:
+          - References: copilot_cli_tutorial/appendix/references.md
   - Copilot SDK Tutorial:
       - Home: copilot_sdk_tutorial/index.md
       - Getting Started: copilot_sdk_tutorial/getting_started.md
@@ -88,6 +105,9 @@ extra:
     provider: google
     property: G-0ZTKFXVQ5K
 markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.keys
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid

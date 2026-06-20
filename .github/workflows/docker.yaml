@@ -17,7 +17,7 @@ jobs:
     runs-on: "ubuntu-latest"
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # to retrieve git tags
       # How to set system path variable in github action workflow: https://stackoverflow.com/a/68214331

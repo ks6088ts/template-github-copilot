@@ -251,14 +251,101 @@ copilot --allow-tool='shell(git:*)' --deny-tool='shell(git push)' --deny-tool='s
 
 ## サンドボックス { #sandboxing }
 
-より大きな自律性を安全に与えるには、サンドボックス内で実行します（[About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#running-in-a-sandbox-with-cloud-and-local-sandboxes-for-github-copilot)、public preview）。
+Copilot が代わりに取る操作（ツール実行、コマンド実行、ファイル変更）が増えるほど、エージェント的ワークフローを安全に採用するための **隔離・可搬性・ポリシー制御** が必要になります。サンドボックスは Copilot を *どこで* 動かすかを選べるようにする仕組みで、現在は Copilot CLI セッションに適用されます（クラウドサンドボックスは Copilot アプリのセッションにも適用）（[About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)、public preview）。
 
 | 種別 | 方法 | 使うとき |
 |------|------|----------|
-| **ローカルサンドボックス** | セッション内で `/sandbox enable` | Copilot が開始するシェルコマンド実行をローカルマシン上で制限。Microsoft MXC ベースで、標準の Copilot seat に含まれる |
-| **クラウドサンドボックス** | `copilot --cloud` | GitHub がホストする一時的な Linux 環境を起動。強い隔離、別デバイスからの継続、計算量の多い作業、並列タスクに使う |
+| **ローカルサンドボックス** | セッション内で `/sandbox enable` | 自分のマシン上で、ファイルシステム・ネットワーク・システム機能へのアクセスを制限して Copilot を実行。標準の Copilot seat に追加費用なしで含まれる |
+| **クラウドサンドボックス** | `copilot --cloud` | GitHub がホストする、完全に隔離された一時的な Linux 環境で Copilot を実行。強い隔離、別デバイスからの継続、計算量の多い作業、並列タスクに使う（従量課金） |
 
-クラウドサンドボックスのポリシーは Copilot cloud agent のポリシーを継承するため、既存のファイアウォールルールが自動的に拡張されます。長時間のワークショップでクラウドサンドボックスに依存する場合は、事前に pricing を確認してください（[Cloud and local sandboxes for GitHub Copilot now in public preview](https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview)）。
+!!! note "認証は共有される"
+    サンドボックスは既存の Copilot CLI 認証を再利用します。別のクラウドプロバイダー、API キー、インフラの管理は不要です。Copilot CLI にサインインでき Copilot にアクセスできれば、サンドボックスを使えます。クラウドサンドボックスはさらに、組織／Enterprise の所有者が **Cloud Sandbox access** ポリシーを有効化する必要があります（[About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)）。
+
+### ローカルサンドボックス
+
+ローカルサンドボックスは、**自分のマシン上で直接** Copilot をサンドボックス内で動かし、ファイルシステム・ネットワーク接続・システム機能へのアクセスを制限します。セッション内で有効化し、対話的な `/sandbox` UI で微調整します（設定は設定ディレクトリの `settings.json` の `sandbox` キー配下に永続化されます）（[Configuring local sandbox settings](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings)）。
+
+```text
+> /sandbox enable     # サンドボックスを有効化
+> /sandbox            # General / Filesystem / Network の設定を開く（Tab で切替、Esc で保存）
+> /sandbox disable    # 無効化
+```
+
+| タブ | 主な設定 |
+|------|----------|
+| **General** | *Sandboxing enabled*; *Allow keychain access*（`git`／`gh` の credential helper 用の macOS Keychain。資格情報の読み取りを防ぐにはオフ） |
+| **Filesystem** | *Include working directory*（プロジェクトに自動で read/write）; *Clear policy on exit*（セッションごとに権限をリセット）; 作業ディレクトリ外の場所に対するパス単位の **read-only** または **read/write** ルール |
+| **Network** | *Allow outbound connections*（完全に隔離するにはオフ）; *Allow local network*（`localhost`／LAN） |
+
+!!! warning "ホスト単位のネットワークルールはセキュリティ境界ではない"
+    `allowedHosts`／`blockedHosts` のフィルタはプラットフォーム間で信頼できません。macOS では allow ルールが無制限のアウトバウンドに静かに劣化し、block ルールは未対応です。Linux では、アウトバウンド無効時にホストルールで特定ホストだけを確実に許可することはできません。実際の隔離には、ホスト単位のルールではなく **Allow outbound connections** のトグルを使ってください（[Configuring local sandbox settings](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings)）。
+
+- **クロスプラットフォーム**: macOS と Linux で利用可能。Windows は Windows Insiders ビルドが必要です。各 OS が異なるサンドボックスバックエンドを使うため、隔離の挙動は OS ごとに異なります（[About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)）。
+- **Enterprise ポリシー適用**: ローカルサンドボックスのポリシーは Microsoft Intune などの MDM プラットフォームで集中構成・強制でき、管理対象デバイス上で Copilot がローカルリソースにどう触れるかを管理者が制御できます（[About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)）。
+- **課金**: 標準の Copilot seat に追加費用なしで含まれます。
+
+### クラウドサンドボックス
+
+クラウドサンドボックスは、CLI セッションを **GitHub がホストする、完全に隔離された一時的な Linux 環境** 内で実行します。ローカルマシンからも他のセッションからも隔離されます。Azure Container Apps Sandboxes 上に構築され、GitHub が ID・ポリシー・課金のレイヤーを提供します（[About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)）。
+
+```bash
+copilot --cloud     # クラウドサンドボックス内で対話セッションを開始
+```
+
+Copilot が実行するコマンドは、自分のマシンではなくクラウド環境で実行されます。これにより 3 つのパターンが可能になります。
+
+- **デバイス間で継続** — セッションが GitHub ホストのインフラ上にあるため、ファイルをコピーしたり依存関係を再インストールしたりせずに、どのデバイスからでも再開できます。
+- **計算量の多い作業をオフロード** — ローカルを軽量・快適に保ったまま、複数の Copilot タスクをクラウドで並列実行できます。
+- **統一されたガバナンス** — クラウドサンドボックスのポリシーは Copilot cloud agent のポリシーと同じ構成を共有するため、既存のファイアウォール／セキュリティ制御が追加設定なしで自動的に拡張されます。
+
+クラウドサンドボックスのセッションは 3 つの状態を遷移します。停止時に状態をスナップショットするため、後で再開できます（[About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)）。
+
+| 状態 | 意味 |
+|------|------|
+| **Active** | 実行中で、Copilot CLI から対話できる |
+| **Stopped** | 実行されていないが状態はスナップショット済み。再開するとファイル・環境変数・作業途中の状態が復元される |
+| **Deleted** | 実行環境 **と** スナップショットが削除される。復元不可 |
+
+!!! note "組織での有効化と課金"
+    メンバーが使えるようにするには、組織／Enterprise の所有者がクラウドサンドボックスアクセスを有効化する必要があります（**組織設定 → Sandboxes → Enabled for all members**）（[Enabling or disabling cloud sandboxes](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization)）。利用は 3 つの軸で計測されます。長時間のセッション前に最新の pricing を確認してください。
+
+    | メーター | 計測対象 | 単位 | 価格（USD） |
+    |----------|----------|------|-------------|
+    | Compute | セッションが実行されている時間 | Compute 秒 | $0.000024 |
+    | Memory | 実行中に割り当てられたメモリ | GiB 秒 | $0.000003 |
+    | Storage | 停止したセッションのスナップショット保管 | GiB 月 | $0.005 |
+
+    詳細は [Billing for cloud and local sandboxes](https://docs.github.com/en/billing/concepts/product-billing/cloud-and-local-sandboxes) と [public preview の発表](https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview) を参照してください。
+
+### Copilot Anywhere: リモートコントロール CLI からクラウドサンドボックスまで
+
+Microsoft Developer のデモ **「GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes」（DEM305）** は、これらを 1 つのストーリーにまとめています。エージェントを 1 つのターミナルに張り付いて見守る必要はありません。Copilot を *リモートコントロール* し、重い・リスクの高い・長時間の作業を、どこからでも再参加できる GitHub ホストの隔離サンドボックスで実行させられます（[デモを見る](https://www.youtube.com/watch?v=JJmmunwXcu8)）。
+
+本ワークショップが既に扱っている「リモートコントロール」のサーフェスは、サンドボックスと自然に組み合わさります。
+
+| やりたいこと | 使うもの | 扱う章 |
+|--------------|----------|--------|
+| 対話 UI なしでタスクを起動（SSH、CI、スクリプト） | `copilot -p "…"` prompt mode | [Demo 4 · CI/CD 自動化](demos/04_cicd_automation.md) |
+| 別のエディタ／ツールから CLI を駆動 | ACP サーバー | [インタフェースと相互運用](#インタフェースと相互運用) |
+| 長いタスクを GitHub のサーバーに委譲 | `/delegate <prompt>` | [Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices) |
+| 隔離・並列・計算量の多い作業を実行 | `copilot --cloud` | 本節 |
+| 別マシンでセッションを再開 | クラウドサンドボックスのセッション継続 | 本節 |
+
+```mermaid
+graph LR
+    Dev[あなた — 任意のデバイス] -->|"copilot -p / ACP"| CLI[Copilot CLI エージェント]
+    CLI -->|"/sandbox enable"| Local[ローカルサンドボックス<br/>自分のマシン上]
+    CLI -->|"copilot --cloud"| Cloud[一時的なクラウドサンドボックス<br/>Azure Container Apps]
+    Cloud -->|"stop → snapshot"| Snap[(保存されたセッション状態)]
+    Snap -->|"どこからでも再開"| Dev2[あなた — 別のデバイス]
+    CLI -->|"/delegate"| Agent[Copilot cloud agent]
+
+    style Cloud fill:#c8e6c9
+    style Local fill:#bbdefb
+```
+
+!!! tip "自律性の安全な既定"
+    無人実行では **autopilot** とサンドボックスを併用しましょう。ローカルサンドボックスは Copilot が自分のマシン上で触れられる範囲を制限し、クラウドサンドボックスは実行を完全にマシン外へ移します。どちらもホスト上の `--allow-all-tools`／`--yolo` よりはるかに安全です（[権限と許可ツール](#権限と許可ツール)）。
 
 ---
 

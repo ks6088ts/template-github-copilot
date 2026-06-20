@@ -251,14 +251,101 @@ Least-privilege patterns for teams:
 
 ## Sandboxing { #sandboxing }
 
-To safely grant more autonomy, run inside a sandbox ([About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#running-in-a-sandbox-with-cloud-and-local-sandboxes-for-github-copilot); public preview):
+As Copilot takes more actions on your behalf — running tools, executing commands, and modifying files — sandboxes provide the **isolation, portability, and policy controls** to adopt agentic workflows safely. They let you choose *where* Copilot runs, and currently apply to Copilot CLI sessions (cloud sandboxes also back sessions in the Copilot app) ([About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes); public preview):
 
 | Type | How | Use when |
 |------|-----|----------|
-| **Local sandbox** | `/sandbox enable` in-session | Restrict Copilot-initiated shell command execution on your machine; local sandboxes are built on Microsoft MXC and included in the standard Copilot seat |
-| **Cloud sandbox** | `copilot --cloud` | Launch an ephemeral Linux environment hosted by GitHub; use for stronger isolation, cross-device continuation, compute-heavy work, or parallel tasks |
+| **Local sandbox** | `/sandbox enable` in-session | Run Copilot on your own machine with restricted access to filesystem, network, and system capabilities; included in the standard Copilot seat at no extra cost |
+| **Cloud sandbox** | `copilot --cloud` | Run Copilot inside a fully isolated, ephemeral Linux environment hosted by GitHub; use for stronger isolation, cross-device continuation, compute-heavy work, or parallel tasks (billed by usage) |
 
-Cloud sandbox policies inherit from Copilot cloud-agent policies, so existing firewall rules extend automatically. Check pricing before relying on cloud sandboxes for long-running workshops ([Cloud and local sandboxes for GitHub Copilot now in public preview](https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview)).
+!!! note "Authentication is shared"
+    Sandboxes reuse your existing Copilot CLI authentication — no separate cloud provider, API keys, or infrastructure to manage. If you can sign in to Copilot CLI and have Copilot access, you can use sandboxes. Cloud sandboxes additionally require an org/enterprise owner to enable the **Cloud Sandbox access** policy ([About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)).
+
+### Local sandboxing
+
+Local sandboxing runs Copilot in a sandbox **directly on your machine**, restricting its access to your filesystem, network connectivity, and system capabilities. Enable it inside a session, then fine-tune it with the interactive `/sandbox` UI (settings persist in `settings.json` under the `sandbox` key) ([Configuring local sandbox settings](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings)):
+
+```text
+> /sandbox enable     # turn sandboxing on
+> /sandbox            # open the General / Filesystem / Network config (Tab to switch, Esc to save)
+> /sandbox disable    # turn it off
+```
+
+| Tab | Key settings |
+|-----|--------------|
+| **General** | *Sandboxing enabled*; *Allow keychain access* (macOS Keychain for `git`/`gh` credential helpers — turn off to block credential reads) |
+| **Filesystem** | *Include working directory* (auto read/write to your project); *Clear policy on exit* (reset permissions each session); per-path **read-only** or **read/write** rules for locations outside the working dir |
+| **Network** | *Allow outbound connections* (turn off to fully isolate); *Allow local network* (`localhost`/LAN) |
+
+!!! warning "Per-host network rules are not a security boundary"
+    `allowedHosts`/`blockedHosts` filtering is unreliable across platforms: on macOS allow-rules silently degrade to unrestricted outbound and block-rules are unsupported; on Linux host rules can't reliably allow selected hosts while outbound is disabled. Use the **Allow outbound connections** toggle for real isolation, not per-host rules ([Configuring local sandbox settings](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings)).
+
+- **Cross-platform**: available on macOS and Linux; Windows requires a Windows Insiders build. Isolation behavior varies by OS because each uses a different sandboxing backend ([About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)).
+- **Enterprise policy enforcement**: local sandbox policies can be centrally configured and enforced with Microsoft Intune and other MDM platforms, giving admins control over how Copilot touches local resources on managed devices ([About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)).
+- **Billing**: included in the standard Copilot seat at no additional cost.
+
+### Cloud sandboxing
+
+Cloud sandboxing runs your CLI session inside a **fully isolated, ephemeral Linux environment hosted by GitHub** — isolated from your local machine and from other sessions. It is built on Azure Container Apps Sandboxes, with GitHub providing the identity, policy, and billing layer ([About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)):
+
+```bash
+copilot --cloud     # start an interactive session inside a cloud sandbox
+```
+
+The commands Copilot runs execute in the cloud environment, not on your machine. This unlocks three patterns:
+
+- **Continue across devices** — because the session lives in GitHub-hosted infrastructure, you can pick it up on any device without copying files or reinstalling dependencies.
+- **Offload compute-intensive work** — run multiple Copilot tasks in parallel in the cloud while your laptop stays lightweight and responsive.
+- **Unified governance** — cloud sandbox policies share the same configuration as Copilot cloud-agent policies, so existing firewall/security controls extend automatically with no extra setup.
+
+A cloud sandbox session moves through three states; stopping snapshots its state so you can resume later ([About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes)):
+
+| State | Meaning |
+|-------|---------|
+| **Active** | Running and interactive from Copilot CLI |
+| **Stopped** | Not running, but state is snapshotted; resuming restores files, environment variables, and in-progress work |
+| **Deleted** | Running environment **and** snapshot removed — not recoverable |
+
+!!! note "Org enablement and billing"
+    An organization/enterprise owner must turn on cloud sandbox access (**Organization settings → Sandboxes → Enabled for all members**) before members can use it ([Enabling or disabling cloud sandboxes](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization)). Usage is metered on three axes — confirm current pricing before long-running sessions:
+
+    | Meter | What it measures | Unit | Price (USD) |
+    |-------|------------------|------|-------------|
+    | Compute | Time a session is running | Compute second | $0.000024 |
+    | Memory | Memory allocated while running | GiB second | $0.000003 |
+    | Storage | Snapshot storage for stopped sessions | GiB month | $0.005 |
+
+    See [Billing for cloud and local sandboxes](https://docs.github.com/en/billing/concepts/product-billing/cloud-and-local-sandboxes) and the [public-preview announcement](https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview).
+
+### Copilot Anywhere: from remote-control CLIs to cloud sandboxes
+
+The Microsoft Developer demo **"GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes" (DEM305)** ties these pieces into one story: you don't have to babysit an agent in a single terminal. You can *remote-control* Copilot and let the heavy, risky, or long-running work execute in an isolated, GitHub-hosted sandbox you can rejoin from anywhere ([watch the demo](https://www.youtube.com/watch?v=JJmmunwXcu8)).
+
+The "remote-control" surfaces this workshop already covers compose naturally with sandboxes:
+
+| Want to… | Reach for | Covered in |
+|----------|-----------|------------|
+| Fire a task with no interactive UI (SSH, CI, scripts) | `copilot -p "…"` prompt mode | [Demo 4 · CI/CD automation](demos/04_cicd_automation.md) |
+| Drive the CLI from another editor or tool | ACP server | [Interfacing & interop](#interfacing--interop) |
+| Hand a long task to GitHub's servers | `/delegate <prompt>` | [Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices) |
+| Run isolated, parallel, or compute-heavy work | `copilot --cloud` | this section |
+| Pick a session back up on another machine | cloud sandbox session continuation | this section |
+
+```mermaid
+graph LR
+    Dev[You — any device] -->|"copilot -p / ACP"| CLI[Copilot CLI agent]
+    CLI -->|"/sandbox enable"| Local[Local sandbox<br/>on your machine]
+    CLI -->|"copilot --cloud"| Cloud[Ephemeral cloud sandbox<br/>Azure Container Apps]
+    Cloud -->|"stop → snapshot"| Snap[(Saved session state)]
+    Snap -->|"resume anywhere"| Dev2[You — another device]
+    CLI -->|"/delegate"| Agent[Copilot cloud agent]
+
+    style Cloud fill:#c8e6c9
+    style Local fill:#bbdefb
+```
+
+!!! tip "A safe default for autonomy"
+    Pair **autopilot** with a sandbox for unattended runs: a local sandbox restricts what Copilot can touch on your machine, while a cloud sandbox moves execution off your machine entirely. Either is far safer than `--allow-all-tools` / `--yolo` on your host ([Permissions & allowed tools](#permissions--allowed-tools)).
 
 ---
 

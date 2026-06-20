@@ -22,7 +22,10 @@
 | [About Model Context Protocol (MCP)](https://docs.github.com/en/copilot/concepts/context/mcp) | MCP の概念 |
 | [Configure MCP servers (JSON structure)](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/extend-cloud-agent-with-mcp#writing-a-json-configuration-for-mcp-servers) | `mcp-config.json` スキーマ |
 | [About GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review) | 自動コードレビュー |
-| [About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes) | サンドボックスモデル |
+| [About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes) | サンドボックスモデル: ローカル／クラウド、セッションライフサイクル、認証、課金 |
+| [Configuring local sandbox settings](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings) | `/sandbox` UI: General／Filesystem／Network 設定とプラットフォーム制限 |
+| [Enabling or disabling cloud sandboxes for your organization](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization) | 組織ポリシー: Cloud Sandbox access |
+| [Billing for cloud and local sandboxes](https://docs.github.com/en/billing/concepts/product-billing/cloud-and-local-sandboxes) | クラウドサンドボックスの Compute／Memory／Storage メーター |
 | [Models and pricing for GitHub Copilot](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing) | プレミアムリクエスト、モデルコスト |
 | [Copilot CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference) | コマンド・フラグの完全な一覧 |
 | [Copilot CLI configuration directory](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference) | `~/.copilot` 設定リファレンス |
@@ -73,6 +76,12 @@
 | リソース | 補足 |
 |----------|------|
 | [Creating applications with Copilot CLI（GitHub Skills）](https://github.com/skills/create-applications-with-the-copilot-cli) | 公式のガイド付き演習: Issue → アプリ → テスト → PR |
+
+## トーク・デモ
+
+| リソース | 補足 |
+|----------|------|
+| [GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes（DEM305）](https://www.youtube.com/watch?v=JJmmunwXcu8) | Microsoft Developer のデモ。[Copilot Anywhere](../features.md#sandboxing) の説明の元ネタ: CLI のリモートコントロール（prompt mode、ACP、`/delegate`）と、任意のデバイスから再開できるクラウドサンドボックスへの作業オフロード |
 
 ## このサイト内の関連資料
 

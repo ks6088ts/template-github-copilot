@@ -22,7 +22,10 @@ All technical claims in this workshop are grounded in the **primary sources** be
 | [About Model Context Protocol (MCP)](https://docs.github.com/en/copilot/concepts/context/mcp) | MCP concepts |
 | [Configure MCP servers (JSON structure)](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/extend-cloud-agent-with-mcp#writing-a-json-configuration-for-mcp-servers) | `mcp-config.json` schema |
 | [About GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review) | Automated code review |
-| [About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes) | Sandboxing model |
+| [About cloud and local sandboxes](https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes) | Sandboxing model: local vs cloud, session lifecycle, auth, billing |
+| [Configuring local sandbox settings](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings) | The `/sandbox` UI: General / Filesystem / Network settings and platform limits |
+| [Enabling or disabling cloud sandboxes for your organization](https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization) | Org policy: Cloud Sandbox access |
+| [Billing for cloud and local sandboxes](https://docs.github.com/en/billing/concepts/product-billing/cloud-and-local-sandboxes) | Compute / Memory / Storage meters for cloud sandboxes |
 | [Models and pricing for GitHub Copilot](https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing) | Premium requests, model costs |
 | [Copilot CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference) | Full command & flag list |
 | [Copilot CLI configuration directory](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-config-dir-reference) | `~/.copilot` settings reference |
@@ -73,6 +76,12 @@ Check these sources before each workshop run. Copilot CLI changes quickly enough
 | Resource | Notes |
 |----------|-------|
 | [Creating applications with Copilot CLI (GitHub Skills)](https://github.com/skills/create-applications-with-the-copilot-cli) | Official guided exercise: issue → app → tests → PR |
+
+## Talks & demos
+
+| Resource | Notes |
+|----------|-------|
+| [GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes (DEM305)](https://www.youtube.com/watch?v=JJmmunwXcu8) | Microsoft Developer demo. Inspiration for the [Copilot Anywhere](../features.md#sandboxing) narrative: remote-controlling the CLI (prompt mode, ACP, `/delegate`) and offloading work to cloud sandboxes you can resume from any device |
 
 ## Related material in this site
 

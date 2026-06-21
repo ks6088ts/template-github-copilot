@@ -69,6 +69,11 @@ nav:
           - References: copilot_report_forge/appendix/references.md
 theme:
   name: material
+  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/
+  features:
+    - search.suggest
+    - search.highlight
+    - search.share
   # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#automatic-light-dark-mode
   palette:
     # Palette toggle for automatic mode
@@ -120,6 +125,12 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 plugins:
+  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/
+  - search:
+      lang:
+        - en
+        - ja
+      separator: '[\s\u200b\-、。：！？「」（）]+'
   - i18n:
       docs_structure: suffix
       languages:

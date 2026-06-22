@@ -32,6 +32,12 @@ The shared helpers that build the `TelemetryConfig`:
 - **Python** — [`src/python/scripts/tutorials/_telemetry.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/_telemetry.py) (`make_client()`).
 - **Go** — [`src/go/cmd/tutorial/telemetry.go`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/go/cmd/tutorial/telemetry.go) (`newClientOptions()`).
 
+> **SDK v1.0.2+ telemetry options.** `TelemetryConfig` adds an `otlpProtocol`
+> option (`http/json` or `http/protobuf`) to select the OTLP export transport,
+> and the client now calls `runtime.shutdown` on a normal stop so telemetry is
+> flushed deterministically before the process exits
+> ([Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)).
+
 ---
 
 ## 1. Start the observability stack

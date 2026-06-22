@@ -4,7 +4,7 @@
 
 > 本ワークショップは全面的に **GitHub 公式の一次情報**（本文中にリンクし、[References](appendix/references.md) にまとめています）に基づいています。製品が急速に進化している箇所では、その旨を明記し、変わりうる値を固定するのではなく、ライブのコマンド（例: `/help` や `/model`）を参照するよう案内します。
 
-> 最終確認は `github/copilot-cli` changelog の **1.0.63（2026-06-15）** と、**2026-06-19** までの GitHub Blog Changelog に基づいています。ワークショップ実施前に確認すべき情報源は [References](appendix/references.md#change-watchlist) を参照してください。
+> 最終確認日は **2026-06-22** で、`github/copilot-cli` changelog の **1.0.63（2026-06-15）** と、**2026-06-19** までの GitHub Blog Changelog に基づいています。ワークショップ実施前に確認すべき情報源は [References](appendix/references.md#change-watchlist) を参照してください。
 
 ---
 

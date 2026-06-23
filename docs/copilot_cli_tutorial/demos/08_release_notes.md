@@ -1,19 +1,21 @@
 # Demo 8 · Release notes & changelog automation
 
 **Theme:** automation. **Time:** ~25 min.
-**Features:** Git history reasoning, `@` references, `copilot -p`, **this repository** as the subject.
+**Features:** Git history reasoning, `@` references, `copilot -p`.
 
-This is the one demo that uses **this repository** — [template-github-copilot](https://github.com/ks6088ts/template-github-copilot) — as its working codebase, so you can reproduce it exactly. The CLI can summarize Git history, compare versions, and draft release descriptions from actual commits ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)).
+> **Story so far:** Several improvements have landed on **template-typescript-react** — a Reset button, a CI review job, a telemetry-naming migration. **This demo:** turn the project's Git history into release notes and a changelog, then make it a repeatable pipeline.
+
+The app already ships real tags (`v0.0.1`, `v0.0.2`) and a `release.yaml` workflow, so you can reproduce this exactly. The CLI can summarize Git history, compare versions, and draft release descriptions from actual commits ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)).
 
 ---
 
 ## Prerequisites
 
-- A local clone of this repo:
+- A local clone of the app (your fork, or upstream):
 
   ```bash
-  git clone https://github.com/ks6088ts/template-github-copilot
-  cd template-github-copilot
+  git clone https://github.com/ks6088ts/template-typescript-react
+  cd template-typescript-react
   ```
 
 - Authenticated CLI. Launch and trust the directory:
@@ -38,7 +40,7 @@ The `!` prefix runs shell commands directly, appending their output to context w
 ### 2. Ask what changed between two points
 
 ```text
-> What changed between the two most recent tags? Group the changes by area (docs, src/python, src/go, infra) and by type (feat, fix, chore).
+> What changed between the two most recent tags? Group the changes by area (src, src/telemetry, tests, .github/workflows, docker, docs) and by type (feat, fix, chore).
 ```
 
 Asking what went into a version is a documented Git use case ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)).
@@ -46,7 +48,7 @@ Asking what went into a version is a documented Git use case ([Best practices](h
 ### 3. Draft user-facing release notes
 
 ```text
-> Draft release notes in Markdown for the next release. Audience: developers using this template. Sections: Highlights, Breaking changes, Features, Fixes, Docs. Base it strictly on the commits between the last tag and HEAD — do not invent entries.
+> Draft release notes in Markdown for the next release. Audience: developers using this React + TypeScript template. Sections: Highlights, Breaking changes, Features, Fixes, Docs. Base it strictly on the commits between the last tag and HEAD — do not invent entries.
 ```
 
 !!! tip "Ground it, don't let it guess"
@@ -89,13 +91,13 @@ graph LR
 
 ### 7. (Optional) Trigger on tag push in CI
 
-Combine with [Demo 4](04_cicd_automation.md): run the command above in a workflow triggered by `push: tags`, then attach `RELEASE_NOTES.md` to the GitHub Release with `gh release create`.
+Combine with [Demo 4](04_cicd_automation.md): run the command above in a workflow triggered by `push: tags` — right alongside the app's existing `release.yaml` — then attach `RELEASE_NOTES.md` to the GitHub Release with `gh release create`.
 
 ---
 
 ## What you learned
 
-- Copilot turns raw Git history into grouped, audience-appropriate release notes.
+- Copilot turns raw Git history into grouped, audience-appropriate release notes for the app.
 - `@CHANGELOG.md` keeps generated output consistent with your existing format.
 - Copilot-authored PR metadata matters for transparency and GitHub's generated release-note crediting behavior.
 - The same prompt works interactively and as a `copilot -p` pipeline step.
@@ -103,9 +105,9 @@ Combine with [Demo 4](04_cicd_automation.md): run the command above in a workflo
 ## Take it further
 
 - Have Copilot also draft the GitHub Release title and a one-paragraph summary for social posts.
-- Feed it `git log` filtered by path (e.g. `-- docs/`) to produce per-area changelogs.
+- Feed it `git log` filtered by path (e.g. `-- src/telemetry/`) to produce per-area changelogs.
 - Encode your release-notes house style as a [skill](06_custom_agents_skills.md) so every release reads the same.
 
 ---
 
-That's all eight scenarios. Head to the [Decision Guide](../access_methods.md#decision-guide) to consolidate, or browse the full [References](../appendix/references.md).
+That's all eight scenarios — one feature, taken from issue to release on **template-typescript-react**. Head to the [Decision Guide](../access_methods.md#decision-guide) to consolidate, or browse the full [References](../appendix/references.md).

@@ -1,19 +1,21 @@
 # Demo 8 · リリースノート／変更履歴の自動生成
 
 **テーマ:** 自動化。**時間:** 約 25 分。
-**機能:** Git 履歴の推論、`@` 参照、`copilot -p`、題材としての **このリポジトリ**。
+**機能:** Git 履歴の推論、`@` 参照、`copilot -p`。
 
-これは **このリポジトリ**（[template-github-copilot](https://github.com/ks6088ts/template-github-copilot)）を題材コードベースとして使う唯一のデモなので、まったく同じに再現できます。Copilot は Git ワークフローが得意で、「バージョン間で何が変わったか」への回答や説明文のドラフトも行えます（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
+> **これまで:** **template-typescript-react** にいくつもの改善が入りました — Reset ボタン、CI レビュージョブ、テレメトリ命名の移行。**このデモ:** プロジェクトの Git 履歴をリリースノートと変更履歴に変え、それを反復可能なパイプラインにします。
+
+このアプリは実際のタグ（`v0.0.1`、`v0.0.2`）と `release.yaml` ワークフローをすでに同梱しているので、まったく同じに再現できます。Copilot は Git 履歴を要約し、バージョンを比較し、実際のコミットから説明文をドラフトできます（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
 
 ---
 
 ## 前提条件
 
-- このリポジトリのローカルクローン。
+- アプリのローカルクローン（自分のフォーク、または上流）。
 
   ```bash
-  git clone https://github.com/ks6088ts/template-github-copilot
-  cd template-github-copilot
+  git clone https://github.com/ks6088ts/template-typescript-react
+  cd template-typescript-react
   ```
 
 - 認証済み CLI。起動してディレクトリを信頼します。
@@ -38,7 +40,7 @@
 ### 2. 2 点間で何が変わったかを尋ねる
 
 ```text
-> What changed between the two most recent tags? Group the changes by area (docs, src/python, src/go, infra) and by type (feat, fix, chore).
+> What changed between the two most recent tags? Group the changes by area (src, src/telemetry, tests, .github/workflows, docker, docs) and by type (feat, fix, chore).
 ```
 
 バージョンに何が入ったかを尋ねるのは、文書化された Git のユースケースです（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
@@ -46,7 +48,7 @@
 ### 3. ユーザー向けリリースノートをドラフトする
 
 ```text
-> Draft release notes in Markdown for the next release. Audience: developers using this template. Sections: Highlights, Breaking changes, Features, Fixes, Docs. Base it strictly on the commits between the last tag and HEAD — do not invent entries.
+> Draft release notes in Markdown for the next release. Audience: developers using this React + TypeScript template. Sections: Highlights, Breaking changes, Features, Fixes, Docs. Base it strictly on the commits between the last tag and HEAD — do not invent entries.
 ```
 
 !!! tip "推測させず、根拠に基づかせる"
@@ -89,13 +91,13 @@ graph LR
 
 ### 7. （任意）CI でタグ push をトリガーにする
 
-[Demo 4](04_cicd_automation.md) と組み合わせます。`push: tags` でトリガーされるワークフローで上記コマンドを実行し、`gh release create` で `RELEASE_NOTES.md` を GitHub Release に添付します。
+[Demo 4](04_cicd_automation.md) と組み合わせます。`push: tags` でトリガーされるワークフローで上記コマンドを実行し（アプリ既存の `release.yaml` のすぐ隣で）、`gh release create` で `RELEASE_NOTES.md` を GitHub Release に添付します。
 
 ---
 
 ## 学んだこと
 
-- Copilot は Git 履歴を読み取り、領域や変更種別で整理したリリースノートを下書きできる。
+- Copilot は Git 履歴を読み取り、領域や変更種別で整理したアプリのリリースノートを下書きできる。
 - `@CHANGELOG.md` で生成物を既存の形式に揃えられる。
 - Copilot-authored PR のメタデータは、透明性と GitHub の生成リリースノートでのクレジット表示に関係する。
 - 同じプロンプトが対話実行でも `copilot -p` のパイプラインステップでも動く。
@@ -103,9 +105,9 @@ graph LR
 ## さらに進める
 
 - Copilot に GitHub Release のタイトルと、SNS 投稿用の一段落の要約もドラフトさせる。
-- パスでフィルタした `git log`（例: `-- docs/`）を渡し、領域別の変更履歴を作る。
+- パスでフィルタした `git log`（例: `-- src/telemetry/`）を渡し、領域別の変更履歴を作る。
 - リリースノートのハウススタイルを [スキル](06_custom_agents_skills.md) に符号化し、どのリリースも同じ読み味にする。
 
 ---
 
-これで 8 つのシナリオはすべて完了です。[Decision Guide](../access_methods.md#decision-guide) で総まとめするか、[References](../appendix/references.md) 全体を眺めてください。
+これで 8 つのシナリオはすべて完了です — 1 つの機能を、Issue から **template-typescript-react** のリリースまで通しで扱いました。[Decision Guide](../access_methods.md#decision-guide) で総まとめするか、[References](../appendix/references.md) 全体を眺めてください。

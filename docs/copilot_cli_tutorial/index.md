@@ -107,6 +107,6 @@ graph TD
 
 - **Facilitators**: each chapter is standalone. Project the page, run the commands live, and let attendees follow along in their own clone.
 - **Self-paced learners**: work top to bottom. Every demo lists its prerequisites and a copy-pasteable command sequence.
-- **One example uses this repository** ([template-github-copilot](https://github.com/ks6088ts/template-github-copilot)) as the working codebase; the rest are intentionally generic so they reproduce anywhere.
+- **All eight demos share one subject app** — [template-typescript-react](https://github.com/ks6088ts/template-typescript-react) — and tell a connected story. Fork it first so you can reproduce each step against your own copy.
 
 Ready? Start with [Getting Started](getting_started.md).

@@ -1,14 +1,45 @@
 # Demo Scenarios
 
-**Part 3 of the workshop — the heart of the day.** Eight self-contained, production-grade scenarios. Each one is reproducible, lists its prerequisites, and gives you a copy-pasteable command sequence plus the *why* behind each step.
+**Part 3 of the workshop — the heart of the day.** Eight self-contained, production-grade scenarios that tell **one connected story**. You join the [template-typescript-react](https://github.com/ks6088ts/template-typescript-react) project — a React 19 + TypeScript + Vite single-page app — and use Copilot CLI to build, review, automate, extend, scale, and release a real feature. Each page is reproducible, lists its prerequisites, and gives you a copy-pasteable command sequence plus the *why* behind each step.
 
-> Seven scenarios are intentionally **generic** so they reproduce in any repository. **Demo 8** uses **this repository** ([template-github-copilot](https://github.com/ks6088ts/template-github-copilot)) as its working codebase.
+> Every scenario uses the **same app** as its subject and builds on the previous one — but each page also stands alone if you want to jump straight in.
 
 ---
 
-## Shared prerequisites
+## The running example
 
-Complete [Getting Started](../getting_started.md) first. Then confirm:
+Across the eight demos you grow one small, realistic feature — a **Reset button** for the counter in `src/App.tsx` — and the engineering practices around it:
+
+```mermaid
+graph LR
+    D1["1 · Build the<br/>Reset button"] --> D2["2 · Review<br/>the PR"]
+    D2 --> D3["3 · Understand<br/>telemetry / E2E / CI"]
+    D3 --> D4["4 · Automate<br/>review in CI"]
+    D4 --> D5["5 · Drive the app<br/>via Playwright MCP"]
+    D5 --> D6["6 · Encode an<br/>agent + skill"]
+    D6 --> D7["7 · Scale a telemetry<br/>convention"]
+    D7 --> D8["8 · Release notes<br/>+ changelog"]
+```
+
+- **Subject app:** [`ks6088ts/template-typescript-react`](https://github.com/ks6088ts/template-typescript-react) — React 19, TypeScript, Vite, Biome, Vitest (browser mode), Playwright, optional OpenTelemetry / Application Insights, and GitHub Actions CI.
+- **The feature thread:** add a Reset button (with a telemetry event) to the counter, then review, test, automate, extend, refactor, and release it.
+
+---
+
+## Shared prerequisites { #shared-prerequisites }
+
+Complete [Getting Started](../getting_started.md) first. Then **fork** (or press *Use this template* on) [template-typescript-react](https://github.com/ks6088ts/template-typescript-react) so you have a copy you can push to, and clone it:
+
+```bash
+# Clone YOUR fork (replace <your-username>)
+git clone https://github.com/<your-username>/template-typescript-react
+cd template-typescript-react
+
+# Node.js + pnpm are required (see the repo README)
+pnpm install
+```
+
+Confirm the CLI is ready:
 
 ```bash
 copilot --version          # CLI installed
@@ -19,8 +50,8 @@ copilot --version          # CLI installed
 > /mcp                     # GitHub MCP server present
 ```
 
-!!! warning "Run in a safe place"
-    Several demos let Copilot edit files, run shell commands, and act on GitHub.com. Use a **throwaway repo or branch**, review proposed actions, and prefer a [sandbox](../features.md#sandboxing) when granting autonomy. Never point destructive automation at `main`.
+!!! warning "Run against your fork"
+    Several demos let Copilot edit files, run shell commands, and act on GitHub.com. Point them at **your fork** and a **feature branch** — never the upstream repo or `main`. Review proposed actions and prefer a [sandbox](../features.md#sandboxing) when granting autonomy.
 
 ---
 
@@ -35,7 +66,7 @@ copilot --version          # CLI installed
 | 5 | [MCP server integration](05_mcp_integration.md) | Extensibility | `/mcp add`, external tools/data |
 | 6 | [Custom agents & skills](06_custom_agents_skills.md) | Extensibility | `.github/agents`, `SKILL.md` |
 | 7 | [Programmatic batch refactor / migration](07_batch_refactor.md) | Automation | plan mode, `/fleet`, checklists |
-| 8 | [Release notes & changelog automation](08_release_notes.md) | Automation | Git history, `@` refs, this repo |
+| 8 | [Release notes & changelog automation](08_release_notes.md) | Automation | Git history, `@` refs, `copilot -p` |
 
 ```mermaid
 graph TD
@@ -63,9 +94,9 @@ graph TD
 ## Suggested running order
 
 - **Short on time?** Do 1, 2, and 4 — they deliver the most immediate value.
-- **Full day?** Run them in order; 5 and 6 (extensibility) give 7 and 8 reusable building blocks.
-- **Facilitating?** Pre-create a demo repo with a couple of open issues and an in-progress branch so 1, 2, and 8 have material to work with.
+- **Full day?** Run them in order; the story compounds, and 5 and 6 (extensibility) give 7 and 8 reusable building blocks.
+- **Facilitating?** Have attendees fork [template-typescript-react](https://github.com/ks6088ts/template-typescript-react) and run `pnpm install` beforehand, so Demo 1 can open the first issue against their own copy.
 
-Each page ends with **"What you learned"** and **"Take it further"** prompts for self-paced exploration.
+Each page opens with a short **"In this story"** recap and ends with **"What you learned"** and **"Take it further"** prompts for self-paced exploration.
 
 Start with [Demo 1 · Issue → Branch → PR automation](01_issue_to_pr.md).

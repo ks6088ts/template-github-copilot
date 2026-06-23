@@ -107,6 +107,6 @@ graph TD
 
 - **ファシリテーター**: 各章は独立しています。ページを投影し、コマンドをライブで実行し、参加者は各自のクローンで追従できます。
 - **自習者**: 上から順に進めてください。各デモは前提条件と、コピー＆ペースト可能なコマンド列を記載しています。
-- **1 つのデモはこのリポジトリ**（[template-github-copilot](https://github.com/ks6088ts/template-github-copilot)）を題材コードベースとして使います。残りは意図的に汎用化しており、どこでも再現できます。
+- **8 つのデモはすべて同じ題材アプリ**（[template-typescript-react](https://github.com/ks6088ts/template-typescript-react)）を共有し、連続したストーリーを描きます。各ステップを自分のコピーで再現できるよう、最初にフォークしてください。
 
 準備はいいですか？ [Getting Started](getting_started.md) から始めましょう。

@@ -3,31 +3,34 @@
 **テーマ:** 品質。**時間:** 約 20 分。
 **機能:** 組み込みの **Code review** エージェント、`@` ファイル参照、ローカル変更とリモート PR のレビュー。
 
+> **これまで:** [Demo 1](01_issue_to_pr.md) で `feature/reset-button` ブランチに **Reset ボタン** を追加する PR を開きました。**このデモ:** 人間が見る前に、その変更をレビューし、テストで堅牢にします。
+
 人間のレビュアーが見る前に、変更に対するレビューを得ます。このワークショップでいう「ノイズが少ない」とは、スタイルの好みを避け、バグの可能性、セキュリティリスク、テスト不足、危険な API 利用に絞るという意味です（[Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli)）。
 
 ---
 
 ## 前提条件
 
-- 未コミットまたは未プッシュの変更があるブランチ（あるいはアクセスできる任意の PR URL）。
+- [Demo 1](01_issue_to_pr.md) の `feature/reset-button` ブランチとその PR（あるいは未コミット／未プッシュの変更がある任意のブランチ）。
 - 認証済み CLI。
 
 ---
 
 ## 手順
 
-### 1. 現在のブランチを `main` と比較してレビューする
+### 1. ブランチを `main` と比較してレビューする
 
-ベストプラクティスガイドは、クロスチェックのために複数モデルを要求できることを示しています。モデル名は短期間で変わるため、スライドや古いメモの名前をコピーするのではなく、`/model` で現在使えるモデルを 2 つ選んでください（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)、[GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated)）。
+フィーチャーブランチにいることを確認してから、クロスチェックを依頼します。ベストプラクティスガイドは複数モデルを要求できることを示しています。モデル名は短期間で変わるため、スライドや古いメモの名前をコピーするのではなく、`/model` で現在使えるモデルを 2 つ選んでください（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)、[GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated)）。
 
 ```text
-> /review Use two currently available models from /model to review the changes in my current branch against `main`. Focus on potential bugs and security issues.
+> !git switch feature/reset-button
+> /review Use two currently available models from /model to review the changes on this branch against `main`. Focus on real bugs, missing tests, and risky React/telemetry patterns — not style.
 ```
 
 お使いのビルドで `/review` が使えない場合は、自然言語でエージェントを呼び出します。自動的に Code review エージェントへ委譲されます。
 
 ```text
-> Review the changes in my current branch against main. Surface only real bugs, security issues, and risky patterns. Skip style nitpicks.
+> Review the Reset-button changes on this branch against main. Surface only real bugs, missing tests, and risky patterns. Skip style nitpicks.
 ```
 
 ### 2. レビューを特定のファイルに絞る
@@ -35,7 +38,7 @@
 `@` でファイルをプロンプトに追加すると、Copilot はその正確な内容に基づいてレビューします（[Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli)）。
 
 ```text
-> Review @src/auth/session.ts and @src/auth/tokens.ts for security issues. Check for missing input validation and unsafe defaults.
+> Review @src/App.tsx and @src/telemetry/react/hooks.ts for the Reset-button change. Check for missing telemetry properties, unguarded state updates, and an accessible name/label on the new button.
 ```
 
 ### 3. リモートのプルリクエストをレビューする
@@ -43,15 +46,15 @@
 Copilot は GitHub.com 上の PR の変更を確認し、重大な問題を報告できます（[About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli)）。
 
 ```text
-> Check the changes made in PR https://github.com/OWNER/REPO/pull/57. Report any serious errors you find in these changes.
+> Check the changes in my Reset-button PR on <your-username>/template-typescript-react. Report any serious errors you find in these changes.
 ```
 
 ### 4. 指摘を修正に変える
 
-これはエージェントなので、同じセッションでレビュー結果に対処できます。
+これはエージェントなので、同じセッションでレビュー結果に対処できます。そして、リポジトリ既存の Playwright パターン（`playwright/app.spec.ts`）を使って回帰テストでループを閉じます。
 
 ```text
-> Fix the highest-severity issue you found, add a regression test, and show me the diff
+> Fix the highest-severity issue you found. Then add a Playwright assertion in @playwright/app.spec.ts that clicks the Reset button and verifies the counter returns to "Count is 0". Run `pnpm test:e2e:playwright` and show me the diff.
 ```
 
 ### 5. 専用のセキュリティレビューコマンドを使う
@@ -85,13 +88,13 @@ CLI のレビューは **ゲート**（PR 前、または CI 内）として、I
 ## 学んだこと
 
 - Code review エージェントは、バグ、セキュリティ、テスト不足、危険な API 利用に絞るなど、明確なレビュー方針と組み合わせると使いやすい。
-- `@` ファイル参照でレビュー範囲を正確に絞れる。
-- *リモート PR* をレビューし、その結果に即座に対処できる。
+- `@` ファイル参照で、Reset 機能が触れたファイルにレビュー範囲を正確に絞れる。
+- *リモート PR* をレビューし、その結果に即座に対処し、同じセッションで回帰テストを追加できる。
 
 ## さらに進める
 
-- 同じプロンプトを CI の非対話ステップとして組み込む（[Demo 4](04_cicd_automation.md) を参照）。
-- チームのレビュー観点を [カスタムエージェント](06_custom_agents_skills.md) に符号化し、すべてのレビューに同じレンズを適用する。
+- 同じプロンプトを CI の非対話ステップとして組み込み、このアプリへのすべての PR をレビューする（[Demo 4](04_cicd_automation.md) を参照）。
+- このレビュー方針を [カスタムエージェント](06_custom_agents_skills.md) に符号化し、すべてのレビューに同じレンズを適用する。
 - GitHub は GitHub.com 上の自動 PR レビューも提供しています — [About GitHub Copilot code review](https://docs.github.com/en/copilot/concepts/agents/code-review)。
 
 次へ: [Demo 3 · コードベースのオンボーディング](03_onboarding.md)。

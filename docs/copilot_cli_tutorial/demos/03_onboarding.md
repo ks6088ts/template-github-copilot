@@ -3,13 +3,15 @@
 **Theme:** understanding. **Time:** ~20 min.
 **Features:** built-in **Explore** and **Research** agents, `@` references, multi-repo access.
 
+> **Story so far:** You've shipped and reviewed a small change. **This demo:** go deeper — understand the **telemetry**, **E2E**, and **CI** subsystems of **template-typescript-react** before you take on the bigger work in the demos that follow.
+
 The fastest way to get productive in an unfamiliar repository is to interrogate it. Copilot CLI's **Explore** agent answers questions about your code *without* adding to your main context, and **Research** does deep, cited investigation across code, related repos, and the web ([Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli)).
 
 ---
 
 ## Prerequisites
 
-- A repository you want to understand (ideally one you didn't write).
+- Your clone of [template-typescript-react](https://github.com/ks6088ts/template-typescript-react).
 - Authenticated CLI.
 
 ---
@@ -18,13 +20,13 @@ The fastest way to get productive in an unfamiliar repository is to interrogate 
 
 ### 1. Ask orientation questions
 
-These onboarding prompts are straight from GitHub's best-practices guide ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
+Point the same best-practice onboarding prompts at this app's real subsystems ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
 
 ```text
-> How is logging configured in this project?
-> What's the pattern for adding a new API endpoint?
-> Explain the authentication flow
-> Where are the database migrations?
+> How is frontend telemetry configured in this project, and which provider is used by default?
+> What's the pattern for tracking a user interaction? Show an example from src/App.tsx.
+> Where are the E2E tests, and what's the difference between the Vitest browser suite and the Playwright suite?
+> What does `make ci-test` run, and how is it wired into GitHub Actions?
 ```
 
 ### 2. Use the Explore agent to keep context clean
@@ -32,13 +34,13 @@ These onboarding prompts are straight from GitHub's best-practices guide ([Best 
 For larger questions, let the Explore agent do the digging in its own context window so your main session stays focused ([Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli)):
 
 ```text
-> Use the Explore agent to map the request lifecycle from HTTP entry point to database, and list the key files involved.
+> Use the Explore agent to map the telemetry flow from a button click in src/App.tsx through src/telemetry/ to the configured provider, and list the key files involved.
 ```
 
 ### 3. Produce a cited deep-dive with Research
 
 ```text
-> Research how this project handles configuration and secrets. Compare it to common best practices and cite the files and any external references.
+> Research how this project handles frontend telemetry and observability (src/telemetry/ and docker/). Compare it to common best practices and cite the files and any external references.
 ```
 
 The Research agent produces a detailed report **with citations** ([Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli)).
@@ -48,23 +50,23 @@ The Research agent produces a detailed report **with citations** ([Using Copilot
 Turn understanding into something the whole team reuses:
 
 ```text
-> Create ONBOARDING.md: architecture overview, how to build/test/run, key directories, and the 5 files a newcomer should read first. Cite real paths.
+> Create ONBOARDING.md: architecture overview, how to install/dev/build/test (the pnpm scripts and `make` targets), key directories, and the 5 files a newcomer should read first. Cite real paths like src/App.tsx, src/telemetry/, and playwright/.
 ```
 
-### 5. Go multi-repo for microservices
+### 5. Cross-stack: follow telemetry to the collector
 
-Onboarding often spans services. Launch from a parent directory, or add repos with `/add-dir`, to let Copilot reason across them ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
-
-```bash
-cd ~/projects        # parent of several repos
-copilot
-```
+The app can export OpenTelemetry data to the local stack in `docker/` (OTel Collector + Grafana LGTM). Trace the path end to end with `@` references:
 
 ```text
-> /add-dir /Users/me/projects/auth-service
-> /add-dir /Users/me/projects/api-gateway
+> Explain how a trackEvent call in @src/App.tsx reaches the OTel Collector and Grafana. Reference @src/telemetry/providers/OtelProvider.ts, @docker/otel-collector/config.yaml, and @docker/compose.yaml.
+```
+
+When onboarding spans repos — say a backend that receives this telemetry — add them with `/add-dir` and let Copilot reason across them ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
+
+```text
+> /add-dir /path/to/your-backend
 > /list-dirs
-> Show me the current auth flow across @auth-service and @api-gateway, and where they could drift.
+> Compare the OTLP export config in this app with what the backend collector expects, and flag any mismatch.
 ```
 
 ---
@@ -82,12 +84,12 @@ graph TD
 ## What you learned
 
 - Explore answers code questions without bloating your main context.
-- Research produces cited, in-depth reports.
-- Multi-repo access (`/add-dir`, parent-dir launch) makes microservice onboarding tractable.
+- Research produces cited, in-depth reports on real subsystems like `src/telemetry/`.
+- Multi-repo access (`/add-dir`, parent-dir launch) makes cross-stack onboarding tractable.
 
 ## Take it further
 
 - Save the generated `ONBOARDING.md` and your best questions as a [skill](06_custom_agents_skills.md) so every new hire gets the same guided tour.
-- Run the same exploration in this repo: clone [template-github-copilot](https://github.com/ks6088ts/template-github-copilot) and ask Copilot to map `src/python` and `src/go`.
+- Ask Copilot to diagram the telemetry provider hierarchy (`Noop`, `AppInsights`, `Otel`, `Composite`) under `src/telemetry/providers/` as a Mermaid graph for the docs.
 
 Next: [Demo 4 · CI/CD non-interactive automation](04_cicd_automation.md).

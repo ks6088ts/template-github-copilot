@@ -3,6 +3,8 @@
 **テーマ:** スケールする自動化。**時間:** 約 30 分。
 **機能:** Plan モード、チェックリスト、`/fleet` 並列サブエージェント、スコープ付き権限。
 
+> **これまで:** アプリに合わせたエージェントとスキルを用意しました。**このデモ:** 反復可能な変更をスケールします — **template-typescript-react** とそのテスト全体に、一貫したテレメトリイベント命名規約（`app.<area>.<action>`）を採用し、まだ追跡されていないリンクにトラッキングを追加します。
+
 大規模で反復的な変更（フレームワーク移行、API リネーム、依存関係のアップグレード）は、作業をレビュー可能に保てる場合に CLI が向く領域です。パターンは **計画 → チェックリスト → 段階的に実行 → 検証** です。
 
 ```mermaid
@@ -17,8 +19,8 @@ graph LR
 
 ## 前提条件
 
-- 反復的な変更を加えるリポジトリ（例: API のリネーム、パターンの移行、コード変更を伴う依存関係のバンプ）。
-- 認証済み CLI。**専用ブランチ** で作業すること。
+- template-typescript-react の自分のフォーク。**専用ブランチ**（例: `chore/telemetry-naming`）で作業すること。
+- 認証済み CLI。
 
 ---
 
@@ -29,7 +31,7 @@ graph LR
 Plan モードでは、コードに触れる前にエージェントが確認の質問をし、承認済みの `plan.md` を作成します（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
 
 ```text
-> /plan Migrate all class components to functional components with hooks
+> /plan Adopt a telemetry event-naming convention `app.<area>.<action>` across the app. Rename the existing counter events and add click tracking to the external links in @src/App.tsx, then update the E2E tests to match.
 ```
 
 質問に答え、計画をレビューし、必要なら ++ctrl+y++ で編集してから承認します。
@@ -39,14 +41,14 @@ Plan モードでは、コードに触れる前にエージェントが確認の
 大規模な変更では、タスク一覧を外部化して、圧縮を越えて進捗が残り、レビュー可能な状態にします（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
 
 ```text
-> Run the linter and write all errors to migration-checklist.md as a checklist.
-> Then fix each issue one by one, checking them off as you go.
+> List every telemetry event name in the codebase (grep for `trackEvent(` across src/ and the E2E tests) and write migration-checklist.md mapping each old name to its new `app.<area>.<action>` name.
+> Then fix each occurrence one by one, checking them off as you go.
 ```
 
 ### 3. 検証しながら段階的に実行する
 
 ```text
-> Implement the plan in small batches. After each batch, run the tests and only continue if they pass.
+> Implement the plan in small batches. After each batch, run `pnpm test:e2e` and only continue if it passes.
 > Commit each passing batch with a conventional-commit message.
 ```
 
@@ -55,7 +57,7 @@ Plan モードでは、コードに触れる前にエージェントが確認の
 ```bash
 copilot --allow-tool='shell(git:*)' \
         --allow-tool='write' \
-        --allow-tool='shell(npm run test:*)' \
+        --allow-tool='shell(pnpm:*)' \
         --deny-tool='shell(git push)' \
         --deny-tool='shell(rm)'
 ```
@@ -67,17 +69,22 @@ copilot --allow-tool='shell(git:*)' \
 独立したサブタスクには `/fleet` を先頭に付け、Copilot がそれぞれ自分のコンテキストウィンドウを管理するサブエージェントへ作業を分割します（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
 
 ```text
-> /fleet Apply the rename `getUser` → `fetchUser` across all packages, updating call sites and tests.
+> /fleet Apply the renames `counter_button_clicked` → `app.counter.incremented` and `counter_reset_clicked` → `app.counter.reset` across src/ and the E2E tests, updating every call site and assertion.
 ```
 
-### 5. マルチリポの移行
+### 5. 下流の利用者も同期させる
 
-変更が複数サービスにまたがるときは、リポジトリを追加して Copilot に連携させます（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
+このようなリネームはソースの外まで波及しえます。アプリはイベント名を参照しうる Grafana ダッシュボードを同梱しているため、同じ変更でまとめて連れていきます。
 
 ```text
-> /add-dir /Users/me/projects/api-gateway
-> /add-dir /Users/me/projects/auth-service
-> Update the user-auth API contract across @api-gateway and @auth-service, keeping callers in sync.
+> Also update @docker/grafana/dashboards/frontend-telemetry.json if it references any renamed event names, so the dashboards keep working.
+```
+
+変更が複数リポジトリにまたがるとき（たとえばバックエンドや別リポジトリの共有ダッシュボード）は、それらを追加して Copilot に連携させます（[Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)）。
+
+```text
+> /add-dir /path/to/your-dashboards
+> Update any references to the old event names across @your-dashboards, keeping them consistent with the app.
 ```
 
 ### 6. サンドボックスでの Autopilot を検討する
@@ -100,7 +107,7 @@ copilot --allow-tool='shell(git:*)' \
 
 - 計画＋チェックリスト＋段階的検証が、大きなリファクタを安全かつレビュー可能に保つ。
 - `/fleet` は独立したサブタスクをサブエージェント間で並列化する。
-- スコープ付き権限が、制御を手放さずにハンズオフの反復を可能にする。
+- スコープ付き権限が、制御を手放さずにハンズオフの反復を可能にする — ダッシュボードのような下流の利用者もリネームと一緒に動く。
 
 ## さらに進める
 

@@ -3,6 +3,8 @@
 **Theme:** automation at scale. **Time:** ~30 min.
 **Features:** plan mode, checklists, `/fleet` parallel subagents, scoped permissions.
 
+> **Story so far:** You have agents and skills tuned to the app. **This demo:** scale a repeatable change — adopt a consistent **telemetry event-naming convention** (`app.<area>.<action>`) across **template-typescript-react** and its tests, and add tracking to the currently-untracked links.
+
 Large, repetitive changes — framework migrations, API renames, dependency upgrades — are good CLI candidates only when you keep the work reviewable. The pattern is **plan → checklist → execute incrementally → verify**.
 
 ```mermaid
@@ -17,8 +19,8 @@ graph LR
 
 ## Prerequisites
 
-- A repo with a repetitive change to make (e.g. rename an API, migrate a pattern, bump a dependency with code changes).
-- Authenticated CLI. Work on a **dedicated branch**.
+- Your fork of template-typescript-react. Work on a **dedicated branch** (e.g. `chore/telemetry-naming`).
+- Authenticated CLI.
 
 ---
 
@@ -29,7 +31,7 @@ graph LR
 Plan mode makes the agent ask clarifying questions and produce an approved `plan.md` before touching code ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
 
 ```text
-> /plan Migrate all class components to functional components with hooks
+> /plan Adopt a telemetry event-naming convention `app.<area>.<action>` across the app. Rename the existing counter events and add click tracking to the external links in @src/App.tsx, then update the E2E tests to match.
 ```
 
 Answer its questions, review the plan, press ++ctrl+y++ to edit if needed, then approve.
@@ -39,14 +41,14 @@ Answer its questions, review the plan, press ++ctrl+y++ to edit if needed, then 
 For large-scale changes, externalize the task list so progress survives compaction and is reviewable ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
 
 ```text
-> Run the linter and write all errors to migration-checklist.md as a checklist.
-> Then fix each issue one by one, checking them off as you go.
+> List every telemetry event name in the codebase (grep for `trackEvent(` across src/ and the E2E tests) and write migration-checklist.md mapping each old name to its new `app.<area>.<action>` name.
+> Then fix each occurrence one by one, checking them off as you go.
 ```
 
 ### 3. Execute incrementally with verification
 
 ```text
-> Implement the plan in small batches. After each batch, run the tests and only continue if they pass.
+> Implement the plan in small batches. After each batch, run `pnpm test:e2e` and only continue if it passes.
 > Commit each passing batch with a conventional-commit message.
 ```
 
@@ -55,7 +57,7 @@ Scope permissions so the agent can do the repetitive work without prompting on e
 ```bash
 copilot --allow-tool='shell(git:*)' \
         --allow-tool='write' \
-        --allow-tool='shell(npm run test:*)' \
+        --allow-tool='shell(pnpm:*)' \
         --deny-tool='shell(git push)' \
         --deny-tool='shell(rm)'
 ```
@@ -67,17 +69,22 @@ If a batch fails tests, stop the sequence. Ask Copilot to mark the checklist ite
 For independent sub-tasks, prefix with `/fleet` so Copilot splits the work across subagents that each manage their own context window ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
 
 ```text
-> /fleet Apply the rename `getUser` → `fetchUser` across all packages, updating call sites and tests.
+> /fleet Apply the renames `counter_button_clicked` → `app.counter.incremented` and `counter_reset_clicked` → `app.counter.reset` across src/ and the E2E tests, updating every call site and assertion.
 ```
 
-### 5. Multi-repo migrations
+### 5. Keep downstream consumers in sync
 
-When a change spans services, add the repos and let Copilot coordinate ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
+A rename like this can ripple beyond the source. The app ships Grafana dashboards that may reference event names — bring them along in the same change:
 
 ```text
-> /add-dir /Users/me/projects/api-gateway
-> /add-dir /Users/me/projects/auth-service
-> Update the user-auth API contract across @api-gateway and @auth-service, keeping callers in sync.
+> Also update @docker/grafana/dashboards/frontend-telemetry.json if it references any renamed event names, so the dashboards keep working.
+```
+
+When a change spans repos (for example, a backend or shared dashboards in another repo), add them and let Copilot coordinate ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)):
+
+```text
+> /add-dir /path/to/your-dashboards
+> Update any references to the old event names across @your-dashboards, keeping them consistent with the app.
 ```
 
 ### 6. Consider autopilot in a sandbox
@@ -100,7 +107,7 @@ For long unattended runs, switch to autopilot (++shift+tab++, experimental) insi
 
 - Plan + checklist + incremental verification keeps big refactors safe and reviewable.
 - `/fleet` parallelizes independent sub-tasks across subagents.
-- Scoped permissions enable hands-off repetition without surrendering control.
+- Scoped permissions enable hands-off repetition without surrendering control — and downstream consumers (like dashboards) move with the rename.
 
 ## Take it further
 

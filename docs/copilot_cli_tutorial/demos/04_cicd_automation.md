@@ -3,6 +3,8 @@
 **Theme:** automation. **Time:** ~30 min.
 **Features:** programmatic mode (`copilot -p`), PAT auth, scoped tool permissions, GitHub Actions.
 
+> **Story so far:** You can build and review changes by hand. **This demo:** automate that review in CI so **every** pull request to **template-typescript-react** gets a Copilot pass — right next to the repo's existing `test.yaml` and `e2e-test.yaml` workflows.
+
 The CLI's programmatic mode (`-p`/`--prompt`) runs one prompt and exits, which makes it practical for scripts and CI/CD pipelines ([About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli)).
 
 !!! danger "Least privilege in automation"
@@ -13,7 +15,7 @@ The CLI's programmatic mode (`-p`/`--prompt`) runs one prompt and exits, which m
 ## Prerequisites
 
 - A fine-grained **PAT** with the **Copilot Requests** permission (see [Getting Started → Authenticate](../getting_started.md#authenticate)). Store it as `COPILOT_CLI_TOKEN` and expose it to the CLI as `COPILOT_GITHUB_TOKEN`.
-- A repo where you can add a GitHub Actions workflow.
+- Your fork of template-typescript-react, where you can add a GitHub Actions workflow.
 
 ---
 
@@ -22,7 +24,7 @@ The CLI's programmatic mode (`-p`/`--prompt`) runs one prompt and exits, which m
 Start with your laptop. A single command, no interaction ([About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli)):
 
 ```bash
-copilot -p "Show me this week's commits and summarize them" --allow-tool='shell(git)'
+copilot -p "Show me this week's commits on this repo and summarize them by area (src, telemetry, tests, ci)" --allow-tool='shell(git)'
 ```
 
 You can also feed options/prompt from another program by piping into `copilot` ([About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli)):
@@ -34,7 +36,7 @@ You can also feed options/prompt from another program by piping into `copilot` (
 A read-mostly triage example that writes a report file but nothing else:
 
 ```bash
-copilot -p "Review the diff of HEAD against origin/main for security issues. \
+copilot -p "Review the diff of HEAD against origin/main for bugs and security issues. \
 Write findings to review.md as a checklist. Do not modify source files." \
   --allow-tool='shell(git:*)' \
   --allow-tool='write' \
@@ -46,7 +48,7 @@ Write findings to review.md as a checklist. Do not modify source files." \
 
 ## Part B — GitHub Actions workflow
 
-Wire the same idea into CI. This example runs an automated review on every pull request and posts the result as a comment. It is **read-mostly**: Copilot may run `git` and write a report file, but is denied push/destructive commands.
+Wire the same idea into CI. This example runs an automated review on every pull request and posts the result as a comment. It is **read-mostly**: Copilot may run `git` and write a report file, but is denied push/destructive commands. It sits alongside the app's existing `test.yaml` (which runs `make ci-test`) and `e2e-test.yaml` workflows.
 
 ```yaml
 # .github/workflows/copilot-review.yml
@@ -69,7 +71,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24   # matches the app's CI (see test.yaml)
 
       - name: Install Copilot CLI
         run: npm install -g @github/copilot
@@ -80,7 +82,7 @@ jobs:
           COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_CLI_TOKEN }}
         run: |
           copilot -p "Review the changes in this PR (diff ${{ github.event.pull_request.base.sha }}..${{ github.sha }}). \
-          Focus on bugs and security. Write a concise markdown summary to copilot-review.md." \
+          Focus on bugs, security, and missing tests in this React + TypeScript app. Write a concise markdown summary to copilot-review.md." \
             --allow-tool='shell(git:*)' \
             --allow-tool='write' \
             --deny-tool='shell(git push)' \
@@ -118,7 +120,7 @@ graph LR
 Inside an interactive session you can also schedule recurring prompts with `/every` and one-shot delayed prompts with `/after` ([Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli)):
 
 ```text
-> /every 1h Run frontend tests and report any failures
+> /every 1h Run `pnpm test:e2e` and report any failures
 ```
 
 ---

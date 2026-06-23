@@ -71,6 +71,27 @@ External links and further reading for the GitHub Copilot SDK.
 
 ---
 
+## Change watchlist { #change-watchlist }
+
+Check these sources before each workshop run. The SDK and the Copilot CLI it depends on evolve quickly, so treat this tutorial as a snapshot rather than a contract. Prefer the package registries and release notes over any version frozen in a page.
+
+| Area to watch | Primary source | Why it matters |
+|---------------|----------------|----------------|
+| SDK releases and API changes | [`github/copilot-sdk` releases](https://github.com/github/copilot-sdk/releases) | Tracks SDK versions and changes to the client, session, event, tool, skill, hook, and permission APIs across languages |
+| Python package version | [`github-copilot-sdk` on PyPI](https://pypi.org/project/github-copilot-sdk/) | The version the Python tutorials install and pin |
+| Go package version | [Go SDK on pkg.go.dev](https://pkg.go.dev/github.com/github/copilot-sdk/go) | The version the Go tutorials build against |
+| SDK how-tos and reference | [GitHub Copilot SDK how-tos](https://docs.github.com/en/copilot/how-tos/copilot-sdk) | Documented workflows for server mode, authentication, and BYOK |
+| CLI server behavior | [`github/copilot-cli` changelog](https://github.com/github/copilot-cli/blob/main/changelog.md) | The SDK spawns or connects to the Copilot CLI server, so CLI flag and behavior changes affect [Getting Started](../getting_started.md) and [CLI Server Mode](../server_mode.md) |
+
+## Recent changes reflected in this tutorial
+
+| Date | Change | Source |
+|------|--------|--------|
+| 2026-06-19 | Python and Go SDK tutorials established against the then-current SDK packages and Copilot CLI server mode | [github/copilot-sdk releases](https://github.com/github/copilot-sdk/releases) |
+| 2026-06-18 | SDK v1.0.2: opt-in session memory on create/resume, tool `defer` option for tool search, `otlpProtocol` telemetry transport (`http/json` \| `http/protobuf`), `ModelBilling.tokenPrices`, and deterministic telemetry flush on client stop | [Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2) |
+
+---
+
 ## Related Projects in This Repository
 
 | Document | Description |

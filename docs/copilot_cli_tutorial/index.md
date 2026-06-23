@@ -4,7 +4,7 @@ A full-day, hands-on workshop that takes intermediate-to-advanced developers fro
 
 > This workshop is built entirely on **GitHub's official primary sources** (linked inline and collected in [References](appendix/references.md)). Where the product is evolving quickly, we say so and point you to the live command (for example `/help` or `/model`) rather than freezing a value that may change.
 
-> Last reviewed against `github/copilot-cli` changelog version **1.0.63 (2026-06-15)** and GitHub Blog Changelog entries through **2026-06-19**. See [References](appendix/references.md#change-watchlist) for the sources to monitor before running the workshop.
+> Last reviewed on **2026-06-22** against `github/copilot-cli` changelog version **1.0.63 (2026-06-15)** and GitHub Blog Changelog entries through **2026-06-19**. See [References](appendix/references.md#change-watchlist) for the sources to monitor before running the workshop.
 
 ---
 

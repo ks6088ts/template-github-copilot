@@ -43,8 +43,9 @@ A **session** is a stateful conversation context. Each session has its own:
 - Permission handler
 - Streaming configuration
 - Optional provider override (for BYOK)
+- Optional session memory (opt-in; lets the agent recall information across turns)
 
-A session is created from the client and is where prompts are sent and events are received.
+A session is created from the client and is where prompts are sent and events are received. Session memory is **opt-in**: enable it in the session configuration when you create or resume a session; when omitted, the runtime default applies ([Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)).
 
 ### Copilot CLI Server
 
@@ -67,7 +68,7 @@ Tools extend the agent's capabilities. There are two kinds:
 | Built-in | Provided by the Copilot CLI server | File system, web search |
 | Custom | A custom-tool API (`@define_tool` in Python, `DefineTool` in Go) | GitHub API calls, database queries |
 
-Custom tools are registered per-session when the session is created.
+Custom tools are registered per-session when the session is created. Tool definitions also accept a `defer` option — `"auto"` (the default) lets large tool sets surface lazily through tool search, while `"never"` keeps a tool pre-loaded ([Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)).
 
 ### Skills
 

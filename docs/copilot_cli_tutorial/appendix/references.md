@@ -17,6 +17,10 @@ All technical claims in this workshop are grounded in the **primary sources** be
 | [Adding agent skills for GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills) | Authoring `SKILL.md` skills |
 | [About agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | Skill concepts |
 | [Creating custom agents](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/create-custom-agents) | Agent-profile schema |
+| [About the rubber duck agent](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/rubber-duck) | Cross-model "second opinion" critique used by `/rubber-duck` |
+| [Running tasks in parallel with `/fleet`](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/fleet) | Parallel subagent execution and `/tasks` monitoring |
+| [Allowing Copilot CLI to work autonomously (autopilot)](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/autopilot) | How autopilot iterates (plan → act → test → verify) until done |
+| [About GitHub Copilot plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins) | Plugin marketplaces and `/plugin` management |
 | [About hooks for GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/hooks) | Lifecycle hooks |
 | [About GitHub Copilot Memory](https://docs.github.com/en/copilot/concepts/agents/copilot-memory) | Persistent repo memories |
 | [About Model Context Protocol (MCP)](https://docs.github.com/en/copilot/concepts/context/mcp) | MCP concepts |
@@ -76,12 +80,18 @@ Check these sources before each workshop run. Copilot CLI changes quickly enough
 | Resource | Notes |
 |----------|-------|
 | [Creating applications with Copilot CLI (GitHub Skills)](https://github.com/skills/create-applications-with-the-copilot-cli) | Official guided exercise: issue → app → tests → PR |
+| [github/awesome-copilot](https://github.com/github/awesome-copilot) ([gh.io/awesome-copilot](https://gh.io/awesome-copilot)) | Community collection of instructions, agents, skills, hooks, and **plugins**. Pre-registered as a Copilot plugin marketplace, so you can `copilot plugin install <name>@awesome-copilot` (or `/plugin marketplace add github/awesome-copilot`). Featured in the *Mona Mayhem* video below |
 
-## Talks & demos
+## Talks & demos { #talks--demos }
 
-| Resource | Notes |
-|----------|-------|
-| [GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes (DEM305)](https://www.youtube.com/watch?v=JJmmunwXcu8) | Microsoft Developer demo. Inspiration for the [Copilot Anywhere](../features.md#sandboxing) narrative: remote-controlling the CLI (prompt mode, ACP, `/delegate`) and offloading work to cloud sandboxes you can resume from any device |
+The three videos below are from the **official GitHub YouTube channel** and pair directly with this workshop. They are the primary inspiration for the inline "Watch it" callouts in [Getting Started](../getting_started.md), [Feature Deep Dive](../features.md), and [Demo Scenarios](../demos/index.md).
+
+| Resource | Maps to | What it covers |
+|----------|---------|----------------|
+| [Ultimate GitHub Copilot CLI tutorial for beginners](https://www.youtube.com/watch?v=rheqk-L7Yes) | Parts 0–2 | The official *Copilot CLI for beginners* series in one video: install & `/login`, first requests, interactive vs. non-interactive modes, a slash-command tour (`/model`, `/context`, `/compact`, `/clear`, `/resume`, `/diff`, `/cwd`, `/reset-allowed-tools`), the **plan → delegate → review** loop (`/plan`, `/delegate`, `/review`), MCP (`/mcp add`, Playwright/Svelte), and instructions/agents/skills (`/init`, `.instructions.md`, `.github/skills`, `.github/agents`) |
+| [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) | Part 3 (Demos) | A GitHub *Dev Days* hands-on workshop that builds a retro-arcade app end to end: context engineering with `/init`, **plan mode**, **autopilot vs. YOLO mode**, iterative UI debugging by pasting screenshots, the `/plugin marketplace` + [awesome-copilot](https://github.com/github/awesome-copilot), `/fleet` parallel agents, and `/delegate` to the cloud agent |
+| [Less // TODO: more done with GitHub Copilot CLI](https://www.youtube.com/watch?v=zS_40Tfl75w) | Parts 0–2 + [SDK](../../copilot_sdk_tutorial/index.md) | A *Dev Days* deep dive into the three interaction modes (non-interactive/headless for CI, interactive, **server mode**), `/login` & `/user`, `/env`, Auto model selection, built-in agents (research, plan, autopilot), `/review`, `/rubber-duck` cross-model validation, `/fleet` + `/tasks`, Copilot Memory, and driving the CLI from an app via the Copilot SDK |
+| [GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes (DEM305)](https://www.youtube.com/watch?v=JJmmunwXcu8) | [Sandboxing](../features.md#sandboxing) | Microsoft Developer demo. Inspiration for the [Copilot Anywhere](../features.md#sandboxing) narrative: remote-controlling the CLI (prompt mode, ACP, `/delegate`) and offloading work to cloud sandboxes you can resume from any device |
 
 ## Related material in this site
 

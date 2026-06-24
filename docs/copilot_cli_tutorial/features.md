@@ -4,6 +4,9 @@
 
 > The CLI evolves weekly. Treat specific values here as "true at time of writing, verified against GitHub docs" and confirm live with `/help`, `/model`, and `copilot help <topic>` ([Best practices](https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices)).
 
+!!! tip "See these features in action"
+    Two official GitHub *Dev Days* videos demonstrate most of this chapter end to end: [Less // TODO: more done with GitHub Copilot CLI](https://www.youtube.com/watch?v=zS_40Tfl75w) (modes, `/env`, Auto model, built-in agents, `/review`, `/rubber-duck`, `/fleet` + `/tasks`, Copilot Memory, server mode) and [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) (plan mode, autopilot vs. YOLO, plugins / awesome-copilot, `/fleet`, `/delegate`). Full breakdown in [References → Talks & demos](appendix/references.md#talks--demos).
+
 ---
 
 ## Models & model selection
@@ -60,6 +63,14 @@ explore → plan → review → implement → verify → commit
 ### Autopilot
 
 Autopilot keeps working autonomously until the task is complete. Toggle it with ++shift+tab++; if a feature is still marked experimental in your build, enable experimental features with `--experimental` or `/experimental` ([README](https://github.com/github/copilot-cli)). As of CLI 1.0.63, agent mode is tracked per session, so it no longer carries over when you create, clear, or switch sessions ([copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)). Pair autopilot with a [sandbox](#sandboxing) for unattended runs.
+
+!!! note "Autopilot ≠ YOLO mode"
+    These two solve different problems and are easy to confuse (the *Mona Mayhem* video walks through both):
+
+    - **Autopilot** is an *agent mode* — it changes *how much Copilot decides on its own*. Copilot keeps iterating like a developer (plan → act → run tests → verify) and continues until the task is done ([autopilot](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/autopilot)).
+    - **YOLO mode** (`/yolo`, `--yolo`, or `--allow-all`) is a *permission setting* — it changes *whether Copilot asks before acting*. It auto-approves every tool call so you are never prompted ([CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)).
+
+    They compose independently: autopilot decides *what to do next*; YOLO decides *whether to ask first*. Autopilot **with** YOLO on your own machine is maximally hands-off **and** maximally risky — prefer pairing autopilot with a [sandbox](#sandboxing) instead.
 
 ### Parallelism: `/fleet` and subagents
 
@@ -161,7 +172,7 @@ A custom agent is a specialized version of Copilot with its own expertise, tools
 | **General purpose** | Complex multi-step tasks in a separate context |
 | **Code review** | Surfaces only genuine issues, minimizing noise |
 | **Research** | Deep research across code, repos, and the web, with citations |
-| **Rubber duck** | Constructive critic; can be invoked with `/rubber-duck` and may be used by the main agent for a second opinion |
+| **Rubber duck** | Constructive critic for a *second opinion*. Invoke with `/rubber-duck`; the main agent can also consult it automatically. It deliberately runs on a **complementary model** (a different model family than the one that did the work), so it catches issues a single model tends to miss ([rubber duck agent](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/rubber-duck)) |
 
 **Define your own** as Markdown "agent profiles":
 
@@ -186,6 +197,21 @@ GitHub is also rolling out **Agent finder**, which searches an allowed registry 
 ### Skills
 
 Skills enhance Copilot with instructions, scripts, and resources for specialized tasks, packaged as `SKILL.md` folders ([Adding agent skills](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills); [About agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills)). Also covered in [Demo 6](demos/06_custom_agents_skills.md).
+
+### Plugins & the awesome-copilot marketplace
+
+Plugins bundle related instructions, skills, agents, and hooks into a single installable unit, distributed through plugin *marketplaces*. Manage them with `/plugin` in a session (or `copilot plugin` from the shell) ([About GitHub Copilot plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins); [CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)):
+
+```text
+> /plugin marketplace list                 # browse registered marketplaces
+> /plugin list                             # see installed plugins
+> /plugin install <name>@awesome-copilot   # install a specific plugin
+```
+
+GitHub's community collection — [github/awesome-copilot](https://github.com/github/awesome-copilot) (`gh.io/awesome-copilot`) — ships hundreds of ready-made instructions, agents, skills, hooks, and plugins, and is **pre-registered as a marketplace** in recent CLI builds. If yours doesn't have it yet, register it once with `/plugin marketplace add github/awesome-copilot`. The *Mona Mayhem* video discovers and installs from it live.
+
+!!! warning "Treat third-party customizations as code"
+    awesome-copilot content is community-contributed. Inspect an instruction file, agent, skill, or plugin before installing it — it can carry shell commands and tool permissions exactly like code you write yourself.
 
 ### Hooks
 

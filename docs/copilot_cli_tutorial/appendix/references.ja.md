@@ -17,6 +17,10 @@
 | [Adding agent skills for GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills) | `SKILL.md` スキルの作成 |
 | [About agent skills](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | スキルの概念 |
 | [Creating custom agents](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/cloud-agent/create-custom-agents) | エージェントプロファイルのスキーマ |
+| [About the rubber duck agent](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/rubber-duck) | `/rubber-duck` が使う、別モデルによる「セカンドオピニオン」批評 |
+| [Running tasks in parallel with `/fleet`](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/fleet) | サブエージェントの並列実行と `/tasks` による監視 |
+| [Allowing Copilot CLI to work autonomously (autopilot)](https://docs.github.com/en/copilot/concepts/agents/copilot-cli/autopilot) | autopilot が完了まで反復する仕組み（計画 → 実行 → テスト → 検証） |
+| [About GitHub Copilot plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins) | プラグインマーケットプレイスと `/plugin` 管理 |
 | [About hooks for GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/hooks) | ライフサイクルフック |
 | [About GitHub Copilot Memory](https://docs.github.com/en/copilot/concepts/agents/copilot-memory) | 永続的なリポジトリメモリ |
 | [About Model Context Protocol (MCP)](https://docs.github.com/en/copilot/concepts/context/mcp) | MCP の概念 |
@@ -76,12 +80,18 @@
 | リソース | 補足 |
 |----------|------|
 | [Creating applications with Copilot CLI（GitHub Skills）](https://github.com/skills/create-applications-with-the-copilot-cli) | 公式のガイド付き演習: Issue → アプリ → テスト → PR |
+| [github/awesome-copilot](https://github.com/github/awesome-copilot)（[gh.io/awesome-copilot](https://gh.io/awesome-copilot)） | 指示・エージェント・スキル・フック・**プラグイン** のコミュニティコレクション。Copilot のプラグインマーケットプレイスとして既定で登録済みで、`copilot plugin install <name>@awesome-copilot`（または `/plugin marketplace add github/awesome-copilot`）で導入できる。下記の *Mona Mayhem* 動画で紹介されている |
 
-## トーク・デモ
+## トーク・デモ { #talks--demos }
 
-| リソース | 補足 |
-|----------|------|
-| [GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes（DEM305）](https://www.youtube.com/watch?v=JJmmunwXcu8) | Microsoft Developer のデモ。[Copilot Anywhere](../features.md#sandboxing) の説明の元ネタ: CLI のリモートコントロール（prompt mode、ACP、`/delegate`）と、任意のデバイスから再開できるクラウドサンドボックスへの作業オフロード |
+以下の 3 本は **GitHub 公式 YouTube チャンネル** の動画で、本ワークショップと直接対応します。[Getting Started](../getting_started.md)、[Feature Deep Dive](../features.md)、[Demo Scenarios](../demos/index.md) 内の「動画で見る」コールアウトの元ネタです。
+
+| リソース | 対応する Part | 扱う内容 |
+|----------|---------------|----------|
+| [Ultimate GitHub Copilot CLI tutorial for beginners](https://www.youtube.com/watch?v=rheqk-L7Yes) | Part 0〜2 | 公式の *Copilot CLI for beginners* シリーズを 1 本に: インストールと `/login`、最初のリクエスト、対話／非対話モード、スラッシュコマンド一巡り（`/model`、`/context`、`/compact`、`/clear`、`/resume`、`/diff`、`/cwd`、`/reset-allowed-tools`）、**plan → delegate → review** のループ（`/plan`、`/delegate`、`/review`）、MCP（`/mcp add`、Playwright／Svelte）、指示・エージェント・スキル（`/init`、`.instructions.md`、`.github/skills`、`.github/agents`） |
+| [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) | Part 3（デモ） | レトロアーケードアプリをエンドツーエンドで作る GitHub *Dev Days* ハンズオン: `/init` によるコンテキストエンジニアリング、**plan モード**、**autopilot と YOLO モードの違い**、スクリーンショットを貼り付けての UI デバッグ、`/plugin marketplace` と [awesome-copilot](https://github.com/github/awesome-copilot)、`/fleet` の並列エージェント、クラウドエージェントへの `/delegate` |
+| [Less // TODO: more done with GitHub Copilot CLI](https://www.youtube.com/watch?v=zS_40Tfl75w) | Part 0〜2 ＋ [SDK](../../copilot_sdk_tutorial/index.md) | 3 つの対話モード（CI 向けの非対話／ヘッドレス、対話、**サーバーモード**）、`/login` と `/user`、`/env`、Auto モデル選択、組み込みエージェント（research・plan・autopilot）、`/review`、`/rubber-duck` のクロスモデル検証、`/fleet` ＋ `/tasks`、Copilot Memory、Copilot SDK でアプリから CLI を駆動する話題までを扱う *Dev Days* のディープダイブ |
+| [GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes（DEM305）](https://www.youtube.com/watch?v=JJmmunwXcu8) | [Sandboxing](../features.md#sandboxing) | Microsoft Developer のデモ。[Copilot Anywhere](../features.md#sandboxing) の説明の元ネタ: CLI のリモートコントロール（prompt mode、ACP、`/delegate`）と、任意のデバイスから再開できるクラウドサンドボックスへの作業オフロード |
 
 ## このサイト内の関連資料
 

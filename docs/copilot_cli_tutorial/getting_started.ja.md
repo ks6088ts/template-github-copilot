@@ -2,6 +2,9 @@
 
 **ワークショップの Part 0。** この章を終えると、Copilot CLI のインストールと認証が完了し、4 つの対話モードを理解し、設定がどこにあるかを把握できます。所要時間は約 45 分です。
 
+!!! tip "まず動画で見たい方へ"
+    公式動画 [Ultimate GitHub Copilot CLI tutorial for beginners](https://www.youtube.com/watch?v=rheqk-L7Yes)（GitHub）は、本章の内容（インストール、`/login`、フォルダの信頼、最初の対話プロンプトと `-p` プロンプト）を数分でデモし、続けてこのあと出てくるモードやスラッシュコマンドまで紹介します。各コンパニオン動画の内容は [References → トーク・デモ](appendix/references.md#talks--demos) を参照してください。
+
 ---
 
 ## 前提条件
@@ -75,7 +78,7 @@ copilot
 > /login
 ```
 
-ブラウザのフローに従います。トークンは自動的に保存され、セッションをまたいで再利用されます（[README](https://github.com/github/copilot-cli)）。
+ブラウザのフローに従います。トークンは自動的に保存され、セッションをまたいで再利用されます（[README](https://github.com/github/copilot-cli)）。サインイン中の GitHub アカウントは `/user` でいつでも確認できます（[CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)）。
 
 ### ヘッドレス／CI: Personal Access Token
 
@@ -153,13 +156,16 @@ copilot --version
 # 2. Inside a session, list everything available
 > /help
 
-# 3. See and switch models
+# 3. Confirm which GitHub account is signed in
+> /user
+
+# 4. See and switch models
 > /model
 
-# 4. Inspect context usage
+# 5. Inspect context usage
 > /context
 
-# 5. Confirm the GitHub MCP server is wired up
+# 6. Confirm the GitHub MCP server is wired up
 > /mcp
 ```
 

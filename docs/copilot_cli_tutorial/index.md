@@ -103,6 +103,20 @@ graph TD
 
 ---
 
+## Companion video walkthroughs
+
+Prefer to watch first, then do? These three **official GitHub** videos cover the same ground as this workshop and are great to play before (or alongside) each part. Full descriptions and timestamps-by-topic live in [References → Talks & demos](appendix/references.md#talks--demos).
+
+| Video | Best paired with |
+|-------|------------------|
+| [Ultimate GitHub Copilot CLI tutorial for beginners](https://www.youtube.com/watch?v=rheqk-L7Yes) | [Getting Started](getting_started.md) → [Feature Deep Dive](features.md) |
+| [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) | [Demo Scenarios](demos/index.md) |
+| [Less // TODO: more done with GitHub Copilot CLI](https://www.youtube.com/watch?v=zS_40Tfl75w) | [Feature Deep Dive](features.md) + [Copilot SDK Tutorial](../copilot_sdk_tutorial/index.md) |
+
+> These are narrated, hands-on demos by GitHub. This site adds the *why*, the primary-source citations, and a reproducible eight-demo storyline so you can practice each idea against your own fork.
+
+---
+
 ## How to use this site
 
 - **Facilitators**: each chapter is standalone. Project the page, run the commands live, and let attendees follow along in their own clone.

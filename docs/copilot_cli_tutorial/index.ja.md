@@ -103,6 +103,20 @@ graph TD
 
 ---
 
+## 動画で学ぶ（コンパニオン動画）
+
+まず見てから手を動かしたい方へ。以下の **GitHub 公式** 動画 3 本は本ワークショップと同じ領域をカバーしており、各 Part の前（または並行して）見るのに適しています。詳しい説明とトピック別の見どころは [References → トーク・デモ](appendix/references.md#talks--demos) にあります。
+
+| 動画 | 併せて見るとよい章 |
+|------|------------------|
+| [Ultimate GitHub Copilot CLI tutorial for beginners](https://www.youtube.com/watch?v=rheqk-L7Yes) | [Getting Started](getting_started.md) → [Feature Deep Dive](features.md) |
+| [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) | [Demo Scenarios](demos/index.md) |
+| [Less // TODO: more done with GitHub Copilot CLI](https://www.youtube.com/watch?v=zS_40Tfl75w) | [Feature Deep Dive](features.md) ＋ [Copilot SDK チュートリアル](../copilot_sdk_tutorial/index.md) |
+
+> いずれも GitHub によるナレーション付きのハンズオンデモです。本サイトはその上に *なぜそうするのか*、一次情報への引用、そして自分のフォークで各アイデアを試せるようにした再現可能な 8 つのデモストーリーを加えています。
+
+---
+
 ## このサイトの使い方
 
 - **ファシリテーター**: 各章は独立しています。ページを投影し、コマンドをライブで実行し、参加者は各自のクローンで追従できます。

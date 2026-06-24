@@ -2,6 +2,9 @@
 
 **Part 0 of the workshop.** By the end of this chapter you will have Copilot CLI installed and authenticated, understand the four interaction modes, and know where its configuration lives. Budget ~45 minutes.
 
+!!! tip "Prefer to watch first?"
+    The official [Ultimate GitHub Copilot CLI tutorial for beginners](https://www.youtube.com/watch?v=rheqk-L7Yes) (GitHub) demonstrates everything in this chapter — install, `/login`, folder trust, and your first interactive and `-p` prompts — in a few minutes, then continues into the modes and slash commands you will meet next. See [References → Talks & demos](appendix/references.md#talks--demos) for what each companion video covers.
+
 ---
 
 ## Prerequisites
@@ -75,7 +78,7 @@ If you are not already signed in, the CLI prompts you to run `/login`.
 > /login
 ```
 
-Follow the browser flow. Your token is stored automatically and reused across sessions ([README](https://github.com/github/copilot-cli)).
+Follow the browser flow. Your token is stored automatically and reused across sessions ([README](https://github.com/github/copilot-cli)). Confirm which GitHub account is active at any time with `/user` ([CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)).
 
 ### Headless / CI: Personal Access Token
 
@@ -153,13 +156,16 @@ copilot --version
 # 2. Inside a session, list everything available
 > /help
 
-# 3. See and switch models
+# 3. Confirm which GitHub account is signed in
+> /user
+
+# 4. See and switch models
 > /model
 
-# 4. Inspect context usage
+# 5. Inspect context usage
 > /context
 
-# 5. Confirm the GitHub MCP server is wired up
+# 6. Confirm the GitHub MCP server is wired up
 > /mcp
 ```
 

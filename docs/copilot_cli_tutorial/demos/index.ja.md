@@ -4,6 +4,9 @@
 
 > すべてのシナリオは **同じアプリ** を題材にし、前のデモを土台に積み上がります。とはいえ、途中から始めたい場合は各ページ単体でも成立します。
 
+!!! tip "ナレーション付きでゼロから作るコンパニオンが欲しい方へ"
+    GitHub の *Dev Days* ワークショップ [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) は、ここで練習するのと同じ手法で別のアプリ（レトロアーケード風の「コントリビューション対戦」）を作ります: `/init` によるコンテキストエンジニアリング、plan モード、autopilot と YOLO、スクリーンショット駆動の UI デバッグ、`/plugin` と [awesome-copilot](https://github.com/github/awesome-copilot)、`/fleet`、`/delegate`。とくに Demo 1・6・7 と相性が良いです。[References → トーク・デモ](../appendix/references.md#talks--demos) を参照。
+
 ---
 
 ## 通底する題材

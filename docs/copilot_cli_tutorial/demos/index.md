@@ -4,6 +4,9 @@
 
 > Every scenario uses the **same app** as its subject and builds on the previous one — but each page also stands alone if you want to jump straight in.
 
+!!! tip "Want a narrated, build-from-scratch companion?"
+    GitHub's *Dev Days* workshop [Build with the Copilot CLI — Mona Mayhem](https://www.youtube.com/watch?v=c2QeGuWPnSw) builds a different app (a retro-arcade "contribution battle") using the same techniques you practice here: `/init` context engineering, plan mode, autopilot vs. YOLO, screenshot-driven UI debugging, `/plugin` + [awesome-copilot](https://github.com/github/awesome-copilot), `/fleet`, and `/delegate`. It pairs especially well with Demos 1, 6, and 7. See [References → Talks & demos](../appendix/references.md#talks--demos).
+
 ---
 
 ## The running example

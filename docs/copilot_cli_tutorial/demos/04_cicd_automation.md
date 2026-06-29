@@ -101,6 +101,9 @@ Key points:
 - **Permissions** are explicitly scoped — Copilot can read history and write one file, nothing else ([Security considerations](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#using-the-approval-options)).
 - Store the PAT as the `COPILOT_CLI_TOKEN` repository secret. Each prompt consumes a premium request ([README](https://github.com/github/copilot-cli)).
 
+!!! note "If your workflow opens a pull request"
+    This example posts a comment, so the built-in `GITHUB_TOKEN` is enough. If you instead let a workflow **open a pull request** with `GITHUB_TOKEN` (for example `gh pr create`), first enable **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests** for the repository (or its organization). New personal-account repositories have this **off by default**, so the job fails with `GitHub Actions is not permitted to create or approve pull requests (createPullRequest)`. A user PAT used in place of `GITHUB_TOKEN` is not subject to this guard ([Preventing GitHub Actions from creating or approving pull requests](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)).
+
 !!! tip "Make prompt-mode jobs idempotent"
   CI reruns happen. Write prompts so a second run can safely detect existing output: "update or create `copilot-review.md`" is safer than "append findings." Keep `git push`, deployment commands, and destructive file operations denied unless the workflow is explicitly designed to publish changes. The CLI changelog also notes that prompt mode has changed over time for repo hooks and workspace MCP loading, so keep CI jobs explicit about required tools and config ([copilot-cli changelog](https://github.com/github/copilot-cli/blob/main/changelog.md)).
 

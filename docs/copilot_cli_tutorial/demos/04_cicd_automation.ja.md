@@ -101,6 +101,9 @@ jobs:
 - **権限** は明示的にスコープ。Copilot は履歴の読み取りと 1 ファイルの書き込みのみ可能で、それ以外は不可（[Security considerations](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#using-the-approval-options)）。
 - PAT は `COPILOT_CLI_TOKEN` リポジトリシークレットとして保存します。プロンプトごとにプレミアムリクエストを消費します（[README](https://github.com/github/copilot-cli)）。
 
+!!! note "ワークフローでプルリクエストを作成する場合"
+    この例はコメントを投稿するだけなので、組み込みの `GITHUB_TOKEN` で十分です。ワークフローで `GITHUB_TOKEN` を使って **プルリクエストを作成** する場合（たとえば `gh pr create`）は、まずリポジトリ（または組織）で **Settings → Actions → General → Workflow permissions → Allow GitHub Actions to create and approve pull requests** を有効にしてください。個人アカウントで新規作成したリポジトリではこの設定が **既定で無効** のため、ジョブは `GitHub Actions is not permitted to create or approve pull requests (createPullRequest)` で失敗します。`GITHUB_TOKEN` の代わりにユーザーの PAT を使う場合は、このガードの対象外です（[Preventing GitHub Actions from creating or approving pull requests](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#preventing-github-actions-from-creating-or-approving-pull-requests)）。
+
 !!! tip "prompt mode のジョブは冪等にする"
   CI は再実行されます。2 回目の実行でも安全に既存出力を検出できるプロンプトにしてください。たとえば「`copilot-review.md` を update or create」する方が、「findings を append」するより安全です。ワークフローが明示的に公開を目的としていない限り、`git push`、デプロイコマンド、破壊的なファイル操作は deny します。prompt mode の repo hooks や workspace MCP の読み込み挙動は過去に変わっているため、CI ジョブでは必要なツールと設定を明示してください（[copilot-cli changelog](https://github.com/github/copilot-cli/blob/main/changelog.md)）。
 

@@ -5,6 +5,12 @@ name: update-workshop-docs
 # Requests); the default GITHUB_TOKEN cannot drive Copilot and is used only to push the branch
 # and open the PR. User inputs pass through env vars (never interpolated into run scripts) to
 # avoid script injection, and every change lands in a reviewable pull request rather than on main.
+#
+# One-time setup: because the PR is opened with GITHUB_TOKEN, you must enable
+# "Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and
+# approve pull requests" for this repository (or the owning organization). Without it the
+# Create-pull-request step fails with: "GitHub Actions is not permitted to create or approve
+# pull requests (createPullRequest)".
 
 on:
   schedule:
@@ -31,9 +37,8 @@ on:
         description: Model to use for the refresh
         options:
           - claude-sonnet-4.6
-          - claude-opus-4.6
-          - claude-opus-4.6-fast
-          - gpt-5-mini
+          - claude-opus-4.8
+          - gpt-5.5
         required: false
         default: claude-sonnet-4.6
       dry_run:
@@ -93,6 +98,9 @@ jobs:
         working-directory: ./src/python
         run: make ci-test-docs
       - name: Create pull request
+        # Requires the repo/org setting "Allow GitHub Actions to create and approve pull requests"
+        # (Settings > Actions > General > Workflow permissions). Without it, gh pr create fails with
+        # "GitHub Actions is not permitted to create or approve pull requests".
         if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

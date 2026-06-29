@@ -142,7 +142,7 @@ In the repository (or organization) settings, add the token as a secret named `C
 ```yaml
 - name: Install GitHub Copilot CLI
   run: |
-    curl -fsSL https://gh.io/copilot-install | VERSION="1.0.63" bash
+    curl -fsSL https://gh.io/copilot-install | VERSION="1.0.65" bash
     echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
 - name: Run GitHub Copilot CLI

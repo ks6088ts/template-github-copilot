@@ -34,6 +34,13 @@ uv sync --all-groups
 > dependency pinned in `uv.lock`. Use `uv run <command>` to run tools inside
 > that environment without activating it manually.
 
+> **Runtime download (SDK v1.0.4+):** the Python package no longer bundles the
+> Copilot CLI runtime in its wheel — it downloads a pinned runtime on first use.
+> Pre-cache it with `uv run python -m copilot download-runtime`, or set
+> `COPILOT_CLI_PATH` to reuse an existing `copilot` binary. Set
+> `COPILOT_SKIP_CLI_DOWNLOAD=1` to disable the auto-download fallback
+> ([Copilot SDK v1.0.4](https://github.com/github/copilot-sdk/releases/tag/v1.0.4)).
+
 > **CLI, authentication, and server mode:** installing the `copilot` CLI,
 > signing in with `gh auth login` or `COPILOT_GITHUB_TOKEN`, and running the CLI
 > as a TCP server are covered once in the common

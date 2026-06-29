@@ -64,6 +64,12 @@ Check these sources before each workshop run. Copilot CLI changes quickly enough
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-06-29 | Claude Opus 4.8 (fast mode) entered preview across Copilot surfaces including Copilot CLI (admin policy off by default) | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-29-claude-opus-4-8-fast-mode-is-now-in-preview-for-github-copilot) |
+| 2026-06-26 | MAI-Code-1-Flash reached general availability for Copilot Business and Copilot Enterprise | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise) |
+| 2026-06-25 | Copilot code review now uses the CLI/SDK `grep`/`rg`/`glob`/`view` file tools (~20% lower review cost) and adds org-level default Medium analysis depth | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates) |
+| 2026-06-24 | Free and Student plans default to Copilot auto model selection only; `(Preview)` label retired from Microsoft-released models | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans) |
+| 2026-06-24 | `/security-review` available to all users without `--experimental` (CLI 1.0.64) | [copilot-cli changelog 1.0.64](https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23) |
+| 2026-06-23 | New Copilot CLI terminal interface GA: tabbed Session/Gists/Issues/Pull requests layout, `/mcp search` GitHub MCP Registry install, and `/theme` color modes | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available) |
 | 2026-06-19 | `ai_credits_used` added to user-level Copilot usage metrics API reports | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-19-ai-credits-consumed-per-user-now-in-the-copilot-usage-metrics-api) |
 | 2026-06-18 | Generated release notes now credit the developer alongside `@copilot` for Copilot cloud-agent PRs | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-18-generated-release-notes-credit-you-for-copilot-pull-requests) |
 | 2026-06-18 | Copilot code review reads repository-root `AGENTS.md` | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-18-copilot-code-review-agents-md-support-and-ui-improvements) |

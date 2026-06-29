@@ -29,8 +29,9 @@ Use this decision table instead:
 Recent additions worth knowing, without hard-coding them into exercises:
 
 - Gemini 3.1 Pro (Preview) and Gemini 3.5 Flash are available on Copilot CLI when plan and policy allow them; Business/Enterprise admins must opt in via model policy ([Gemini models in Copilot CLI](https://github.blog/changelog/2026-06-02-gemini-models-in-copilot-cli-cloud-agent-and-the-copilot-app)).
-- MAI-Code-1-Flash is rolling out to more Copilot surfaces, including Copilot CLI, with staged availability by plan ([MAI-Code-1-Flash available on more Copilot surfaces](https://github.blog/changelog/2026-06-18-mai-code-1-flash-available-on-more-copilot-surfaces)).
+- MAI-Code-1-Flash reached general availability for Copilot Business and Copilot Enterprise (admins must enable the policy); it is also available on Copilot CLI with staged availability by plan ([MAI-Code-1-Flash for Copilot Business and Copilot Enterprise](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise), [MAI-Code-1-Flash available on more Copilot surfaces](https://github.blog/changelog/2026-06-18-mai-code-1-flash-available-on-more-copilot-surfaces)).
 - Enterprise-admin configured external-provider models now appear in the Copilot CLI model picker, while individual users can still configure client-side BYOK providers ([Copilot CLI supports enterprise BYOK models](https://github.blog/changelog/2026-06-17-copilot-cli-supports-enterprise-bring-your-own-key-byok-models)).
+- Free and Student plans now use Copilot auto model selection as the default and only experience, and the `(Preview)` label is being retired from Microsoft-released models — another reason to read availability live from `/model` rather than a fixed list ([Changes to model selection for Free and Student plans](https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans)).
 - Supported models offer an **extended (1M-token) context** option and **configurable reasoning levels**; GitHub recommends using defaults for everyday tasks and reserving extended context or higher reasoning for complex, multi-file work because they consume more AI credits ([Larger context windows and configurable reasoning levels](https://github.blog/changelog/2026-06-04-larger-context-windows-and-configurable-reasoning-levels-for-github-copilot)).
 
 ---
@@ -228,9 +229,10 @@ The CLI ships with the **GitHub MCP server pre-configured**, so GitHub.com opera
 ```text
 > /mcp           # list configured servers
 > /mcp add       # add a server (Tab between fields, Ctrl+S to save)
+> /mcp search    # browse the GitHub MCP Registry and install a server
 ```
 
-User-level server definitions live in `mcp-config.json` under `~/.copilot` (override with `COPILOT_HOME`). Recent CLI versions also auto-load workspace MCP config from `.github/mcp.json`, and the changelog is the best source for newly supported MCP config locations and keys such as `deferTools` ([copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09), [copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)). We wire up a custom server in [Demo 5](demos/05_mcp_integration.md).
+User-level server definitions live in `mcp-config.json` under `~/.copilot` (override with `COPILOT_HOME`). New servers added with `/mcp add` or `/mcp search` are available immediately, without restarting the CLI ([Copilot CLI: New terminal interface is generally available](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available)). Recent CLI versions also auto-load workspace MCP config from `.github/mcp.json`, and the changelog is the best source for newly supported MCP config locations and keys such as `deferTools` ([copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09), [copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)). We wire up a custom server in [Demo 5](demos/05_mcp_integration.md).
 
 ---
 
@@ -414,7 +416,7 @@ Requirements and caveats:
 | **Dictate prompts locally** | hold Space, or press ++ctrl+x++ then `V` | [Copilot CLI improved UI, rubber duck, scheduling, and voice input](https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input) |
 | **Toggle reasoning visibility** | ++ctrl+t++ | [Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) |
 | **Get a second opinion** | `/rubber-duck` | [Copilot CLI improved UI, rubber duck, scheduling, and voice input](https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input) |
-| **Security-focused local review** | `/security-review` (experimental) | [Dedicated security review command](https://github.blog/changelog/2026-06-10-dedicated-security-review-command-now-available-in-copilot-cli) |
+| **Security-focused local review** | `/security-review` (available to all users) | [copilot-cli changelog 1.0.64](https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23) |
 | **Create/switch to a worktree** | `/worktree` (alias `/move`) | [copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09) |
 | **Review session changes** | `/diff` | [copilot-cli changelog](https://github.com/github/copilot-cli/blob/main/changelog.md) |
 | **Use as an agent in other tools (ACP)** | Agent Client Protocol server | [About Copilot CLI](https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#use-copilot-cli-via-acp) |

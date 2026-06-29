@@ -30,6 +30,8 @@ uv sync --all-groups
 
 > `uv sync` は `.venv/` に仮想環境を作成し、`uv.lock` に固定された依存関係をすべてインストールします。仮想環境を手動でアクティブ化する代わりに `uv run <command>` を使うと、その環境内でツールを実行できます。
 
+> **ランタイムのダウンロード（SDK v1.0.4 以降）:** Python パッケージは Copilot CLI ランタイムを wheel に同梱しなくなり、初回利用時に固定バージョンのランタイムをダウンロードします。`uv run python -m copilot download-runtime` で事前にキャッシュするか、`COPILOT_CLI_PATH` で既存の `copilot` バイナリを再利用してください。自動ダウンロードのフォールバックを無効化するには `COPILOT_SKIP_CLI_DOWNLOAD=1` を設定します（[Copilot SDK v1.0.4](https://github.com/github/copilot-sdk/releases/tag/v1.0.4)）。
+
 > **CLI・認証・サーバーモードについて:** `copilot` CLI のインストール、`gh auth login`
 > または `COPILOT_GITHUB_TOKEN` でのサインイン、CLI を TCP サーバーとして起動する方法は、
 > 共通の [はじめに](../getting_started.md) と [CLI サーバーモード](../server_mode.md) ガイドに

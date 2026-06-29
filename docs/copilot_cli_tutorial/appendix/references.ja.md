@@ -64,6 +64,12 @@
 
 | 日付 | 変更 | 出典 |
 |------|------|------|
+| 2026-06-29 | Claude Opus 4.8（fast mode）が Copilot CLI を含む各サーフェスでプレビュー提供開始（管理者ポリシーは既定でオフ） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-29-claude-opus-4-8-fast-mode-is-now-in-preview-for-github-copilot) |
+| 2026-06-26 | MAI-Code-1-Flash が Copilot Business / Copilot Enterprise で一般提供（GA） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise) |
+| 2026-06-25 | Copilot コードレビューが CLI/SDK の `grep`/`rg`/`glob`/`view` ファイルツールを利用（レビューコスト約 20% 削減）し、組織レベルの既定 Medium 分析深度を追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates) |
+| 2026-06-24 | Free / Student プランが Copilot auto モデル選択のみを既定に。Microsoft 提供モデルから `(Preview)` ラベルを廃止 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans) |
+| 2026-06-24 | `/security-review` が `--experimental` なしで全ユーザーに提供（CLI 1.0.64） | [copilot-cli changelog 1.0.64](https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23) |
+| 2026-06-23 | Copilot CLI の新ターミナルインターフェースが GA：Session/Gists/Issues/Pull requests のタブ構成、`/mcp search` による GitHub MCP Registry からのインストール、`/theme` カラーモード | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available) |
 | 2026-06-19 | ユーザーレベルの Copilot usage metrics API レポートに `ai_credits_used` が追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-19-ai-credits-consumed-per-user-now-in-the-copilot-usage-metrics-api) |
 | 2026-06-18 | Copilot cloud-agent PR の生成リリースノートで、`@copilot` と並んで依頼した開発者もクレジット | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-18-generated-release-notes-credit-you-for-copilot-pull-requests) |
 | 2026-06-18 | Copilot code review がリポジトリルートの `AGENTS.md` を読むようになった | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-18-copilot-code-review-agents-md-support-and-ui-improvements) |

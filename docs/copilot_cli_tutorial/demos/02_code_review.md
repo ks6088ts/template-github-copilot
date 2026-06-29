@@ -59,12 +59,14 @@ Because this is an agent, you can act on the review in the same session — and 
 
 ### 5. Run the dedicated security review command
 
-For security-specific checks, recent CLI builds include `/security-review` as an experimental public-preview command. It analyzes local changes and reports high-confidence findings with severity and confidence; enable experimental mode first if the command is not visible ([Dedicated security review command](https://github.blog/changelog/2026-06-10-dedicated-security-review-command-now-available-in-copilot-cli)).
+For security-specific checks, the CLI includes `/security-review`, now available to all users without enabling experimental mode. It analyzes local changes and reports high-confidence findings with severity and confidence ([copilot-cli changelog 1.0.64](https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23), [Dedicated security review command](https://github.blog/changelog/2026-06-10-dedicated-security-review-command-now-available-in-copilot-cli)).
 
 ```text
-> /experimental on
 > /security-review
 ```
+
+!!! note "Code review now reuses the CLI/SDK file tools"
+    Copilot code review on GitHub.com now explores source with the same `grep`, `rg`, `glob`, and `view` tools built into the Copilot CLI and SDK, which trimmed review cost by about 20% with no workflow change. Organizations in the Medium analysis-depth preview can also set an organization-level default review level ([Copilot code review: Analysis depth and efficiency updates](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates)).
 
 ---
 

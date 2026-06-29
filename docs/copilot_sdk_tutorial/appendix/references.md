@@ -87,6 +87,7 @@ Check these sources before each workshop run. The SDK and the Copilot CLI it dep
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-06-25 | SDK v1.0.4 (Python and Go): the Python package downloads the pinned CLI runtime instead of bundling it (`python -m copilot download-runtime`); adds an HTTP request callback to intercept inference requests, a `getBearerToken` callback for BYOK providers (e.g. Managed Identity), an experimental multi-provider BYOK registry, `preamble`/`preserve` system-message section controls, and `capi.enableWebSocketResponses` / `provider.transport` session options | [Copilot SDK v1.0.4](https://github.com/github/copilot-sdk/releases/tag/v1.0.4) |
 | 2026-06-19 | Python and Go SDK tutorials established against the then-current SDK packages and Copilot CLI server mode | [github/copilot-sdk releases](https://github.com/github/copilot-sdk/releases) |
 | 2026-06-18 | SDK v1.0.2: opt-in session memory on create/resume, tool `defer` option for tool search, `otlpProtocol` telemetry transport (`http/json` \| `http/protobuf`), `ModelBilling.tokenPrices`, and deterministic telemetry flush on client stop | [Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2) |
 

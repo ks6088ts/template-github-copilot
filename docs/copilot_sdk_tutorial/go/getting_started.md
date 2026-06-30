@@ -65,6 +65,25 @@ The root command exposes a global `--verbose`/`-v` flag (inherited by every subc
 ./dist/template-github-copilot-go tutorial chat-bot --verbose --prompt "Hello!"
 ```
 
+The `tutorial` command also exposes persistent OpenTelemetry flags inherited by
+all tutorial subcommands. They default to the matching environment variables,
+and telemetry remains disabled when no endpoint is provided:
+
+| Flag | Environment variable | Purpose |
+|------|----------------------|---------|
+| `--otel-endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP endpoint, for example `http://localhost:4318` |
+| `--otel-capture-content` | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Optional `true`/`false` to capture prompt and response content in spans |
+| `--otel-bsp-schedule-delay` | `OTEL_BSP_SCHEDULE_DELAY` | Optional span batch flush interval in milliseconds |
+
+Example:
+
+```bash
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello!"
+```
+
 ---
 
 ## Project Layout
@@ -82,8 +101,9 @@ src/go/cmd/tutorial/
 
 The Go CLI relies on the common Copilot variables (`COPILOT_GITHUB_TOKEN`,
 `COPILOT_CLI_PATH`, `COPILOT_CLI_URL`) documented in the common
-[Getting Started](../getting_started.md). It does not add any Go-specific
-environment variables.
+[Getting Started](../getting_started.md). OpenTelemetry can additionally be
+configured with the standard `OTEL_*` variables listed above, or with the
+equivalent `tutorial` flags.
 
 ---
 

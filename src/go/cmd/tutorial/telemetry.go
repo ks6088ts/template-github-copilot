@@ -22,26 +22,43 @@ THE SOFTWARE.
 package tutorial
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
-	"strconv"
+	"strings"
 
 	copilot "github.com/github/copilot-sdk/go"
 )
 
+const (
+	otelEndpointEnv       = "OTEL_EXPORTER_OTLP_ENDPOINT"
+	otelCaptureContentEnv = "OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT"
+	otelBSPDelayEnv       = "OTEL_BSP_SCHEDULE_DELAY"
+)
+
+var (
+	tutorialOTELEndpoint         = os.Getenv(otelEndpointEnv)
+	tutorialOTELCaptureContent   = os.Getenv(otelCaptureContentEnv)
+	tutorialOTELBSPScheduleDelay = os.Getenv(otelBSPDelayEnv)
+)
+
 // telemetryConfig builds an OpenTelemetry configuration for the Copilot CLI
-// process from environment variables, mirroring the Python tutorials' helper.
+// process from tutorial flags or environment variables, mirroring the Python
+// tutorials' helper while also making the knobs available from the Go CLI.
 //
-// It returns nil (telemetry disabled) unless OTEL_EXPORTER_OTLP_ENDPOINT is set,
-// so the tutorials behave exactly as before when no collector is running.
+// It returns nil (telemetry disabled) unless an OTLP endpoint is set, so the
+// tutorials behave exactly as before when no collector is running.
 //
-//   - OTEL_EXPORTER_OTLP_ENDPOINT: OTLP HTTP endpoint (e.g. http://localhost:4318).
-//   - OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT: optional bool to capture
-//     prompt/response content in spans.
+//   - --otel-endpoint / OTEL_EXPORTER_OTLP_ENDPOINT: OTLP HTTP endpoint
+//     (e.g. http://localhost:4318).
+//   - --otel-capture-content / OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT:
+//     optional bool to capture prompt/response content in spans.
+//   - --otel-bsp-schedule-delay / OTEL_BSP_SCHEDULE_DELAY: optional batch flush
+//     interval in ms for the launched Copilot CLI process.
 //
 // See: https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry
 func telemetryConfig() *copilot.TelemetryConfig {
-	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	endpoint := strings.TrimSpace(tutorialOTELEndpoint)
 	if endpoint == "" {
 		return nil
 	}
@@ -51,14 +68,43 @@ func telemetryConfig() *copilot.TelemetryConfig {
 		ExporterType: "otlp-http",
 	}
 
-	if v, ok := os.LookupEnv("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT"); ok {
-		if b, err := strconv.ParseBool(v); err == nil {
-			cfg.CaptureContent = copilot.Bool(b)
-		}
+	if captureContent, ok := parseOptionalBool(tutorialOTELCaptureContent); ok {
+		cfg.CaptureContent = copilot.Bool(captureContent)
 	}
+	applyTelemetryEnvironment()
 
 	slog.Debug("OpenTelemetry enabled", "endpoint", endpoint)
 	return cfg
+}
+
+func validateTelemetryOptions() error {
+	captureContent := strings.TrimSpace(tutorialOTELCaptureContent)
+	if captureContent == "" {
+		return nil
+	}
+	if _, ok := parseOptionalBool(captureContent); !ok {
+		return fmt.Errorf("--otel-capture-content must be true or false, got %q", tutorialOTELCaptureContent)
+	}
+	return nil
+}
+
+func applyTelemetryEnvironment() {
+	if delay := strings.TrimSpace(tutorialOTELBSPScheduleDelay); delay != "" {
+		_ = os.Setenv(otelBSPDelayEnv, delay)
+	}
+}
+
+func parseOptionalBool(value string) (bool, bool) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "":
+		return false, false
+	case "1", "true", "yes", "on", "y", "t":
+		return true, true
+	case "0", "false", "no", "off", "n", "f":
+		return false, true
+	default:
+		return false, false
+	}
 }
 
 // newClientOptions returns ClientOptions wired with telemetry and, when cliURL is

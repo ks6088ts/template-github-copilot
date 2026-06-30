@@ -64,6 +64,25 @@ GitHub Copilot is an AI-powered coding assistant developed by GitHub and OpenAI.
 ./dist/template-github-copilot-go tutorial chat-bot --verbose --prompt "Hello!"
 ```
 
+`tutorial` コマンドは、すべてのチュートリアルサブコマンドが継承する
+OpenTelemetry 用の persistent flag も公開します。各フラグの既定値は対応する
+環境変数から読み込まれ、エンドポイントを指定しない限りテレメトリは無効です。
+
+| フラグ | 環境変数 | 用途 |
+|--------|----------|------|
+| `--otel-endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP エンドポイント（例: `http://localhost:4318`） |
+| `--otel-capture-content` | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | スパンにプロンプトと応答の内容を含めるかを示す任意の `true`/`false` |
+| `--otel-bsp-schedule-delay` | `OTEL_BSP_SCHEDULE_DELAY` | スパンのバッチフラッシュ間隔（ミリ秒、任意） |
+
+例:
+
+```bash
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello!"
+```
+
 ---
 
 ## プロジェクト構成
@@ -80,8 +99,8 @@ src/go/cmd/tutorial/
 ## 環境変数
 
 Go CLI は、共通の [はじめに](../getting_started.md) で説明している共通の Copilot 変数
-（`COPILOT_GITHUB_TOKEN`、`COPILOT_CLI_PATH`、`COPILOT_CLI_URL`）を使用します。Go 固有の
-環境変数は追加しません。
+（`COPILOT_GITHUB_TOKEN`、`COPILOT_CLI_PATH`、`COPILOT_CLI_URL`）を使用します。加えて、
+OpenTelemetry は上記の標準 `OTEL_*` 変数、または同等の `tutorial` フラグで設定できます。
 
 ---
 

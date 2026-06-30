@@ -16,16 +16,17 @@ Reference:
 Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
 ```
 
-Telemetry is **opt-in via environment variables**, so the tutorials behave
-exactly as before unless you configure an endpoint
+Telemetry is **opt-in**, so the tutorials behave exactly as before unless you
+configure an endpoint. Python tutorials use environment variables; Go tutorials
+can use the same environment variables or the `tutorial` persistent flags
 (VS Code Copilot Chat is wired separately via `.vscode/settings.json` — see
 [Visualizing VS Code Copilot Chat metrics](#visualizing-vs-code-copilot-chat-metrics)):
 
-| Variable | Description |
-|----------|-------------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP endpoint (e.g. `http://localhost:4318`). When unset, telemetry is disabled. |
-| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Optional `true`/`false` to capture prompt/response content in spans. |
-| `OTEL_BSP_SCHEDULE_DELAY` | Span batch flush interval in ms. Keep low (e.g. `500`) — see [Troubleshooting](#troubleshooting-no-spans-arrive). |
+| Environment variable | Go flag | Description |
+|----------------------|---------|-------------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `--otel-endpoint` | OTLP HTTP endpoint (e.g. `http://localhost:4318`). When unset, telemetry is disabled. |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `--otel-capture-content` | Optional `true`/`false` to capture prompt/response content in spans. |
+| `OTEL_BSP_SCHEDULE_DELAY` | `--otel-bsp-schedule-delay` | Span batch flush interval in ms. Keep low (e.g. `500`) — see [Troubleshooting](#troubleshooting-no-spans-arrive). |
 
 The shared helpers that build the `TelemetryConfig`:
 
@@ -40,8 +41,8 @@ Use these points when you move from the tutorial stack to a real application:
   language-specific options for the OTLP endpoint, exporter type
   (`"otlp-http"` or `"file"`), JSON-lines file path, instrumentation source
   name, and message-content capture. This repository's helpers intentionally
-  expose only the endpoint and content-capture settings through environment
-  variables.
+  expose only the endpoint and content-capture settings; the Go tutorial CLI
+  also exposes these settings as persistent flags.
 - Keep content capture disabled by default. Enable it only in trusted
   environments because spans can include prompts, responses, and tool
   arguments.
@@ -104,7 +105,10 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```bash
 cd src/go
 make build
-./dist/template-github-copilot-go tutorial chat-bot --prompt "Hello, Copilot!"
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ---

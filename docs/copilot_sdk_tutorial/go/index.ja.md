@@ -44,6 +44,26 @@ Go 固有のセットアップについては [はじめに（Go）](getting_sta
 
 ---
 
+## オブザーバビリティ
+
+Go チュートリアルのすべてのサブコマンドは、既定ではテレメトリを無効にしています。
+OpenTelemetry トレースを出力するには、ローカルのコレクタースタックを起動し、
+`tutorial` の persistent flag を指定します。
+
+```bash
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
+```
+
+同じ設定は Python 版と互換の環境変数 `OTEL_EXPORTER_OTLP_ENDPOINT`、
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`、`OTEL_BSP_SCHEDULE_DELAY`
+からも読み込めます。[OpenTelemetry によるオブザーバビリティ](../observability.md)
+を参照してください。
+
+---
+
 ## スコープ
 
 **含めるもの:**

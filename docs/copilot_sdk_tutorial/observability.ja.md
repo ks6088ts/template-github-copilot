@@ -17,17 +17,19 @@ Copilot SDK は、内部で動作する Copilot CLI から
 Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
 ```
 
-テレメトリは **環境変数によるオプトイン** です。エンドポイントを設定しない限り
-チュートリアルの挙動は従来どおり変わりません（VS Code の Copilot Chat は
+テレメトリは **オプトイン** です。エンドポイントを設定しない限り
+チュートリアルの挙動は従来どおり変わりません。Python チュートリアルは環境変数を使い、
+Go チュートリアルは同じ環境変数または `tutorial` の persistent flag を使えます
+（VS Code の Copilot Chat は
 `.vscode/settings.json` で別途設定します。
 [VS Code の Copilot Chat メトリックを可視化する](#vs-code-の-copilot-chat-メトリックを可視化する)
 を参照）。
 
-| 変数 | 説明 |
-|------|------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP エンドポイント（例: `http://localhost:4318`）。未設定の場合テレメトリは無効。 |
-| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | スパンにプロンプト/応答の内容を含めるか（`true`/`false`、任意）。 |
-| `OTEL_BSP_SCHEDULE_DELAY` | スパンのバッチフラッシュ間隔（ms）。低く設定する（例: `500`）。[トラブルシューティング](#トラブルシューティング-スパンが届かない) を参照。 |
+| 環境変数 | Go フラグ | 説明 |
+|----------|-----------|------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `--otel-endpoint` | OTLP HTTP エンドポイント（例: `http://localhost:4318`）。未設定の場合テレメトリは無効。 |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `--otel-capture-content` | スパンにプロンプト/応答の内容を含めるか（`true`/`false`、任意）。 |
+| `OTEL_BSP_SCHEDULE_DELAY` | `--otel-bsp-schedule-delay` | スパンのバッチフラッシュ間隔（ms）。低く設定する（例: `500`）。[トラブルシューティング](#トラブルシューティング-スパンが届かない) を参照。 |
 
 `TelemetryConfig` を組み立てる共有ヘルパー:
 
@@ -42,7 +44,8 @@ Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector
   エンドポイント、エクスポーター種別（`"otlp-http"` または `"file"`）、
   JSON Lines 形式のファイルパス、計装スコープ名、メッセージ内容の取得を
   言語ごとのオプション名で示しています。本リポジトリの共有ヘルパーでは、
-  意図的にエンドポイントと内容取得の設定だけを環境変数から公開しています。
+  意図的にエンドポイントと内容取得の設定だけを公開しています。Go チュートリアル CLI
+  では、これらの設定を persistent flag としても指定できます。
 - 内容取得は既定で無効のままにしてください。スパンにプロンプト、応答、
   ツール引数が含まれる可能性があるため、信頼できる環境でのみ有効化します。
 - このチュートリアルのようにコレクターへ送る構成では、OTLP/HTTP を優先します。
@@ -98,7 +101,10 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```bash
 cd src/go
 make build
-./dist/template-github-copilot-go tutorial chat-bot --prompt "Hello, Copilot!"
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ---

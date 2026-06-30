@@ -12,7 +12,7 @@ import json
 import sys
 from typing import Any, TypedDict
 
-from _telemetry import make_client
+from _telemetry import add_telemetry_arguments, apply_telemetry_arguments, make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     PermissionRequest,
@@ -107,6 +107,7 @@ def parse_args() -> argparse.Namespace:
             "When omitted, the SDK launches the copilot CLI over stdio."
         ),
     )
+    add_telemetry_arguments(parser)
     return parser.parse_args()
 
 
@@ -195,6 +196,7 @@ async def run(cli_url: str | None) -> None:
 
 def main() -> None:
     args = parse_args()
+    apply_telemetry_arguments(args)
     try:
         asyncio.run(run(args.cli_url))
     except KeyboardInterrupt:

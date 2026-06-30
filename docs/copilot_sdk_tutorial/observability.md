@@ -17,13 +17,14 @@ Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector
 ```
 
 Telemetry is **opt-in**, so the tutorials behave exactly as before unless you
-configure an endpoint. Python tutorials use environment variables; Go tutorials
-can use the same environment variables or the `tutorial` persistent flags
+configure an endpoint. Python scripts expose shared `--otel-*` options, and Go
+tutorial subcommands expose the same options as `tutorial` persistent flags;
+both languages can also use the equivalent environment variables
 (VS Code Copilot Chat is wired separately via `.vscode/settings.json` — see
 [Visualizing VS Code Copilot Chat metrics](#visualizing-vs-code-copilot-chat-metrics)):
 
-| Environment variable | Go flag | Description |
-|----------------------|---------|-------------|
+| Environment variable | CLI option | Description |
+|----------------------|------------|-------------|
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | `--otel-endpoint` | OTLP HTTP endpoint (e.g. `http://localhost:4318`). When unset, telemetry is disabled. |
 | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `--otel-capture-content` | Optional `true`/`false` to capture prompt/response content in spans. |
 | `OTEL_BSP_SCHEDULE_DELAY` | `--otel-bsp-schedule-delay` | Span batch flush interval in ms. Keep low (e.g. `500`) — see [Troubleshooting](#troubleshooting-no-spans-arrive). |
@@ -41,8 +42,8 @@ Use these points when you move from the tutorial stack to a real application:
   language-specific options for the OTLP endpoint, exporter type
   (`"otlp-http"` or `"file"`), JSON-lines file path, instrumentation source
   name, and message-content capture. This repository's helpers intentionally
-  expose only the endpoint and content-capture settings; the Go tutorial CLI
-  also exposes these settings as persistent flags.
+  expose only the endpoint and content-capture settings; the Python scripts and
+  Go tutorial CLI expose these settings as `--otel-*` options.
 - Keep content capture disabled by default. Enable it only in trusted
   environments because spans can include prompts, responses, and tool
   arguments.
@@ -97,7 +98,10 @@ export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
 
 ```bash
 cd src/python
-uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ### Go

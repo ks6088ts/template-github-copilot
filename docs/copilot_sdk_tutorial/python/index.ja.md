@@ -44,6 +44,26 @@ Python 固有のセットアップについては [はじめに（Python）](get
 
 ---
 
+## オブザーバビリティ
+
+Python チュートリアルのすべてのスクリプトは、既定ではテレメトリを無効にしています。
+OpenTelemetry トレースを出力するには、ローカルのコレクタースタックを起動し、
+共通の `--otel-*` オプションを指定します。
+
+```bash
+uv run python scripts/tutorials/01_chat_bot.py \
+ --otel-endpoint http://localhost:4318 \
+ --otel-bsp-schedule-delay 500 \
+ --prompt "Hello, Copilot!"
+```
+
+同じ設定は環境変数 `OTEL_EXPORTER_OTLP_ENDPOINT`、
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`、`OTEL_BSP_SCHEDULE_DELAY`
+からも読み込めます。[OpenTelemetry によるオブザーバビリティ](../observability.md)
+を参照してください。
+
+---
+
 ## スコープ
 
 **含めるもの:**

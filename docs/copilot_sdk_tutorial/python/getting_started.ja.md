@@ -57,6 +57,29 @@ GitHub Copilot is an AI-powered coding assistant developed by GitHub and OpenAI.
 
 ---
 
+## オブザーバビリティオプション
+
+すべてのチュートリアルスクリプトは、同じ任意の OpenTelemetry オプションを公開します。
+各オプションの既定値は対応する環境変数から読み込まれ、エンドポイントを指定しない限り
+テレメトリは無効です。
+
+| オプション | 環境変数 | 用途 |
+|------------|----------|------|
+| `--otel-endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP エンドポイント（例: `http://localhost:4318`） |
+| `--otel-capture-content` | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | スパンにプロンプトと応答の内容を含めるかを示す任意の `true`/`false` |
+| `--otel-bsp-schedule-delay` | `OTEL_BSP_SCHEDULE_DELAY` | スパンのバッチフラッシュ間隔（ミリ秒、任意） |
+
+例:
+
+```bash
+uv run python scripts/tutorials/01_chat_bot.py \
+    --otel-endpoint http://localhost:4318 \
+    --otel-bsp-schedule-delay 500 \
+    --prompt "Hello!"
+```
+
+---
+
 ## プロジェクト構成
 
 ```
@@ -79,8 +102,9 @@ src/python/scripts/tutorials/
 
 すべてのチュートリアルスクリプトは `--cli-url`（デフォルト: *stdio*）を受け付けます。共通の CLI
 変数（`COPILOT_GITHUB_TOKEN`、`COPILOT_CLI_PATH`、`COPILOT_CLI_URL`）は共通の
-[はじめに](../getting_started.md) で説明しています。スクリプト 06 はさらに次の BYOK
-設定も読み込みます。
+[はじめに](../getting_started.md) で説明しています。加えて、OpenTelemetry は上記の
+標準 `OTEL_*` 変数、または同等のスクリプトオプションで設定できます。スクリプト 06 は
+さらに次の BYOK 設定も読み込みます。
 
 | 変数名 | 用途 | 使用するスクリプト |
 |--------|------|------------------|

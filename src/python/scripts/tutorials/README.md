@@ -115,20 +115,26 @@ See [04 — Skills](../../../../docs/copilot_sdk_tutorial/python/tutorials/04_sk
 
 ## Observability (OpenTelemetry)
 
-Every script can export OpenTelemetry traces. Set `OTEL_EXPORTER_OTLP_ENDPOINT`
-to enable it (telemetry is wired via `make_client()` in [`_telemetry.py`](_telemetry.py)):
+Every script can export OpenTelemetry traces. Telemetry is off by default;
+enable it with the shared `--otel-*` options or the equivalent environment
+variables wired through `make_client()` in [`_telemetry.py`](_telemetry.py):
 
 ```bash
 # Start the collector + Grafana LGTM stack (from the repository root)
 docker compose -f docker/compose.yaml up -d
 
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-export OTEL_BSP_SCHEDULE_DELAY=500   # flush before the SDK kills the CLI
-uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello!"
+uv run python scripts/tutorials/01_chat_bot.py \
+    --otel-endpoint http://localhost:4318 \
+    --otel-bsp-schedule-delay 500 \
+    --prompt "Hello!"
 
 # View traces in Grafana → Explore → Tempo
 open http://localhost:3000   # admin / admin
 ```
+
+Equivalent environment variables: `OTEL_EXPORTER_OTLP_ENDPOINT`,
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, and
+`OTEL_BSP_SCHEDULE_DELAY`.
 
 See [Observability with OpenTelemetry](../../../../docs/copilot_sdk_tutorial/observability.md)
 and [`docker/README.md`](../../../../docker/README.md) for details.

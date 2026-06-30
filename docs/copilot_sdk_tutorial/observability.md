@@ -32,6 +32,30 @@ The shared helpers that build the `TelemetryConfig`:
 - **Python** — [`src/python/scripts/tutorials/_telemetry.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/_telemetry.py) (`make_client()`).
 - **Go** — [`src/go/cmd/tutorial/telemetry.go`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/go/cmd/tutorial/telemetry.go) (`newClientOptions()`).
 
+### Observability considerations
+
+Use these points when you move from the tutorial stack to a real application:
+
+- `TelemetryConfig` is the SDK-level switch. The official guide lists
+  language-specific options for the OTLP endpoint, exporter type
+  (`"otlp-http"` or `"file"`), JSON-lines file path, instrumentation source
+  name, and message-content capture. This repository's helpers intentionally
+  expose only the endpoint and content-capture settings through environment
+  variables.
+- Keep content capture disabled by default. Enable it only in trusted
+  environments because spans can include prompts, responses, and tool
+  arguments.
+- Prefer OTLP/HTTP for collector-based setups like this tutorial. Use file
+  export only for local diagnostics or disconnected review, then treat the
+  output like any other log that may contain sensitive data.
+- Treat trace-context propagation as an advanced integration point.
+  `TelemetryConfig` is enough to collect CLI spans; add explicit propagation
+  only when your application creates its own spans and needs them in the same
+  distributed trace as the CLI.
+- For cost attribution, combine traces with `assistant.usage` streaming events
+  and inspect the `apiEndpoint` value to identify which inference API handled
+  the turn.
+
 > **SDK v1.0.2+ telemetry options.** `TelemetryConfig` adds an `otlpProtocol`
 > option (`http/json` or `http/protobuf`) to select the OTLP export transport,
 > and the client now calls `runtime.shutdown` on a normal stop so telemetry is

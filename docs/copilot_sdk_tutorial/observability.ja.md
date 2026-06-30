@@ -7,7 +7,7 @@ Copilot SDK は、内部で動作する Copilot CLI から
 方法を説明します。
 
 参考:
-[OpenTelemetry instrumentation for Copilot SDK](https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry)
+[Copilot SDK 用の OpenTelemetry インストルメンテーション](https://docs.github.com/ja/copilot/how-tos/copilot-sdk/observability/opentelemetry)
 
 ---
 
@@ -33,6 +33,26 @@ Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector
 
 - **Python** — [`src/python/scripts/tutorials/_telemetry.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/_telemetry.py)（`make_client()`）
 - **Go** — [`src/go/cmd/tutorial/telemetry.go`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/go/cmd/tutorial/telemetry.go)（`newClientOptions()`）
+
+### オブザーバビリティの考慮事項
+
+チュートリアルの構成を実アプリケーションに広げるときは、次を確認してください:
+
+- `TelemetryConfig` が SDK 側のスイッチです。公式ガイドでは、OTLP
+  エンドポイント、エクスポーター種別（`"otlp-http"` または `"file"`）、
+  JSON Lines 形式のファイルパス、計装スコープ名、メッセージ内容の取得を
+  言語ごとのオプション名で示しています。本リポジトリの共有ヘルパーでは、
+  意図的にエンドポイントと内容取得の設定だけを環境変数から公開しています。
+- 内容取得は既定で無効のままにしてください。スパンにプロンプト、応答、
+  ツール引数が含まれる可能性があるため、信頼できる環境でのみ有効化します。
+- このチュートリアルのようにコレクターへ送る構成では、OTLP/HTTP を優先します。
+  ファイル出力はローカル診断や切断環境での確認に限定し、出力ファイルは機密情報を
+  含み得るログとして扱ってください。
+- トレースコンテキストの伝播は高度な統合ポイントとして扱います。CLI のスパンを
+  収集するだけなら `TelemetryConfig` で十分です。アプリケーション自身がスパンを作成し、
+  それを CLI と同じ分散トレースに含めたい場合だけ、明示的な伝播を追加します。
+- コスト帰属を確認する場合は、トレースに加えて `assistant.usage` のストリーミング
+  イベントを購読し、`apiEndpoint` の値からそのターンを処理した推論 API を確認します。
 
 > **SDK v1.0.2 以降のテレメトリオプション。** `TelemetryConfig` に OTLP エクスポートのトランスポートを選択する `otlpProtocol` オプション（`http/json` または `http/protobuf`）が追加されました。また、通常停止時にクライアントが `runtime.shutdown` を呼び出すようになり、プロセス終了前にテレメトリが確定的にフラッシュされます（[Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)）。
 

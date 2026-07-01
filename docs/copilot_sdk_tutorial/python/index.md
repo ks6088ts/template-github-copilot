@@ -44,6 +44,26 @@ For Python-specific setup, see [Getting Started (Python)](getting_started.md).
 
 ---
 
+## Observability
+
+All Python tutorial scripts keep telemetry off by default. To export
+OpenTelemetry traces, start the local collector stack and pass the shared
+`--otel-*` options:
+
+```bash
+uv run python scripts/tutorials/01_chat_bot.py \
+ --otel-endpoint http://localhost:4318 \
+ --otel-bsp-schedule-delay 500 \
+ --prompt "Hello, Copilot!"
+```
+
+The same settings can still come from the environment variables:
+`OTEL_EXPORTER_OTLP_ENDPOINT`,
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, and
+`OTEL_BSP_SCHEDULE_DELAY`. See [Observability with OpenTelemetry](../observability.md).
+
+---
+
 ## Scope
 
 **In scope:**

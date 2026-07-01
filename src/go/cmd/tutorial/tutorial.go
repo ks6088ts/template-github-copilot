@@ -38,6 +38,15 @@ var tutorialCmd = &cobra.Command{
 Each subcommand corresponds 1:1 to a Python tutorial script under
 src/python/scripts/tutorials/. Running these subcommands requires the
 GitHub Copilot CLI to be installed and authenticated.`,
+	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
+		return validateTelemetryOptions()
+	},
+}
+
+func init() {
+	tutorialCmd.PersistentFlags().StringVar(&tutorialOTELEndpoint, "otel-endpoint", tutorialOTELEndpoint, "Optional OTLP HTTP endpoint for tutorial telemetry (also reads OTEL_EXPORTER_OTLP_ENDPOINT). When empty, telemetry is disabled.")
+	tutorialCmd.PersistentFlags().StringVar(&tutorialOTELCaptureContent, "otel-capture-content", tutorialOTELCaptureContent, "Optional true/false value to capture prompt and response content in spans (also reads OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT).")
+	tutorialCmd.PersistentFlags().StringVar(&tutorialOTELBSPScheduleDelay, "otel-bsp-schedule-delay", tutorialOTELBSPScheduleDelay, "Optional span batch flush interval in milliseconds (sets OTEL_BSP_SCHEDULE_DELAY for the launched Copilot CLI).")
 }
 
 // GetCommand returns the tutorial parent command for registration on the root command.

@@ -10,7 +10,7 @@ import argparse
 import asyncio
 import sys
 
-from _telemetry import make_client
+from _telemetry import add_telemetry_arguments, apply_telemetry_arguments, make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
@@ -49,6 +49,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Run in interactive chat loop mode (Ctrl+C to exit)",
     )
+    add_telemetry_arguments(parser)
     return parser.parse_args()
 
 
@@ -133,6 +134,7 @@ async def run_loop(cli_url: str | None) -> None:
 
 def main() -> None:
     args = parse_args()
+    apply_telemetry_arguments(args)
     try:
         if args.loop:
             asyncio.run(run_loop(args.cli_url))

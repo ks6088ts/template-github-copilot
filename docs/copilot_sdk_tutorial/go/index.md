@@ -44,6 +44,26 @@ For Go-specific setup, see [Getting Started (Go)](getting_started.md).
 
 ---
 
+## Observability
+
+All Go tutorial subcommands keep telemetry off by default. To export
+OpenTelemetry traces, start the local collector stack and pass the `tutorial`
+persistent flags:
+
+```bash
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
+```
+
+The same settings can still come from the Python-compatible environment
+variables: `OTEL_EXPORTER_OTLP_ENDPOINT`,
+`OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT`, and
+`OTEL_BSP_SCHEDULE_DELAY`. See [Observability with OpenTelemetry](../observability.md).
+
+---
+
 ## Scope
 
 **In scope:**

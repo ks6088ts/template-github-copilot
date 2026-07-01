@@ -68,6 +68,29 @@ GitHub Copilot is an AI-powered coding assistant developed by GitHub and OpenAI.
 
 ---
 
+## Observability Flags
+
+All tutorial scripts expose the same optional OpenTelemetry flags. They default
+to the matching environment variables, and telemetry remains disabled when no
+endpoint is provided:
+
+| Option | Environment variable | Purpose |
+|--------|----------------------|---------|
+| `--otel-endpoint` | `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP endpoint, for example `http://localhost:4318` |
+| `--otel-capture-content` | `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Optional `true`/`false` to capture prompt and response content in spans |
+| `--otel-bsp-schedule-delay` | `OTEL_BSP_SCHEDULE_DELAY` | Optional span batch flush interval in milliseconds |
+
+Example:
+
+```bash
+uv run python scripts/tutorials/01_chat_bot.py \
+    --otel-endpoint http://localhost:4318 \
+    --otel-bsp-schedule-delay 500 \
+    --prompt "Hello!"
+```
+
+---
+
 ## Project Layout
 
 ```
@@ -90,8 +113,10 @@ src/python/scripts/tutorials/
 
 All tutorial scripts accept `--cli-url` (default: *stdio*). The common CLI
 variables (`COPILOT_GITHUB_TOKEN`, `COPILOT_CLI_PATH`, `COPILOT_CLI_URL`) are
-described in the common [Getting Started](../getting_started.md). Script 06 also
-reads these BYOK settings:
+described in the common [Getting Started](../getting_started.md). OpenTelemetry
+can additionally be configured with the standard `OTEL_*` variables listed
+above, or with the equivalent script options. Script 06 also reads these BYOK
+settings:
 
 | Variable | Purpose | Used by |
 |----------|---------|---------|

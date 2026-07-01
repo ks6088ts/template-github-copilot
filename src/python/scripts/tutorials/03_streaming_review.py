@@ -11,7 +11,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-from _telemetry import make_client
+from _telemetry import add_telemetry_arguments, apply_telemetry_arguments, make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
@@ -69,6 +69,7 @@ def parse_args() -> argparse.Namespace:
             "When omitted, the SDK launches the copilot CLI over stdio."
         ),
     )
+    add_telemetry_arguments(parser)
     return parser.parse_args()
 
 
@@ -114,6 +115,7 @@ async def run(cli_url: str | None, diff_text: str) -> None:
 
 def main() -> None:
     args = parse_args()
+    apply_telemetry_arguments(args)
 
     if args.diff:
         diff_path = Path(args.diff)

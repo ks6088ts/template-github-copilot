@@ -12,7 +12,7 @@ import os
 import sys
 
 from azure.identity import DefaultAzureCredential
-from _telemetry import make_client
+from _telemetry import add_telemetry_arguments, apply_telemetry_arguments, make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
     SessionEventType,
@@ -67,6 +67,7 @@ def parse_args() -> argparse.Namespace:
         default=os.environ.get("BYOK_MODEL", "gpt-4o"),
         help="Model/deployment name (overrides BYOK_MODEL env var, default: gpt-4o)",
     )
+    add_telemetry_arguments(parser)
     return parser.parse_args()
 
 
@@ -152,6 +153,7 @@ async def run(
 
 def main() -> None:
     args = parse_args()
+    apply_telemetry_arguments(args)
     try:
         asyncio.run(
             run(

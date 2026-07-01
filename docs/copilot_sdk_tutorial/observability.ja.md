@@ -7,7 +7,7 @@ Copilot SDK は、内部で動作する Copilot CLI から
 方法を説明します。
 
 参考:
-[OpenTelemetry instrumentation for Copilot SDK](https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry)
+[Copilot SDK 用の OpenTelemetry インストルメンテーション](https://docs.github.com/ja/copilot/how-tos/copilot-sdk/observability/opentelemetry)
 
 ---
 
@@ -17,22 +17,46 @@ Copilot SDK は、内部で動作する Copilot CLI から
 Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
 ```
 
-テレメトリは **環境変数によるオプトイン** です。エンドポイントを設定しない限り
-チュートリアルの挙動は従来どおり変わりません（VS Code の Copilot Chat は
+テレメトリは **オプトイン** です。エンドポイントを設定しない限り
+チュートリアルの挙動は従来どおり変わりません。Python スクリプトは共通の
+`--otel-*` オプションを公開し、Go チュートリアルサブコマンドは同じオプションを
+`tutorial` の persistent flag として公開します。どちらの言語でも同等の環境変数を使えます
+（VS Code の Copilot Chat は
 `.vscode/settings.json` で別途設定します。
 [VS Code の Copilot Chat メトリックを可視化する](#vs-code-の-copilot-chat-メトリックを可視化する)
 を参照）。
 
-| 変数 | 説明 |
-|------|------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP エンドポイント（例: `http://localhost:4318`）。未設定の場合テレメトリは無効。 |
-| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | スパンにプロンプト/応答の内容を含めるか（`true`/`false`、任意）。 |
-| `OTEL_BSP_SCHEDULE_DELAY` | スパンのバッチフラッシュ間隔（ms）。低く設定する（例: `500`）。[トラブルシューティング](#トラブルシューティング-スパンが届かない) を参照。 |
+| 環境変数 | CLI オプション | 説明 |
+|----------|----------------|------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `--otel-endpoint` | OTLP HTTP エンドポイント（例: `http://localhost:4318`）。未設定の場合テレメトリは無効。 |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `--otel-capture-content` | スパンにプロンプト/応答の内容を含めるか（`true`/`false`、任意）。 |
+| `OTEL_BSP_SCHEDULE_DELAY` | `--otel-bsp-schedule-delay` | スパンのバッチフラッシュ間隔（ms）。低く設定する（例: `500`）。[トラブルシューティング](#トラブルシューティング-スパンが届かない) を参照。 |
 
 `TelemetryConfig` を組み立てる共有ヘルパー:
 
 - **Python** — [`src/python/scripts/tutorials/_telemetry.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/_telemetry.py)（`make_client()`）
 - **Go** — [`src/go/cmd/tutorial/telemetry.go`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/go/cmd/tutorial/telemetry.go)（`newClientOptions()`）
+
+### オブザーバビリティの考慮事項
+
+チュートリアルの構成を実アプリケーションに広げるときは、次を確認してください:
+
+- `TelemetryConfig` が SDK 側のスイッチです。公式ガイドでは、OTLP
+  エンドポイント、エクスポーター種別（`"otlp-http"` または `"file"`）、
+  JSON Lines 形式のファイルパス、計装スコープ名、メッセージ内容の取得を
+  言語ごとのオプション名で示しています。本リポジトリの共有ヘルパーでは、
+  意図的にエンドポイントと内容取得の設定だけを公開しています。Python スクリプトと
+  Go チュートリアル CLI では、これらの設定を `--otel-*` オプションとして指定できます。
+- 内容取得は既定で無効のままにしてください。スパンにプロンプト、応答、
+  ツール引数が含まれる可能性があるため、信頼できる環境でのみ有効化します。
+- このチュートリアルのようにコレクターへ送る構成では、OTLP/HTTP を優先します。
+  ファイル出力はローカル診断や切断環境での確認に限定し、出力ファイルは機密情報を
+  含み得るログとして扱ってください。
+- トレースコンテキストの伝播は高度な統合ポイントとして扱います。CLI のスパンを
+  収集するだけなら `TelemetryConfig` で十分です。アプリケーション自身がスパンを作成し、
+  それを CLI と同じ分散トレースに含めたい場合だけ、明示的な伝播を追加します。
+- コスト帰属を確認する場合は、トレースに加えて `assistant.usage` のストリーミング
+  イベントを購読し、`apiEndpoint` の値からそのターンを処理した推論 API を確認します。
 
 > **SDK v1.0.2 以降のテレメトリオプション。** `TelemetryConfig` に OTLP エクスポートのトランスポートを選択する `otlpProtocol` オプション（`http/json` または `http/protobuf`）が追加されました。また、通常停止時にクライアントが `runtime.shutdown` を呼び出すようになり、プロセス終了前にテレメトリが確定的にフラッシュされます（[Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)）。
 
@@ -70,7 +94,10 @@ export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
 
 ```bash
 cd src/python
-uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ### Go
@@ -78,7 +105,10 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```bash
 cd src/go
 make build
-./dist/template-github-copilot-go tutorial chat-bot --prompt "Hello, Copilot!"
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ---
@@ -96,7 +126,56 @@ docker compose -f docker/compose.yaml logs -f otel-collector
 
 ---
 
-## 4. 後片付け
+## 4. SDK がスパンを出力しているかを確認する
+
+**Python** と **Go** のスクリプトで OpenTelemetry の配線が端から端まで動作している
+ことを、Grafana を使わずに確認する方法です。コレクターの `debug` エクスポーターが、
+受信したスパンのバッチごとに 1 行のサマリーをログ出力することを利用します。
+
+テレメトリを有効にしてスクリプトを実行します。
+
+### Python
+
+```bash
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (python)"
+```
+
+### Go
+
+```bash
+cd src/go
+make build
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (go)"
+```
+
+続いてコレクターのログを確認し、`spans` が 0 でない `traces` のバッチを探します:
+
+```bash
+docker compose -f docker/compose.yaml logs otel-collector | grep '"otelcol.signal": "traces"'
+```
+
+正常に動作していれば、`spans` の値が 1 以上の行が出力されます:
+
+```text
+otel-collector-1 | ... Traces {... "otelcol.component.id": "debug", "otelcol.signal": "traces", "resource spans": 1, "spans": 2}
+```
+
+次の点を確認します:
+
+1. スクリプトが終了コード `0` で終了し、アシスタントの応答を表示する。応答がない（`(no response)` または `[Error] ...`）場合は、テレメトリではなく CLI または認証の問題です。
+2. 実行直後にコレクターのログへ `"spans": N`（`N` は 1 以上）が出力される。`traces` の行が出ない場合は [トラブルシューティング](#トラブルシューティング-スパンが届かない) を参照してください。多くは CLI がフラッシュ前に停止されることが原因で、`--otel-bsp-schedule-delay 500` で解消します。
+3. 必要に応じて、前の手順どおり **Grafana → Explore → Tempo** で同じトレースが表示されることを確認する。
+
+---
+
+## 5. 後片付け
 
 ```bash
 docker compose -f docker/compose.yaml down

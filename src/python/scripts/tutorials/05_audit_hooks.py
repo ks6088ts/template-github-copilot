@@ -18,7 +18,7 @@ import sys
 import time
 from typing import Any
 
-from _telemetry import make_client
+from _telemetry import add_telemetry_arguments, apply_telemetry_arguments, make_client
 from copilot.generated.rpc import (
     PermissionDecisionApproveOnce,
     PermissionDecisionReject,
@@ -76,6 +76,7 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Use a permission handler that denies all tool executions",
     )
+    add_telemetry_arguments(parser)
     return parser.parse_args()
 
 
@@ -195,6 +196,7 @@ async def run(cli_url: str | None, prompt: str, deny_tools: bool) -> None:
 
 def main() -> None:
     args = parse_args()
+    apply_telemetry_arguments(args)
     try:
         asyncio.run(run(args.cli_url, args.prompt, args.deny_tools))
     except KeyboardInterrupt:

@@ -2,6 +2,8 @@
 #
 # Receives OTLP (gRPC 4317 / HTTP 4318) from the Copilot CLI and forwards
 # traces, metrics, and logs to the bundled Grafana LGTM stack.
+# Optional: also forwards to Azure Application Insights when
+# APPLICATIONINSIGHTS_CONNECTION_STRING is set.
 # Docs: https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry
 receivers:
   otlp:
@@ -24,18 +26,28 @@ exporters:
   # that spans are flowing without opening Grafana.
   debug:
     verbosity: basic
+  # Azure Application Insights (opt-in). The azuremonitor exporter validates its
+  # connection string at startup, so the collector will NOT start when it is
+  # empty. It is therefore commented out by default to keep the Grafana LGTM
+  # stack working out of the box. To forward to Application Insights:
+  #   1. Set APPLICATIONINSIGHTS_CONNECTION_STRING (e.g. in ../.env).
+  #   2. Uncomment the azuremonitor exporter below AND the matching
+  #      `azuremonitor` entries in the pipelines.
+  # Docs: https://learn.microsoft.com/azure/managed-grafana/grafana-opentelemetry-app-insights
+  # azuremonitor:
+  #   connection_string: ${APPLICATIONINSIGHTS_CONNECTION_STRING}
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/lgtm, debug]
+      exporters: [otlp/lgtm, debug] # add azuremonitor to forward to App Insights
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/lgtm, debug]
+      exporters: [otlp/lgtm, debug] # add azuremonitor to forward to App Insights
     logs:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/lgtm, debug]
+      exporters: [otlp/lgtm, debug] # add azuremonitor to forward to App Insights

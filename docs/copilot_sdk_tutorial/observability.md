@@ -16,21 +16,47 @@ Reference:
 Copilot CLI / VS Code Copilot Chat ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
 ```
 
-Telemetry is **opt-in via environment variables**, so the tutorials behave
-exactly as before unless you configure an endpoint
+Telemetry is **opt-in**, so the tutorials behave exactly as before unless you
+configure an endpoint. Python scripts expose shared `--otel-*` options, and Go
+tutorial subcommands expose the same options as `tutorial` persistent flags;
+both languages can also use the equivalent environment variables
 (VS Code Copilot Chat is wired separately via `.vscode/settings.json` — see
 [Visualizing VS Code Copilot Chat metrics](#visualizing-vs-code-copilot-chat-metrics)):
 
-| Variable | Description |
-|----------|-------------|
-| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP HTTP endpoint (e.g. `http://localhost:4318`). When unset, telemetry is disabled. |
-| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | Optional `true`/`false` to capture prompt/response content in spans. |
-| `OTEL_BSP_SCHEDULE_DELAY` | Span batch flush interval in ms. Keep low (e.g. `500`) — see [Troubleshooting](#troubleshooting-no-spans-arrive). |
+| Environment variable | CLI option | Description |
+|----------------------|------------|-------------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `--otel-endpoint` | OTLP HTTP endpoint (e.g. `http://localhost:4318`). When unset, telemetry is disabled. |
+| `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` | `--otel-capture-content` | Optional `true`/`false` to capture prompt/response content in spans. |
+| `OTEL_BSP_SCHEDULE_DELAY` | `--otel-bsp-schedule-delay` | Span batch flush interval in ms. Keep low (e.g. `500`) — see [Troubleshooting](#troubleshooting-no-spans-arrive). |
 
 The shared helpers that build the `TelemetryConfig`:
 
 - **Python** — [`src/python/scripts/tutorials/_telemetry.py`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/python/scripts/tutorials/_telemetry.py) (`make_client()`).
 - **Go** — [`src/go/cmd/tutorial/telemetry.go`](https://github.com/ks6088ts/template-github-copilot/blob/main/src/go/cmd/tutorial/telemetry.go) (`newClientOptions()`).
+
+### Observability considerations
+
+Use these points when you move from the tutorial stack to a real application:
+
+- `TelemetryConfig` is the SDK-level switch. The official guide lists
+  language-specific options for the OTLP endpoint, exporter type
+  (`"otlp-http"` or `"file"`), JSON-lines file path, instrumentation source
+  name, and message-content capture. This repository's helpers intentionally
+  expose only the endpoint and content-capture settings; the Python scripts and
+  Go tutorial CLI expose these settings as `--otel-*` options.
+- Keep content capture disabled by default. Enable it only in trusted
+  environments because spans can include prompts, responses, and tool
+  arguments.
+- Prefer OTLP/HTTP for collector-based setups like this tutorial. Use file
+  export only for local diagnostics or disconnected review, then treat the
+  output like any other log that may contain sensitive data.
+- Treat trace-context propagation as an advanced integration point.
+  `TelemetryConfig` is enough to collect CLI spans; add explicit propagation
+  only when your application creates its own spans and needs them in the same
+  distributed trace as the CLI.
+- For cost attribution, combine traces with `assistant.usage` streaming events
+  and inspect the `apiEndpoint` value to identify which inference API handled
+  the turn.
 
 > **SDK v1.0.2+ telemetry options.** `TelemetryConfig` adds an `otlpProtocol`
 > option (`http/json` or `http/protobuf`) to select the OTLP export transport,
@@ -72,7 +98,10 @@ export OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true
 
 ```bash
 cd src/python
-uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ### Go
@@ -80,7 +109,10 @@ uv run python scripts/tutorials/01_chat_bot.py --prompt "Hello, Copilot!"
 ```bash
 cd src/go
 make build
-./dist/template-github-copilot-go tutorial chat-bot --prompt "Hello, Copilot!"
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "Hello, Copilot!"
 ```
 
 ---
@@ -98,7 +130,58 @@ docker compose -f docker/compose.yaml logs -f otel-collector
 
 ---
 
-## 4. Tear down
+## 4. Verify the SDK is emitting spans
+
+Use this check to confirm the OpenTelemetry wiring works end to end for the
+**Python** and **Go** scripts, independent of Grafana. It relies on the
+collector's `debug` exporter, which logs a one-line summary for every batch of
+spans it receives.
+
+Run one of the scripts with telemetry enabled.
+
+### Python
+
+```bash
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (python)"
+```
+
+### Go
+
+```bash
+cd src/go
+make build
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (go)"
+```
+
+Then read the collector logs and look for `traces` batches with a non-zero
+`spans` count:
+
+```bash
+docker compose -f docker/compose.yaml logs otel-collector | grep '"otelcol.signal": "traces"'
+```
+
+A working setup prints a line whose `spans` value is greater than zero:
+
+```text
+otel-collector-1 | ... Traces {... "otelcol.component.id": "debug", "otelcol.signal": "traces", "resource spans": 1, "spans": 2}
+```
+
+Confirm the following:
+
+1. The script exits with code `0` and prints the assistant's reply. A missing reply (`(no response)` or `[Error] ...`) points to a CLI or authentication problem rather than a telemetry problem.
+2. The collector logs show `"spans": N` with `N` greater than zero shortly after the run. When no `traces` line appears, see [Troubleshooting](#troubleshooting-no-spans-arrive); the usual cause is the CLI being terminated before it flushes, which `--otel-bsp-schedule-delay 500` resolves.
+3. Optionally, open **Grafana → Explore → Tempo** (previous step) and confirm the same trace appears there.
+
+---
+
+## 5. Tear down
 
 ```bash
 docker compose -f docker/compose.yaml down

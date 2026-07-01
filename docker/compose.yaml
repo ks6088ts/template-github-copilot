@@ -17,6 +17,16 @@ services:
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      # Azure Application Insights forwarding (opt-in). Set this to the full
+      # connection string from the Application Insights resource overview
+      # ("Connection String" in the Essentials panel) — e.g. via ../.env — then
+      # enable the azuremonitor exporter in otel-collector-config.yaml.
+      # See: https://learn.microsoft.com/azure/managed-grafana/grafana-opentelemetry-app-insights
+      APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
     ports:
       - "4317:4317" # OTLP gRPC
       - "4318:4318" # OTLP HTTP

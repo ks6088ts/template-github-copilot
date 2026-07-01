@@ -126,7 +126,56 @@ docker compose -f docker/compose.yaml logs -f otel-collector
 
 ---
 
-## 4. 後片付け
+## 4. SDK がスパンを出力しているかを確認する
+
+**Python** と **Go** のスクリプトで OpenTelemetry の配線が端から端まで動作している
+ことを、Grafana を使わずに確認する方法です。コレクターの `debug` エクスポーターが、
+受信したスパンのバッチごとに 1 行のサマリーをログ出力することを利用します。
+
+テレメトリを有効にしてスクリプトを実行します。
+
+### Python
+
+```bash
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (python)"
+```
+
+### Go
+
+```bash
+cd src/go
+make build
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (go)"
+```
+
+続いてコレクターのログを確認し、`spans` が 0 でない `traces` のバッチを探します:
+
+```bash
+docker compose -f docker/compose.yaml logs otel-collector | grep '"otelcol.signal": "traces"'
+```
+
+正常に動作していれば、`spans` の値が 1 以上の行が出力されます:
+
+```text
+otel-collector-1 | ... Traces {... "otelcol.component.id": "debug", "otelcol.signal": "traces", "resource spans": 1, "spans": 2}
+```
+
+次の点を確認します:
+
+1. スクリプトが終了コード `0` で終了し、アシスタントの応答を表示する。応答がない（`(no response)` または `[Error] ...`）場合は、テレメトリではなく CLI または認証の問題です。
+2. 実行直後にコレクターのログへ `"spans": N`（`N` は 1 以上）が出力される。`traces` の行が出ない場合は [トラブルシューティング](#トラブルシューティング-スパンが届かない) を参照してください。多くは CLI がフラッシュ前に停止されることが原因で、`--otel-bsp-schedule-delay 500` で解消します。
+3. 必要に応じて、前の手順どおり **Grafana → Explore → Tempo** で同じトレースが表示されることを確認する。
+
+---
+
+## 5. 後片付け
 
 ```bash
 docker compose -f docker/compose.yaml down

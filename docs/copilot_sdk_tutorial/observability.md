@@ -130,7 +130,58 @@ docker compose -f docker/compose.yaml logs -f otel-collector
 
 ---
 
-## 4. Tear down
+## 4. Verify the SDK is emitting spans
+
+Use this check to confirm the OpenTelemetry wiring works end to end for the
+**Python** and **Go** scripts, independent of Grafana. It relies on the
+collector's `debug` exporter, which logs a one-line summary for every batch of
+spans it receives.
+
+Run one of the scripts with telemetry enabled.
+
+### Python
+
+```bash
+cd src/python
+uv run python scripts/tutorials/01_chat_bot.py \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (python)"
+```
+
+### Go
+
+```bash
+cd src/go
+make build
+./dist/template-github-copilot-go tutorial chat-bot \
+  --otel-endpoint http://localhost:4318 \
+  --otel-bsp-schedule-delay 500 \
+  --prompt "OTEL check (go)"
+```
+
+Then read the collector logs and look for `traces` batches with a non-zero
+`spans` count:
+
+```bash
+docker compose -f docker/compose.yaml logs otel-collector | grep '"otelcol.signal": "traces"'
+```
+
+A working setup prints a line whose `spans` value is greater than zero:
+
+```text
+otel-collector-1 | ... Traces {... "otelcol.component.id": "debug", "otelcol.signal": "traces", "resource spans": 1, "spans": 2}
+```
+
+Confirm the following:
+
+1. The script exits with code `0` and prints the assistant's reply. A missing reply (`(no response)` or `[Error] ...`) points to a CLI or authentication problem rather than a telemetry problem.
+2. The collector logs show `"spans": N` with `N` greater than zero shortly after the run. When no `traces` line appears, see [Troubleshooting](#troubleshooting-no-spans-arrive); the usual cause is the CLI being terminated before it flushes, which `--otel-bsp-schedule-delay 500` resolves.
+3. Optionally, open **Grafana → Explore → Tempo** (previous step) and confirm the same trace appears there.
+
+---
+
+## 5. Tear down
 
 ```bash
 docker compose -f docker/compose.yaml down

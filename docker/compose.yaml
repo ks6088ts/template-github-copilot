@@ -7,6 +7,10 @@
 #   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 #   # ...run a tutorial, then open Grafana at http://localhost:3000 (admin/admin)
 #
+# Optional: add an MLflow tracking server as a second trace sink with the
+# `mlflow` profile (see the mlflow service and otel-collector-config.yaml):
+#   docker compose -f docker/compose.yaml --profile mlflow up -d
+#
 # Docs: https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry
 name: copilot-sdk-observability
 
@@ -27,6 +31,13 @@ services:
       # enable the azuremonitor exporter in otel-collector-config.yaml.
       # See: https://learn.microsoft.com/azure/managed-grafana/grafana-opentelemetry-app-insights
       APPLICATIONINSIGHTS_CONNECTION_STRING: ${APPLICATIONINSIGHTS_CONNECTION_STRING:-}
+      # MLflow trace forwarding (opt-in via the `mlflow` compose profile). These
+      # feed the otlphttp/mlflow exporter in otel-collector-config.yaml. Inside
+      # the compose network the server is reachable at http://mlflow:5000, and
+      # the default experiment id "0" ("Default") works out of the box.
+      # See: https://mlflow.org/docs/latest/genai/tracing/opentelemetry/ingest/
+      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-http://mlflow:5000}
+      MLFLOW_EXPERIMENT_ID: ${MLFLOW_EXPERIMENT_ID:-0}
     ports:
       - "4317:4317" # OTLP gRPC
       - "4318:4318" # OTLP HTTP
@@ -40,3 +51,39 @@ services:
     ports:
       - "3000:3000" # Grafana UI
     # OTLP receivers (4317/4318) stay internal; the collector forwards to them.
+
+  # MLflow tracking server (opt-in) — an alternative trace sink that renders the
+  # Copilot CLI spans as MLflow traces. Disabled by default; start it with the
+  # `mlflow` profile, then enable the otlphttp/mlflow exporter in
+  # otel-collector-config.yaml:
+  #   docker compose -f docker/compose.yaml --profile mlflow up -d
+  # A SQL backend store is required for OTLP ingestion; this uses SQLite on a
+  # named volume. Browse ingested traces at http://localhost:5001 (Traces tab).
+  # Docs: https://mlflow.org/docs/latest/genai/tracing/opentelemetry/ingest/
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.14.0
+    profiles:
+      - mlflow
+    command:
+      - mlflow
+      - server
+      - --host=0.0.0.0
+      - --port=5000
+      - --backend-store-uri=sqlite:////mlflow/mlflow.db
+      - --artifacts-destination=/mlflow/artifacts
+      # MLflow 3.x rejects unknown Host headers as DNS-rebinding attacks. This is
+      # a local-only dev sink, so allow any Host: the collector reaches it at
+      # http://mlflow:5000 and the UI is browsed at http://localhost:5001,
+      # which would otherwise both need enumerating (and re-editing on a port
+      # change). Restrict this list if you expose the server beyond localhost.
+      - --allowed-hosts=*
+    ports:
+      # Host 5001 avoids clashing with a local MLflow or macOS AirPlay on 5000.
+      # The collector still forwards to the container's internal port 5000.
+      - "5001:5000" # MLflow UI (http://localhost:5001); OTLP ingest at /v1/traces
+    volumes:
+      - mlflow-data:/mlflow
+
+volumes:
+  # Persists the MLflow SQLite backend store and artifacts across restarts.
+  mlflow-data:

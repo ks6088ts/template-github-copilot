@@ -1,16 +1,24 @@
 # Observability stack (OpenTelemetry Collector + Grafana LGTM)
 
 A minimal, two-service Docker Compose stack for verifying the OpenTelemetry
-traces emitted by the GitHub Copilot SDK tutorials (Go and Python).
+traces emitted by the GitHub Copilot SDK tutorials (Go and Python). An optional
+MLflow tracking server can be added as a second trace sink (see
+[Forwarding traces to MLflow](#forwarding-traces-to-mlflow)).
 
-```text
-Copilot CLI ──OTLP/HTTP :4318──▶ otel-collector ──OTLP/gRPC :4317──▶ grafana-lgtm ──▶ Grafana UI :3000
+```mermaid
+graph LR
+    cli["Copilot CLI"] -->|"OTLP/HTTP :4318"| collector["otel-collector"]
+    collector -->|"OTLP/gRPC :4317"| lgtm["grafana-lgtm"]
+    lgtm --> grafana["Grafana UI :3000"]
+    collector -.->|"OTLP/HTTP /v1/traces"| mlflow["mlflow (opt-in)"]
+    mlflow --> mlflowui["MLflow UI :5001"]
 ```
 
 | Service | Image | Purpose | Host ports |
 |---------|-------|---------|------------|
 | `otel-collector` | `otel/opentelemetry-collector-contrib` | Single OTLP ingest endpoint; forwards to Grafana LGTM | `4317` (gRPC), `4318` (HTTP) |
 | `grafana-lgtm` | `grafana/otel-lgtm` | All-in-one Loki + Grafana + Tempo + Prometheus backend | `3000` (Grafana UI) |
+| `mlflow` (opt-in) | `ghcr.io/mlflow/mlflow` | OTLP/HTTP trace sink; renders CLI spans as MLflow traces | `5001` (MLflow UI) |
 
 ## Quick start
 
@@ -51,6 +59,84 @@ is set, so they behave exactly as before when the stack is not running.
 
 The SDK passes the endpoint to the Copilot CLI process, which exports its
 spans over OTLP. The collector then fans them out to Grafana LGTM.
+
+## Forwarding traces to MLflow
+
+[MLflow](https://mlflow.org/) can ingest OpenTelemetry traces through its
+OTLP/HTTP endpoint at `/v1/traces`, rendering the Copilot CLI spans as MLflow
+traces alongside Grafana. MLflow accepts **traces only** (no metrics or logs)
+and supports OTLP/HTTP but not OTLP/gRPC.
+
+Enabling MLflow forwarding uses two independent opt-in switches, both off by
+default: the `mlflow` Compose profile (which creates the tracking-server
+container) and the `otlphttp/mlflow` exporter in the collector config (which
+routes traces to it). You need both.
+
+### 1. Start the stack with the `mlflow` profile
+
+The `mlflow` service declares `profiles: [mlflow]`, so a plain
+`docker compose up` skips it:
+
+```bash
+docker compose -f docker/compose.yaml --profile mlflow up -d
+```
+
+Keep `--profile mlflow` on every later `up`, `down`, `ps`, and `logs` that
+should include the server.
+
+### 2. Enable the exporter in `otel-collector-config.yaml`
+
+Apply both edits below; the collector refuses to start if an exporter is defined
+but unused, or listed in a pipeline but undefined. First, uncomment the
+`otlphttp/mlflow` block in the `exporters:` section (remove the leading `# `
+from each line) so it reads:
+
+```yaml
+  otlphttp/mlflow:
+    endpoint: ${env:MLFLOW_TRACKING_URI:-http://mlflow:5000}
+    headers:
+      x-mlflow-experiment-id: ${env:MLFLOW_EXPERIMENT_ID:-0}
+    compression: gzip
+```
+
+Then add `otlphttp/mlflow` to the `traces` pipeline exporters only (leave
+`metrics` and `logs` unchanged, since MLflow ingests traces only):
+
+```yaml
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/lgtm, debug, otlphttp/mlflow]
+```
+
+### 3. Reload the collector and confirm it started
+
+```bash
+docker compose -f docker/compose.yaml up -d --force-recreate otel-collector
+docker compose -f docker/compose.yaml logs --tail 20 otel-collector
+# expect "Everything is ready. Begin running and processing data." and no errors
+```
+
+### 4. Run a tutorial, then browse the traces
+
+```bash
+open http://localhost:5001   # MLflow UI → Traces tab (Default experiment)
+```
+
+The collector reaches MLflow at `http://mlflow:5000` inside the Compose network
+and tags every trace with the destination experiment via the
+`x-mlflow-experiment-id` header. Override the defaults (experiment id `0`, the
+`Default` experiment) with `MLFLOW_TRACKING_URI` and `MLFLOW_EXPERIMENT_ID`,
+for example in `../.env`. The bundled server uses a SQLite backend store on a
+named volume, which OTLP ingestion requires.
+
+> The UI is published on host port `5001` to avoid clashing with a local MLflow
+> instance or macOS AirPlay on `5000`. The `mlflow` service sets
+> `--allowed-hosts=*` because it is a local-only dev sink; restrict that list
+> if you expose the server beyond localhost.
+
+See [Observability with OpenTelemetry](../docs/copilot_sdk_tutorial/observability.md#forwarding-traces-to-mlflow)
+for the tutorial walkthrough.
 
 ## VS Code Copilot Chat metrics
 
@@ -98,5 +184,6 @@ gracefully and flushes on shutdown.
 ## References
 
 - [OpenTelemetry instrumentation for Copilot SDK](https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry)
+- [Collect OpenTelemetry Traces into MLflow](https://mlflow.org/docs/latest/genai/tracing/opentelemetry/ingest/)
 - [grafana/otel-lgtm](https://github.com/grafana/docker-otel-lgtm)
 - [OpenTelemetry Collector](https://opentelemetry.io/docs/collector/)

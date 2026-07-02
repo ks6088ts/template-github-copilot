@@ -3,7 +3,8 @@
 # Receives OTLP (gRPC 4317 / HTTP 4318) from the Copilot CLI and forwards
 # traces, metrics, and logs to the bundled Grafana LGTM stack.
 # Optional: also forwards to Azure Application Insights when
-# APPLICATIONINSIGHTS_CONNECTION_STRING is set.
+# APPLICATIONINSIGHTS_CONNECTION_STRING is set, and/or traces to an MLflow
+# tracking server (see the otlphttp/mlflow exporter below).
 # Docs: https://docs.github.com/en/copilot/how-tos/copilot-sdk/observability/opentelemetry
 receivers:
   otlp:
@@ -36,13 +37,34 @@ exporters:
   # Docs: https://learn.microsoft.com/azure/managed-grafana/grafana-opentelemetry-app-insights
   # azuremonitor:
   #   connection_string: ${APPLICATIONINSIGHTS_CONNECTION_STRING}
+  #
+  # MLflow trace ingestion (opt-in). MLflow Server exposes an OTLP/HTTP endpoint
+  # at /v1/traces — traces only; OTLP/gRPC and metrics/logs are not supported.
+  # The otlphttp exporter appends /v1/traces to the endpoint automatically and
+  # tags every trace with the destination experiment via the
+  # x-mlflow-experiment-id header. To forward to MLflow:
+  #   1. Start the bundled MLflow server: `docker compose --profile mlflow up -d`.
+  #   2. Uncomment the otlphttp/mlflow exporter below AND the matching
+  #      `otlphttp/mlflow` entry in the traces pipeline (metrics/logs must NOT
+  #      include it — MLflow ingests traces only).
+  #   3. Optionally override MLFLOW_TRACKING_URI / MLFLOW_EXPERIMENT_ID
+  #      (e.g. in ../.env). Inside the compose network the server is reachable at
+  #      http://mlflow:5000 and the default experiment id "0" works out of the box.
+  # Docs: https://mlflow.org/docs/latest/genai/tracing/opentelemetry/ingest/
+  # otlphttp/mlflow:
+  #   endpoint: ${env:MLFLOW_TRACKING_URI:-http://mlflow:5000}
+  #   headers:
+  #     x-mlflow-experiment-id: ${env:MLFLOW_EXPERIMENT_ID:-0}
+  #   # MLflow accepts gzip-compressed payloads since 3.7.0 (the bundled image is
+  #   # newer). Set to `none` if you point this at an older MLflow server.
+  #   compression: gzip
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp/lgtm, debug] # add azuremonitor to forward to App Insights
+      exporters: [otlp/lgtm, debug] # add azuremonitor and/or otlphttp/mlflow to forward onward
     metrics:
       receivers: [otlp]
       processors: [batch]

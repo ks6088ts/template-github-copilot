@@ -25,7 +25,7 @@ append instructions from an `agents.md` file, and attach image or file inputs.
 go run . run --prompt "Explain goroutines in Go"
 
 # choose a model
-go run . run --model gpt-4o --prompt "Summarize this repository"
+go run . run --model gpt-5-mini --prompt "Summarize this repository"
 
 # append local agent instructions
 go run . run --agents-md AGENTS.md --prompt "Review this task"
@@ -50,12 +50,12 @@ go run . serve
 # submit a JSON task
 curl -sS http://127.0.0.1:8080/v1/tasks \
  -H 'Content-Type: application/json' \
- -d '{"prompt":"Explain goroutines in Go","model":"gpt-4o"}'
+ -d '{"prompt":"Explain goroutines in Go","model":"gpt-5-mini"}'
 
 # submit a multipart task with attachments
 curl -sS http://127.0.0.1:8080/v1/tasks \
  -F 'prompt=Evaluate these inputs' \
- -F 'model=gpt-4o' \
+ -F 'model=gpt-5-mini' \
  -F 'agents_md=@AGENTS.md' \
  -F 'image=@screenshot.png' \
  -F 'file=@README.md'

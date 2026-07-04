@@ -273,7 +273,7 @@ func handleCreateTask(w http.ResponseWriter, r *http.Request, store *taskStore, 
 					slog.Warn("failed to close system message temp file", "error", closeErr)
 				}
 				opts.AgentsFile = tmp.Name()
-				defer os.Remove(tmp.Name())
+				defer func() { _ = os.Remove(tmp.Name()) }()
 			}
 		}
 
@@ -298,7 +298,7 @@ func handleCreateTask(w http.ResponseWriter, r *http.Request, store *taskStore, 
 					slog.Warn("failed to close image temp file", "error", closeErr)
 				}
 				opts.ImagePath = tmp.Name()
-				defer os.Remove(tmp.Name())
+				defer func() { _ = os.Remove(tmp.Name()) }()
 			}
 		}
 

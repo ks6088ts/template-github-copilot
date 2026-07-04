@@ -26,11 +26,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -52,12 +56,15 @@ const (
 
 // Task holds the state of a single Copilot run submitted via the HTTP API.
 type Task struct {
-	ID          string     `json:"id"`
-	Status      TaskStatus `json:"status"`
-	Result      string     `json:"result,omitempty"`
-	Error       string     `json:"error,omitempty"`
-	CreatedAt   time.Time  `json:"created_at"`
-	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	ID          string              `json:"id"`
+	Status      TaskStatus          `json:"status"`
+	Prompt      string              `json:"prompt,omitempty"`
+	Model       string              `json:"model,omitempty"`
+	Progress    []run.ProgressEvent `json:"progress,omitempty"`
+	Result      string              `json:"result,omitempty"`
+	Error       string              `json:"error,omitempty"`
+	CreatedAt   time.Time           `json:"created_at"`
+	CompletedAt *time.Time          `json:"completed_at,omitempty"`
 }
 
 // taskStore is the in-memory store for all submitted tasks.
@@ -70,10 +77,12 @@ func newTaskStore() *taskStore {
 	return &taskStore{tasks: make(map[string]*Task)}
 }
 
-func (s *taskStore) create() *Task {
+func (s *taskStore) create(prompt, model string) *Task {
 	t := &Task{
 		ID:        uuid.New().String(),
 		Status:    TaskStatusPending,
+		Prompt:    prompt,
+		Model:     model,
 		CreatedAt: time.Now().UTC(),
 	}
 	s.mu.Lock()
@@ -115,6 +124,14 @@ type taskRequest struct {
 	ImageData string `json:"image_data,omitempty"`
 	// ImageMIMEType is the MIME type for ImageData (e.g. "image/png").
 	ImageMIMEType string `json:"image_mime_type,omitempty"`
+	// Yolo approves every tool permission request for this task. When nil, the
+	// server default is used.
+	Yolo *bool `json:"yolo,omitempty"`
+
+	AgentsFile string   `json:"-"`
+	ImagePath  string   `json:"-"`
+	ImagePaths []string `json:"-"`
+	FilePaths  []string `json:"-"`
 }
 
 // taskCreatedResponse is the JSON body returned by POST /tasks.
@@ -130,13 +147,17 @@ var serveCmd = &cobra.Command{
 prompt tasks and tracking their progress.
 
 Endpoints:
-  POST /tasks          Submit a new task (JSON body: prompt, model, system_message,
-                       image_data, image_mime_type). Returns {"task_id": "..."}.
-  GET  /tasks/{id}     Get the status and result of a previously submitted task.
-  GET  /tasks          List all submitted tasks.
+	POST /v1/tasks       Submit a new task. Accepts JSON or multipart/form-data.
+	GET  /v1/tasks/{id}  Get the status, progress, and result of a task.
+	GET  /v1/tasks       List submitted tasks.
+	GET  /healthz        Health check.
 
-Tasks run asynchronously in the background. Poll GET /tasks/{id} until the
-status is "done" or "failed".
+Tasks run asynchronously in the background. Poll GET /v1/tasks/{id} until the
+status is "done" or "failed". The unversioned /tasks endpoints are also
+available for compatibility.
+
+By default, only read permission requests are approved automatically. Pass
+--yolo to make task execution approve every tool permission request.
 
 Examples:
   # Start the server on the default address
@@ -160,6 +181,10 @@ Examples:
 		if err != nil {
 			return err
 		}
+		yolo, err := cmd.Flags().GetBool("yolo")
+		if err != nil {
+			return err
+		}
 
 		ctx, stop := signal.NotifyContext(cmd.Context(), os.Interrupt)
 		defer stop()
@@ -167,7 +192,7 @@ Examples:
 		addr := net.JoinHostPort(host, fmt.Sprintf("%d", port))
 		slog.Info("starting Copilot task server", "addr", addr)
 
-		return startServer(ctx, addr, cliURL)
+		return startServer(ctx, addr, cliURL, yolo)
 	},
 }
 
@@ -175,6 +200,7 @@ func init() {
 	serveCmd.Flags().StringP("host", "H", "127.0.0.1", "Host address to bind the HTTP server to")
 	serveCmd.Flags().IntP("port", "p", 8080, "Port to listen on")
 	serveCmd.Flags().StringP("cli-url", "c", "", "Optional Copilot CLI server URL (e.g. localhost:3000). When omitted, the SDK launches the copilot CLI over stdio.")
+	serveCmd.Flags().Bool("yolo", false, "Approve all Copilot tool permission requests for submitted tasks. By default only read requests are approved.")
 }
 
 // GetCommand returns the serve command for registration on the root command.
@@ -184,23 +210,33 @@ func GetCommand() *cobra.Command {
 
 // startServer wires up the HTTP routes, starts the listener, and blocks until
 // ctx is cancelled (Ctrl+C).
-func startServer(ctx context.Context, addr, cliURL string) error {
+func startServer(ctx context.Context, addr, cliURL string, defaultYolo bool) error {
 	store := newTaskStore()
 	mux := http.NewServeMux()
 
+	createTask := func(w http.ResponseWriter, r *http.Request) {
+		handleCreateTask(w, r, store, cliURL, defaultYolo)
+	}
+	getTask := func(w http.ResponseWriter, r *http.Request) {
+		handleGetTask(w, r, store)
+	}
+	listTasks := func(w http.ResponseWriter, r *http.Request) {
+		handleListTasks(w, r, store)
+	}
+
 	// POST /tasks — create a new task
-	mux.HandleFunc("POST /tasks", func(w http.ResponseWriter, r *http.Request) {
-		handleCreateTask(w, r, store, cliURL)
-	})
+	mux.HandleFunc("POST /tasks", createTask)
+	mux.HandleFunc("POST /v1/tasks", createTask)
 
 	// GET /tasks/{id} — get a specific task
-	mux.HandleFunc("GET /tasks/{id}", func(w http.ResponseWriter, r *http.Request) {
-		handleGetTask(w, r, store)
-	})
+	mux.HandleFunc("GET /tasks/{id}", getTask)
+	mux.HandleFunc("GET /v1/tasks/{id}", getTask)
 
 	// GET /tasks — list all tasks
-	mux.HandleFunc("GET /tasks", func(w http.ResponseWriter, r *http.Request) {
-		handleListTasks(w, r, store)
+	mux.HandleFunc("GET /tasks", listTasks)
+	mux.HandleFunc("GET /v1/tasks", listTasks)
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
 
 	srv := &http.Server{
@@ -232,79 +268,245 @@ func startServer(ctx context.Context, addr, cliURL string) error {
 	}
 }
 
-// handleCreateTask handles POST /tasks.
-func handleCreateTask(w http.ResponseWriter, r *http.Request, store *taskStore, defaultCLIURL string) {
+func parseTaskRequest(r *http.Request) (taskRequest, func(), error) {
+	if strings.HasPrefix(strings.ToLower(r.Header.Get("Content-Type")), "multipart/form-data") {
+		return parseMultipartTaskRequest(r)
+	}
+	return parseJSONTaskRequest(r)
+}
+
+func parseJSONTaskRequest(r *http.Request) (taskRequest, func(), error) {
+	cleanup := func() {}
 	var req taskRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid JSON: " + err.Error()})
+		return req, cleanup, fmt.Errorf("invalid JSON: %w", err)
+	}
+
+	var tmpDir string
+	ensureTempDir := func() (string, error) {
+		if tmpDir != "" {
+			return tmpDir, nil
+		}
+		dir, err := os.MkdirTemp("", "copilot-task-*")
+		if err != nil {
+			return "", fmt.Errorf("failed to create temp directory: %w", err)
+		}
+		tmpDir = dir
+		cleanup = func() { _ = os.RemoveAll(dir) }
+		return dir, nil
+	}
+
+	if req.SystemMessage != "" {
+		dir, err := ensureTempDir()
+		if err != nil {
+			return req, cleanup, err
+		}
+		path, err := writeTempBytes(dir, "agents.md", []byte(req.SystemMessage))
+		if err != nil {
+			return req, cleanup, err
+		}
+		req.AgentsFile = path
+	}
+
+	if req.ImageData != "" {
+		mimeType := req.ImageMIMEType
+		if mimeType == "" {
+			mimeType = "image/png"
+		}
+		imgBytes, err := base64.StdEncoding.DecodeString(req.ImageData)
+		if err != nil {
+			return req, cleanup, fmt.Errorf("invalid image_data: %w", err)
+		}
+		dir, err := ensureTempDir()
+		if err != nil {
+			return req, cleanup, err
+		}
+		path, err := writeTempBytes(dir, "image"+mimeTypeExt(mimeType), imgBytes)
+		if err != nil {
+			return req, cleanup, err
+		}
+		req.ImagePath = path
+	}
+
+	return req, cleanup, nil
+}
+
+func parseMultipartTaskRequest(r *http.Request) (taskRequest, func(), error) {
+	cleanup := func() {}
+	var req taskRequest
+	if err := r.ParseMultipartForm(64 << 20); err != nil {
+		return req, cleanup, fmt.Errorf("invalid multipart form: %w", err)
+	}
+	form := r.MultipartForm
+	cleanup = func() {
+		if form != nil {
+			_ = form.RemoveAll()
+		}
+	}
+
+	tmpDir, err := os.MkdirTemp("", "copilot-task-*")
+	if err != nil {
+		return req, cleanup, fmt.Errorf("failed to create temp directory: %w", err)
+	}
+	cleanup = func() {
+		_ = os.RemoveAll(tmpDir)
+		if form != nil {
+			_ = form.RemoveAll()
+		}
+	}
+
+	req.Prompt = r.FormValue("prompt")
+	req.Model = r.FormValue("model")
+	req.SystemMessage = r.FormValue("system_message")
+	if yoloText := strings.TrimSpace(r.FormValue("yolo")); yoloText != "" {
+		yolo, parseErr := strconv.ParseBool(yoloText)
+		if parseErr != nil {
+			return req, cleanup, fmt.Errorf("invalid yolo value %q: %w", yoloText, parseErr)
+		}
+		req.Yolo = &yolo
+	}
+
+	if req.SystemMessage != "" {
+		path, err := writeTempBytes(tmpDir, "agents.md", []byte(req.SystemMessage))
+		if err != nil {
+			return req, cleanup, err
+		}
+		req.AgentsFile = path
+	}
+
+	agentFiles, err := saveUploadedFiles(r.MultipartForm, "agents_md", tmpDir)
+	if err != nil {
+		return req, cleanup, err
+	}
+	legacyAgentFiles, err := saveUploadedFiles(r.MultipartForm, "agents_file", tmpDir)
+	if err != nil {
+		return req, cleanup, err
+	}
+	agentFiles = append(agentFiles, legacyAgentFiles...)
+	if len(agentFiles) > 0 {
+		req.AgentsFile = agentFiles[0]
+	}
+
+	req.ImagePaths, err = saveUploadedFiles(r.MultipartForm, "image", tmpDir)
+	if err != nil {
+		return req, cleanup, err
+	}
+	req.FilePaths, err = saveUploadedFiles(r.MultipartForm, "file", tmpDir)
+	if err != nil {
+		return req, cleanup, err
+	}
+
+	return req, cleanup, nil
+}
+
+func writeTempBytes(dir, name string, data []byte) (string, error) {
+	path := filepath.Join(dir, name)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		return "", fmt.Errorf("failed to write temp file %q: %w", name, err)
+	}
+	return path, nil
+}
+
+func saveUploadedFiles(form *multipart.Form, field, dir string) ([]string, error) {
+	if form == nil {
+		return nil, nil
+	}
+	files := form.File[field]
+	paths := make([]string, 0, len(files))
+	for i, header := range files {
+		path, err := saveUploadedFile(header, field, i, dir)
+		if err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
+	}
+	return paths, nil
+}
+
+func saveUploadedFile(header *multipart.FileHeader, field string, index int, dir string) (string, error) {
+	src, err := header.Open()
+	if err != nil {
+		return "", fmt.Errorf("failed to open uploaded %s file: %w", field, err)
+	}
+
+	path := filepath.Join(dir, uploadFileName(field, index, header.Filename))
+	dst, err := os.Create(path)
+	if err != nil {
+		_ = src.Close()
+		return "", fmt.Errorf("failed to create uploaded %s temp file: %w", field, err)
+	}
+
+	_, copyErr := io.Copy(dst, src)
+	closeDstErr := dst.Close()
+	closeSrcErr := src.Close()
+	if copyErr != nil {
+		return "", fmt.Errorf("failed to copy uploaded %s file: %w", field, copyErr)
+	}
+	if closeDstErr != nil {
+		return "", fmt.Errorf("failed to close uploaded %s temp file: %w", field, closeDstErr)
+	}
+	if closeSrcErr != nil {
+		return "", fmt.Errorf("failed to close uploaded %s file: %w", field, closeSrcErr)
+	}
+
+	return path, nil
+}
+
+func uploadFileName(field string, index int, filename string) string {
+	base := filepath.Base(filename)
+	if base == "." || base == string(filepath.Separator) || base == "" {
+		base = "upload"
+	}
+	return fmt.Sprintf("%s-%d-%s", field, index, base)
+}
+
+// handleCreateTask handles POST /tasks.
+func handleCreateTask(w http.ResponseWriter, r *http.Request, store *taskStore, defaultCLIURL string, defaultYolo bool) {
+	req, cleanup, err := parseTaskRequest(r)
+	if err != nil {
+		cleanup()
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
 	if strings.TrimSpace(req.Prompt) == "" {
+		cleanup()
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "prompt is required"})
 		return
 	}
 
-	task := store.create()
+	task := store.create(req.Prompt, req.Model)
 	slog.Info("task created", "id", task.ID, "model", req.Model)
 
 	// Run the Copilot session in the background.
 	go func() {
+		defer cleanup()
+
 		store.update(task.ID, func(t *Task) { t.Status = TaskStatusRunning })
 		slog.Debug("task running", "id", task.ID)
 
+		yolo := defaultYolo
+		if req.Yolo != nil {
+			yolo = *req.Yolo
+		}
+
 		opts := run.RunOptions{
-			Model:  req.Model,
-			Prompt: req.Prompt,
-			CLIURL: defaultCLIURL,
-		}
-
-		// If the caller supplied a system message directly, write it to a
-		// temp file so RunSessionCollect can read it via AgentsFile. This
-		// avoids changing the RunOptions signature for the simpler case.
-		if req.SystemMessage != "" {
-			tmp, createErr := os.CreateTemp("", "agents-*.md")
-			if createErr != nil {
-				slog.Warn("failed to create temp file for system message", "error", createErr)
-			} else {
-				if _, writeErr := tmp.WriteString(req.SystemMessage); writeErr != nil {
-					slog.Warn("failed to write system message to temp file", "error", writeErr)
-				}
-				if closeErr := tmp.Close(); closeErr != nil {
-					slog.Warn("failed to close system message temp file", "error", closeErr)
-				}
-				opts.AgentsFile = tmp.Name()
-				defer func() { _ = os.Remove(tmp.Name()) }()
-			}
-		}
-
-		// If the caller supplied inline image data, write it to a temp file.
-		if req.ImageData != "" {
-			mimeType := req.ImageMIMEType
-			if mimeType == "" {
-				mimeType = "image/png"
-			}
-			ext := mimeTypeExt(mimeType)
-			tmp, createErr := os.CreateTemp("", "image-*"+ext)
-			if createErr != nil {
-				slog.Warn("failed to create temp file for image", "error", createErr)
-			} else {
-				imgBytes, decErr := base64.StdEncoding.DecodeString(req.ImageData)
-				if decErr != nil {
-					slog.Warn("failed to decode base64 image data", "error", decErr)
-				} else if _, writeErr := tmp.Write(imgBytes); writeErr != nil {
-					slog.Warn("failed to write image data to temp file", "error", writeErr)
-				}
-				if closeErr := tmp.Close(); closeErr != nil {
-					slog.Warn("failed to close image temp file", "error", closeErr)
-				}
-				opts.ImagePath = tmp.Name()
-				defer func() { _ = os.Remove(tmp.Name()) }()
-			}
+			Model:      req.Model,
+			Prompt:     req.Prompt,
+			AgentsFile: req.AgentsFile,
+			ImagePath:  req.ImagePath,
+			ImagePaths: req.ImagePaths,
+			FilePaths:  req.FilePaths,
+			CLIURL:     defaultCLIURL,
+			Yolo:       yolo,
 		}
 
 		// Use a background context so the task keeps running even if the
 		// HTTP request that created it has long since closed.
-		result, err := run.RunSessionCollect(context.Background(), opts)
+		result, err := run.RunSessionCollectWithEvents(context.Background(), opts, func(event run.ProgressEvent) {
+			store.update(task.ID, func(t *Task) {
+				t.Progress = append(t.Progress, event)
+			})
+		})
 
 		now := time.Now().UTC()
 		store.update(task.ID, func(t *Task) {

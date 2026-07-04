@@ -30,24 +30,29 @@ import (
 	"os/signal"
 	"path/filepath"
 	"strings"
+	"time"
 
 	copilot "github.com/github/copilot-sdk/go"
+	"github.com/github/copilot-sdk/go/rpc"
 	"github.com/spf13/cobra"
 )
 
 // runCmd represents the run command.
 //
 // It sends a single prompt to the GitHub Copilot SDK, optionally loading a
-// system message from an agents.md file and attaching an image for
-// vision-capable models.
+// local agents.md file as additional instructions and attaching files or
+// images as prompt inputs.
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run a Copilot session from the command line",
-	Long: `Run a Copilot session with a prompt, optional model, system message from
-an agents.md file, and image attachment for vision-capable models.
+	Long: `Run a Copilot session with a prompt, optional model, additional
+instructions from an agents.md file, and file or image attachments.
 
 The response is streamed to stdout as it is generated. Requires the GitHub
 Copilot CLI to be installed and authenticated.
+
+By default, only read permission requests are approved automatically. Pass
+--yolo to approve every tool permission request.
 
 Examples:
   # Simple prompt with the default model
@@ -55,9 +60,6 @@ Examples:
 
   # Specify a model
   template-github-copilot-go run --model gpt-4o --prompt "What is recursion?"
-
-  # Load a system message from agents.md
-  template-github-copilot-go run --agents-file agents.md --prompt "Summarise the project"
 
   # Attach an image (requires a vision-capable model)
   template-github-copilot-go run --model gpt-4o --image screenshot.png --prompt "What do you see?"`,
@@ -74,11 +76,29 @@ Examples:
 		if err != nil {
 			return err
 		}
-		imagePath, err := cmd.Flags().GetString("image")
+		agentsMD, err := cmd.Flags().GetString("agents-md")
+		if err != nil {
+			return err
+		}
+		if agentsFile != "" && agentsMD != "" {
+			return fmt.Errorf("--agents-file and --agents-md cannot both be set")
+		}
+		if agentsMD != "" {
+			agentsFile = agentsMD
+		}
+		imagePaths, err := cmd.Flags().GetStringArray("image")
+		if err != nil {
+			return err
+		}
+		filePaths, err := cmd.Flags().GetStringArray("file")
 		if err != nil {
 			return err
 		}
 		cliURL, err := cmd.Flags().GetString("cli-url")
+		if err != nil {
+			return err
+		}
+		yolo, err := cmd.Flags().GetBool("yolo")
 		if err != nil {
 			return err
 		}
@@ -89,16 +109,20 @@ Examples:
 		slog.Debug("running run",
 			"model", model,
 			"agentsFile", agentsFile,
-			"imagePath", imagePath,
+			"imagePaths", imagePaths,
+			"filePaths", filePaths,
 			"cliURL", cliURL,
+			"yolo", yolo,
 		)
 
 		err = RunSession(ctx, RunOptions{
 			Model:      model,
 			Prompt:     prompt,
 			AgentsFile: agentsFile,
-			ImagePath:  imagePath,
+			ImagePaths: imagePaths,
+			FilePaths:  filePaths,
 			CLIURL:     cliURL,
+			Yolo:       yolo,
 		})
 		if ctx.Err() != nil {
 			fmt.Println("\nBye!")
@@ -111,9 +135,12 @@ Examples:
 func init() {
 	runCmd.Flags().StringP("model", "m", "", "Model to use for the session (e.g. gpt-4o, claude-3.5-sonnet). Uses the default model when empty.")
 	runCmd.Flags().StringP("prompt", "p", "Hello, Copilot!", "Prompt to send to the model")
-	runCmd.Flags().StringP("agents-file", "a", "", "Path to an agents.md file whose content is used as the system message")
-	runCmd.Flags().StringP("image", "i", "", "Path to an image file to attach to the message (requires a vision-capable model)")
+	runCmd.Flags().StringP("agents-file", "a", "", "Path to an agents.md file whose content is appended as session instructions")
+	runCmd.Flags().String("agents-md", "", "Path to an agents.md file whose content is appended as session instructions")
+	runCmd.Flags().StringArrayP("image", "i", nil, "Path to an image file to attach to the message (repeatable; requires a vision-capable model)")
+	runCmd.Flags().StringArray("file", nil, "Path to a non-image file to attach to the message (repeatable)")
 	runCmd.Flags().StringP("cli-url", "c", "", "Optional Copilot CLI server URL (e.g. localhost:3000). When omitted, the SDK launches the copilot CLI over stdio.")
+	runCmd.Flags().Bool("yolo", false, "Approve all Copilot tool permission requests. By default only read requests are approved.")
 }
 
 // GetCommand returns the run command for registration on the root command.
@@ -129,14 +156,32 @@ type RunOptions struct {
 	// Prompt is the user message to send.
 	Prompt string
 	// AgentsFile is the optional path to an agents.md (or any markdown) file
-	// whose contents are used as the session system message.
+	// whose contents are appended as session instructions.
 	AgentsFile string
 	// ImagePath is the optional path to an image file attached to the message.
 	// The model must support vision for this to have an effect.
 	ImagePath string
+	// ImagePaths are optional paths to image files attached to the message.
+	// The model must support vision for these to have an effect.
+	ImagePaths []string
+	// FilePaths are optional non-image files attached to the message.
+	FilePaths []string
 	// CLIURL is the optional Copilot CLI server URL (e.g. "localhost:3000").
 	// When empty, the SDK spawns the bundled CLI over stdio.
 	CLIURL string
+	// Yolo approves every permission request. When false, only read requests are
+	// approved automatically.
+	Yolo bool
+}
+
+// ProgressEvent is a normalized session event emitted while a Copilot task is
+// running. It is intentionally small so it can be returned by the serve API.
+type ProgressEvent struct {
+	Time       time.Time `json:"time"`
+	Type       string    `json:"type"`
+	Message    string    `json:"message,omitempty"`
+	ToolName   string    `json:"tool_name,omitempty"`
+	ToolCallID string    `json:"tool_call_id,omitempty"`
 }
 
 // RunSession creates a Copilot session with the given options and streams the
@@ -179,6 +224,12 @@ func RunSession(ctx context.Context, opts RunOptions) error {
 // response in a string instead of writing it to stdout. It is used by the
 // serve subcommand to collect task output.
 func RunSessionCollect(ctx context.Context, opts RunOptions) (string, error) {
+	return RunSessionCollectWithEvents(ctx, opts, nil)
+}
+
+// RunSessionCollectWithEvents works like RunSessionCollect and reports compact
+// progress events to onProgress while the session runs.
+func RunSessionCollectWithEvents(ctx context.Context, opts RunOptions, onProgress func(ProgressEvent)) (string, error) {
 	systemMessage, attachments, err := buildSessionInputs(opts)
 	if err != nil {
 		return "", err
@@ -189,6 +240,13 @@ func RunSessionCollect(ctx context.Context, opts RunOptions) (string, error) {
 		return "", err
 	}
 	defer func() { _ = client.Stop() }()
+
+	session.On(func(event copilot.SessionEvent) {
+		if onProgress == nil {
+			return
+		}
+		emitProgressEvent(onProgress, event)
+	})
 
 	reply, err := session.SendAndWait(ctx, copilot.MessageOptions{
 		Prompt:      opts.Prompt,
@@ -206,6 +264,43 @@ func RunSessionCollect(ctx context.Context, opts RunOptions) (string, error) {
 	return "", nil
 }
 
+func emitProgressEvent(onProgress func(ProgressEvent), event copilot.SessionEvent) {
+	progress := ProgressEvent{
+		Time: event.Timestamp,
+		Type: string(event.Type()),
+	}
+	if progress.Time.IsZero() {
+		progress.Time = time.Now().UTC()
+	}
+
+	switch data := event.Data.(type) {
+	case *copilot.ToolExecutionStartData:
+		progress.ToolName = data.ToolName
+		progress.ToolCallID = data.ToolCallID
+		progress.Message = "tool execution started"
+	case *copilot.ToolExecutionProgressData:
+		progress.ToolCallID = data.ToolCallID
+		progress.Message = data.ProgressMessage
+	case *copilot.ToolExecutionCompleteData:
+		progress.ToolCallID = data.ToolCallID
+		if data.Success {
+			progress.Message = "tool execution completed"
+		} else if data.Error != nil {
+			progress.Message = data.Error.Message
+		} else {
+			progress.Message = "tool execution failed"
+		}
+	case *copilot.AssistantMessageData:
+		progress.Message = "assistant message completed"
+	case *copilot.SessionErrorData:
+		progress.Message = data.Message
+	default:
+		return
+	}
+
+	onProgress(progress)
+}
+
 // buildSessionInputs reads the optional agents file and builds any image
 // attachments. It is shared between RunSession and RunSessionCollect to avoid
 // duplicating the setup logic.
@@ -218,19 +313,39 @@ func buildSessionInputs(opts RunOptions) (systemMessage string, attachments []co
 		systemMessage = string(data)
 	}
 
+	imagePaths := make([]string, 0, len(opts.ImagePaths)+1)
 	if opts.ImagePath != "" {
-		data, readErr := os.ReadFile(opts.ImagePath)
+		imagePaths = append(imagePaths, opts.ImagePath)
+	}
+	imagePaths = append(imagePaths, opts.ImagePaths...)
+	for _, imagePath := range imagePaths {
+		data, readErr := os.ReadFile(imagePath)
 		if readErr != nil {
-			return "", nil, fmt.Errorf("failed to read image file %q: %w", opts.ImagePath, readErr)
+			return "", nil, fmt.Errorf("failed to read image file %q: %w", imagePath, readErr)
 		}
-		mimeType := imageMIMEType(opts.ImagePath)
-		displayName := filepath.Base(opts.ImagePath)
+		mimeType := imageMIMEType(imagePath)
+		displayName := filepath.Base(imagePath)
 		attachments = append(attachments, &copilot.AttachmentBlob{
 			Data:        base64.StdEncoding.EncodeToString(data),
 			MIMEType:    mimeType,
 			DisplayName: &displayName,
 		})
-		slog.Debug("attached image", "path", opts.ImagePath, "mimeType", mimeType)
+		slog.Debug("attached image", "path", imagePath, "mimeType", mimeType)
+	}
+
+	for _, filePath := range opts.FilePaths {
+		absPath, absErr := filepath.Abs(filePath)
+		if absErr != nil {
+			return "", nil, fmt.Errorf("failed to resolve file path %q: %w", filePath, absErr)
+		}
+		if _, statErr := os.Stat(absPath); statErr != nil {
+			return "", nil, fmt.Errorf("failed to stat file %q: %w", filePath, statErr)
+		}
+		attachments = append(attachments, &copilot.AttachmentFile{
+			DisplayName: filepath.Base(absPath),
+			Path:        absPath,
+		})
+		slog.Debug("attached file", "path", absPath)
 	}
 
 	return systemMessage, attachments, nil
@@ -253,7 +368,7 @@ func newSession(ctx context.Context, opts RunOptions, systemMessage string, stre
 	}
 
 	sessionCfg := &copilot.SessionConfig{
-		OnPermissionRequest: copilot.PermissionHandler.ApproveAll,
+		OnPermissionRequest: permissionHandler(opts.Yolo),
 		Streaming:           streaming,
 	}
 	if opts.Model != "" {
@@ -261,7 +376,7 @@ func newSession(ctx context.Context, opts RunOptions, systemMessage string, stre
 	}
 	if systemMessage != "" {
 		sessionCfg.SystemMessage = &copilot.SystemMessageConfig{
-			Mode:    "replace",
+			Mode:    "append",
 			Content: systemMessage,
 		}
 	}
@@ -274,6 +389,21 @@ func newSession(ctx context.Context, opts RunOptions, systemMessage string, stre
 	slog.Debug("session created", "model", opts.Model, "streaming", streaming)
 
 	return client, session, nil
+}
+
+func permissionHandler(yolo bool) copilot.PermissionHandlerFunc {
+	if yolo {
+		return copilot.PermissionHandler.ApproveAll
+	}
+	return func(request copilot.PermissionRequest, _ copilot.PermissionInvocation) (rpc.PermissionDecision, error) {
+		switch request.(type) {
+		case *copilot.PermissionRequestRead:
+			return &rpc.PermissionDecisionApproveOnce{}, nil
+		default:
+			feedback := "Permission denied by default. Re-run with --yolo to approve all tool permission requests."
+			return &rpc.PermissionDecisionReject{Feedback: &feedback}, nil
+		}
+	}
 }
 
 // imageMIMEType returns an image MIME type based on the file extension.

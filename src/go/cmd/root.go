@@ -26,7 +26,9 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/ks6088ts/template-github-copilot/src/go/cmd/run"
 	"github.com/ks6088ts/template-github-copilot/src/go/cmd/sandbox"
+	"github.com/ks6088ts/template-github-copilot/src/go/cmd/serve"
 	"github.com/ks6088ts/template-github-copilot/src/go/cmd/tutorial"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -40,13 +42,12 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "template-github-copilot-go",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Short: "GitHub Copilot SDK examples and task runner",
+	Long: `A Go CLI for experimenting with the GitHub Copilot SDK.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Use tutorial subcommands for guided SDK examples, run for one-shot Copilot
+sessions from the command line, and serve to expose the same task execution
+flow over HTTP.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -70,10 +71,6 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.template-github-copilot-go.yaml)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "enable verbose (debug) logging")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Register sub commands
 	registerSubCommands()
@@ -121,7 +118,9 @@ func configureLogging() {
 
 // registerSubCommands registers sub commands
 func registerSubCommands() {
+	rootCmd.AddCommand(run.GetCommand())
 	rootCmd.AddCommand(sandbox.GetCommand())
+	rootCmd.AddCommand(serve.GetCommand())
 	rootCmd.AddCommand(tutorial.GetCommand())
 	// Add other sub commands here
 }

@@ -11,6 +11,63 @@ A Go CLI that demonstrates the [GitHub Copilot SDK for Go](https://pkg.go.dev/gi
 
 - [Go 1.26+](https://go.dev/doc/install)
 - [GNU Make](https://www.gnu.org/software/make/)
+- Authenticated GitHub Copilot CLI access for commands that create Copilot SDK sessions
+
+## Usage
+
+### One-shot task runner
+
+Use `run` to send one prompt to a Copilot SDK session. You can choose a model,
+append instructions from an `agents.md` file, and attach image or file inputs.
+
+```shell
+# simple prompt with the default model
+go run . run --prompt "Explain goroutines in Go"
+
+# choose a model
+go run . run --model gpt-5-mini --prompt "Summarize this repository"
+
+# append local agent instructions
+go run . run --agents-md AGENTS.md --prompt "Review this task"
+
+# attach image and file inputs
+go run . run --image screenshot.png --file README.md --prompt "Evaluate these inputs"
+```
+
+By default, `run` automatically approves only read permission requests from the
+agent. Use `--yolo` only when the prompt and working directory are trusted,
+because it approves every tool permission request.
+
+### HTTP task server
+
+Use `serve` to expose the same task execution flow over HTTP. Tasks run
+asynchronously and are stored in memory for the lifetime of the server process.
+
+```shell
+# start the server on 127.0.0.1:8080
+go run . serve
+
+# submit a JSON task
+curl -sS http://127.0.0.1:8080/v1/tasks \
+ -H 'Content-Type: application/json' \
+ -d '{"prompt":"Explain goroutines in Go","model":"gpt-5-mini"}'
+
+# submit a multipart task with attachments
+curl -sS http://127.0.0.1:8080/v1/tasks \
+ -F 'prompt=Evaluate these inputs' \
+ -F 'model=gpt-5-mini' \
+ -F 'agents_md=@AGENTS.md' \
+ -F 'image=@screenshot.png' \
+ -F 'file=@README.md'
+
+# poll task status, progress, and result
+curl -sS http://127.0.0.1:8080/v1/tasks/<task_id>
+```
+
+The server also exposes `GET /v1/tasks` to list tasks and `GET /healthz` for a
+health check. Unversioned `/tasks` endpoints remain available for compatibility.
+Like `run`, `serve` defaults to read-only permission approval; pass `--yolo` to
+change the server default, or set `yolo=true` on an individual task request.
 
 ## Development instructions
 

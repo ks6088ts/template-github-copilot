@@ -26,7 +26,9 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/ks6088ts/template-github-copilot/src/go/cmd/run"
 	"github.com/ks6088ts/template-github-copilot/src/go/cmd/sandbox"
+	"github.com/ks6088ts/template-github-copilot/src/go/cmd/serve"
 	"github.com/ks6088ts/template-github-copilot/src/go/cmd/tutorial"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -121,7 +123,9 @@ func configureLogging() {
 
 // registerSubCommands registers sub commands
 func registerSubCommands() {
+	rootCmd.AddCommand(run.GetCommand())
 	rootCmd.AddCommand(sandbox.GetCommand())
+	rootCmd.AddCommand(serve.GetCommand())
 	rootCmd.AddCommand(tutorial.GetCommand())
 	// Add other sub commands here
 }

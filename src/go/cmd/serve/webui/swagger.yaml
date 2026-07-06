@@ -1,0 +1,181 @@
+components:
+  schemas:
+    run.ProgressEvent:
+      properties:
+        message:
+          type: string
+        time:
+          type: string
+        tool_call_id:
+          type: string
+        tool_name:
+          type: string
+        type:
+          type: string
+      type: object
+    serve.Task:
+      properties:
+        completed_at:
+          type: string
+        created_at:
+          type: string
+        error:
+          type: string
+        id:
+          type: string
+        model:
+          type: string
+        progress:
+          items:
+            $ref: '#/components/schemas/run.ProgressEvent'
+          type: array
+          uniqueItems: false
+        prompt:
+          type: string
+        result:
+          type: string
+        status:
+          $ref: '#/components/schemas/serve.TaskStatus'
+      type: object
+    serve.TaskStatus:
+      enum:
+      - pending
+      - running
+      - done
+      - failed
+      type: string
+      x-enum-varnames:
+      - TaskStatusPending
+      - TaskStatusRunning
+      - TaskStatusDone
+      - TaskStatusFailed
+    serve.taskCreatedResponse:
+      properties:
+        task_id:
+          type: string
+      type: object
+    serve.taskRequest:
+      properties:
+        image_data:
+          description: ImageData is optional base64-encoded image bytes.
+          type: string
+        image_mime_type:
+          description: ImageMIMEType is the MIME type for ImageData (e.g. "image/png").
+          type: string
+        model:
+          description: Model is the optional model identifier (e.g. "gpt-4o").
+          type: string
+        prompt:
+          description: Prompt is the user message to send to Copilot (required).
+          type: string
+        system_message:
+          description: |-
+            SystemMessage is an optional system/instruction message for the session.
+            Use this to pass the contents of an agents.md file directly.
+          type: string
+        yolo:
+          description: |-
+            Yolo approves every tool permission request for this task. When nil, the
+            server default is used.
+          type: boolean
+      type: object
+externalDocs:
+  description: ""
+  url: ""
+info:
+  description: REST API for submitting GitHub Copilot tasks and tracking their progress.
+  title: Copilot Task API
+  version: "1.0"
+openapi: 3.1.0
+paths:
+  /healthz:
+    get:
+      description: Returns the health status of the server.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: ok
+      summary: Health check
+      tags:
+      - system
+  /tasks:
+    get:
+      description: List all submitted tasks.
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/serve.Task'
+                type: array
+          description: List of tasks
+      summary: List tasks
+      tags:
+      - tasks
+    post:
+      description: Submit a new Copilot task. Accepts JSON or multipart/form-data.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - type: object
+              - $ref: '#/components/schemas/serve.taskRequest'
+                description: Task request
+                summary: task
+        description: Task request
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serve.taskCreatedResponse'
+          description: Task created
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad request
+      summary: Create a task
+      tags:
+      - tasks
+  /tasks/{id}:
+    get:
+      description: Get the current status, progress, and result of a task.
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/serve.Task'
+          description: Task state
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Task not found
+      summary: Get a task
+      tags:
+      - tasks
+servers:
+- url: /v1

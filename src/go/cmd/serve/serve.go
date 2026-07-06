@@ -151,10 +151,16 @@ Endpoints:
 	GET  /v1/tasks/{id}  Get the status, progress, and result of a task.
 	GET  /v1/tasks       List submitted tasks.
 	GET  /healthz        Health check.
+	GET  /docs/          Interactive API browser (Scalar UI, offline).
+	GET  /swagger.yaml   OpenAPI 3.1 spec.
 
 Tasks run asynchronously in the background. Poll GET /v1/tasks/{id} until the
 status is "done" or "failed". The unversioned /tasks endpoints are also
 available for compatibility.
+
+Open http://127.0.0.1:8080/docs/ in a browser to explore and try the API
+interactively. All web assets are embedded in the binary; no network access is
+required.
 
 By default, only read permission requests are approved automatically. Pass
 --yolo to make task execution approve every tool permission request.
@@ -208,10 +214,9 @@ func GetCommand() *cobra.Command {
 	return serveCmd
 }
 
-// startServer wires up the HTTP routes, starts the listener, and blocks until
-// ctx is cancelled (Ctrl+C).
-func startServer(ctx context.Context, addr, cliURL string, defaultYolo bool) error {
-	store := newTaskStore()
+// newMux builds and returns a configured ServeMux with all API and UI routes
+// registered. Extracting this from startServer makes the routing unit-testable.
+func newMux(store *taskStore, cliURL string, defaultYolo bool) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	createTask := func(w http.ResponseWriter, r *http.Request) {
@@ -235,9 +240,20 @@ func startServer(ctx context.Context, addr, cliURL string, defaultYolo bool) err
 	// GET /tasks — list all tasks
 	mux.HandleFunc("GET /tasks", listTasks)
 	mux.HandleFunc("GET /v1/tasks", listTasks)
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
-		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
-	})
+
+	// GET /healthz — health check
+	mux.HandleFunc("GET /healthz", handleHealthz)
+
+	registerWebUI(mux)
+
+	return mux
+}
+
+// startServer wires up the HTTP routes, starts the listener, and blocks until
+// ctx is cancelled (Ctrl+C).
+func startServer(ctx context.Context, addr, cliURL string, defaultYolo bool) error {
+	store := newTaskStore()
+	mux := newMux(store, cliURL, defaultYolo)
 
 	srv := &http.Server{
 		Addr:              addr,
@@ -460,7 +476,29 @@ func uploadFileName(field string, index int, filename string) string {
 	return fmt.Sprintf("%s-%d-%s", field, index, base)
 }
 
+// handleHealthz handles GET /healthz.
+//
+//	@Summary	Health check
+//	@Description Returns the health status of the server.
+//	@Tags		system
+//	@Produce	json
+//	@Success	200	{object}	map[string]string	"ok"
+//	@Router		/healthz [get]
+func handleHealthz(w http.ResponseWriter, _ *http.Request) {
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
 // handleCreateTask handles POST /tasks.
+//
+//	@Summary	Create a task
+//	@Description Submit a new Copilot task. Accepts JSON or multipart/form-data.
+//	@Tags		tasks
+//	@Accept		json
+//	@Produce	json
+//	@Param		task	body		taskRequest			true	"Task request"
+//	@Success	202		{object}	taskCreatedResponse	"Task created"
+//	@Failure	400		{object}	map[string]string	"Bad request"
+//	@Router		/tasks [post]
 func handleCreateTask(w http.ResponseWriter, r *http.Request, store *taskStore, defaultCLIURL string, defaultYolo bool) {
 	req, cleanup, err := parseTaskRequest(r)
 	if err != nil {
@@ -527,6 +565,15 @@ func handleCreateTask(w http.ResponseWriter, r *http.Request, store *taskStore, 
 }
 
 // handleGetTask handles GET /tasks/{id}.
+//
+//	@Summary	Get a task
+//	@Description Get the current status, progress, and result of a task.
+//	@Tags		tasks
+//	@Produce	json
+//	@Param		id	path		string				true	"Task ID"
+//	@Success	200	{object}	Task				"Task state"
+//	@Failure	404	{object}	map[string]string	"Task not found"
+//	@Router		/tasks/{id} [get]
 func handleGetTask(w http.ResponseWriter, r *http.Request, store *taskStore) {
 	id := r.PathValue("id")
 	task, ok := store.get(id)
@@ -538,6 +585,13 @@ func handleGetTask(w http.ResponseWriter, r *http.Request, store *taskStore) {
 }
 
 // handleListTasks handles GET /tasks.
+//
+//	@Summary	List tasks
+//	@Description List all submitted tasks.
+//	@Tags		tasks
+//	@Produce	json
+//	@Success	200	{array}	Task	"List of tasks"
+//	@Router		/tasks [get]
 func handleListTasks(w http.ResponseWriter, _ *http.Request, store *taskStore) {
 	store.mu.RLock()
 	tasks := make([]Task, 0, len(store.tasks))

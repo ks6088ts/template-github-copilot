@@ -69,6 +69,31 @@ health check. Unversioned `/tasks` endpoints remain available for compatibility.
 Like `run`, `serve` defaults to read-only permission approval; pass `--yolo` to
 change the server default, or set `yolo=true` on an individual task request.
 
+#### Browser UI (Scalar API reference)
+
+Once the server is running, open **http://127.0.0.1:8080/docs/** in your
+browser to access the built-in Scalar API reference UI. From there you can
+explore all endpoints and send requests interactively using the built-in
+try-console.
+
+Key points:
+
+- The UI is **fully offline** — the Scalar bundle and the OpenAPI spec are
+  embedded in the binary; no network access is required.
+- The OpenAPI 3.1 spec is also available at `GET /swagger.yaml`.
+- `GET /` redirects to `/docs/`.
+
+To regenerate the spec after changing handler annotations, install `swag` (once)
+and run `make openapi`:
+
+```shell
+# install swag v2 (dev tool only, not a runtime dependency)
+make install-deps-dev
+
+# regenerate cmd/serve/webui/swagger.yaml from handler annotations
+make openapi
+```
+
 ## Development instructions
 
 ### Local development

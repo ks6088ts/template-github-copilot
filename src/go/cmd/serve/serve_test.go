@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -87,5 +88,75 @@ func assertFileExists(t *testing.T, path string) {
 	}
 	if _, err := os.Stat(path); err != nil {
 		t.Fatalf("os.Stat(%q) error = %v", path, err)
+	}
+}
+
+// newTestMux creates a ServeMux backed by a fresh in-memory store. It is used
+// by the route-level tests to exercise the full routing table without starting
+// a real TCP server.
+func newTestMux() *http.ServeMux {
+	return newMux(newTaskStore(), "", false)
+}
+
+func TestDocsRouteReturnsHTML(t *testing.T) {
+	mux := newTestMux()
+	req := httptest.NewRequest(http.MethodGet, "/docs/", nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("GET /docs/ status = %d, want 200", w.Code)
+	}
+	ct := w.Header().Get("Content-Type")
+	if !strings.HasPrefix(ct, "text/html") {
+		t.Fatalf("GET /docs/ Content-Type = %q, want text/html prefix", ct)
+	}
+}
+
+func TestSwaggerYAMLRouteReturnsOpenAPISpec(t *testing.T) {
+	mux := newTestMux()
+	req := httptest.NewRequest(http.MethodGet, "/swagger.yaml", nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("GET /swagger.yaml status = %d, want 200", w.Code)
+	}
+	body := w.Body.String()
+	if !strings.Contains(body, "openapi:") {
+		t.Fatalf("GET /swagger.yaml body does not contain 'openapi:' key")
+	}
+	if !strings.Contains(body, "paths:") {
+		t.Fatalf("GET /swagger.yaml body does not contain 'paths:' key")
+	}
+}
+
+func TestRootRedirectsToDocs(t *testing.T) {
+	mux := newTestMux()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusFound && w.Code != http.StatusMovedPermanently && w.Code/100 != 3 {
+		t.Fatalf("GET / status = %d, want 3xx redirect", w.Code)
+	}
+	loc := w.Header().Get("Location")
+	if loc != "/docs/" {
+		t.Fatalf("GET / Location = %q, want /docs/", loc)
+	}
+}
+
+func TestHealthzRoute(t *testing.T) {
+	mux := newTestMux()
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	w := httptest.NewRecorder()
+	mux.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("GET /healthz status = %d, want 200", w.Code)
+	}
+	body := w.Body.String()
+	if !strings.Contains(body, `"ok"`) {
+		t.Fatalf("GET /healthz body = %q, want body containing \"ok\"", body)
 	}
 }

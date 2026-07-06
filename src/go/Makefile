@@ -41,6 +41,12 @@ install-deps-dev: ## install dependencies for development
 	@# https://aquasecurity.github.io/trivy/v0.18.3/installation/#install-script
 	@which trivy || curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $(TOOLS_DIR) v$(TRIVY_VERSION)
 	@which actionlint || echo "install actionlint https://github.com/rhysd/actionlint"
+	@# https://github.com/swaggo/swag — dev-only, not a runtime dependency
+	@which swag || go install github.com/swaggo/swag/v2/cmd/swag@latest
+
+.PHONY: openapi
+openapi: ## regenerate the OpenAPI spec from handler annotations (requires swag v2)
+	swag init --v3.1 -g cmd/serve/doc.go -o cmd/serve/webui --ot yaml
 
 .PHONY: format-check
 format-check: ## format check

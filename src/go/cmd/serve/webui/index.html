@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Copilot Task API</title>
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="/swagger.yaml"
+      src="./scalar.standalone.js"
+    ></script>
+    <script>
+      document.getElementById('api-reference').dataset.configuration =
+        JSON.stringify({
+          servers: [{ url: '' }],
+        });
+    </script>
+  </body>
+</html>

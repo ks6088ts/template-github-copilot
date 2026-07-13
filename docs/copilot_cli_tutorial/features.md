@@ -24,11 +24,15 @@ Use this decision table instead:
 | Local or external-provider experiments | Use BYOK settings (see [BYOK](#byok)) | Model must support tool calling and streaming |
 
 !!! warning "Model lifecycle changes quickly"
-  Recent changelog examples show why fixed model lists go stale: GPT-4.1 was deprecated on 2026-06-01, GPT-5.2 and GPT-5.2-Codex were deprecated across most Copilot experiences on 2026-06-05, and Opus 4.6 (fast) is scheduled for deprecation on 2026-06-29 ([GPT-4.1 deprecated](https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated), [GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated), [Upcoming deprecation of Opus 4.6 fast](https://github.blog/changelog/2026-06-18-upcoming-deprecation-of-opus-4-6-fast)). Before running a workshop, check `/model`, [supported models](https://docs.github.com/copilot/reference/ai-models/supported-models), and the [GitHub Blog Copilot changelog](https://github.blog/changelog/label/copilot/).
+  Recent changelog examples show why fixed model lists go stale: GPT-4.1 was deprecated on 2026-06-01, GPT-5.2 and GPT-5.2-Codex were deprecated across most Copilot experiences on 2026-06-05, and Claude Opus 4.6 (fast) was deprecated in CLI 1.0.66 (2026-06-30) and replaced by Claude Opus 4.8 (fast) ([GPT-4.1 deprecated](https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated), [GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated), [copilot-cli changelog 1.0.66](https://github.com/github/copilot-cli/blob/main/changelog.md#1066---2026-06-30)). Before running a workshop, check `/model`, [supported models](https://docs.github.com/copilot/reference/ai-models/supported-models), and the [GitHub Blog Copilot changelog](https://github.blog/changelog/label/copilot/).
 
 Recent additions worth knowing, without hard-coding them into exercises:
 
-- Gemini 3.1 Pro (Preview) and Gemini 3.5 Flash are available on Copilot CLI when plan and policy allow them; Business/Enterprise admins must opt in via model policy ([Gemini models in Copilot CLI](https://github.blog/changelog/2026-06-02-gemini-models-in-copilot-cli-cloud-agent-and-the-copilot-app)).
+- **GPT-5.6 Sol, Terra, and Luna** are rolling out in GitHub Copilot. Sol targets complex reasoning over large codebases; Terra is a balanced everyday option; Luna is lightweight and cost-efficient. Sol requires Copilot Pro+, Max, Business, or Enterprise; Terra and Luna are available on Pro and above. Business/Enterprise admins must enable the policy ([GPT-5.6 Sol, Terra, and Luna in GitHub Copilot](https://github.blog/changelog/2026-07-09-openais-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot)).
+- **Claude Sonnet 5** is available in Copilot CLI (added in CLI 1.0.67) ([copilot-cli changelog 1.0.67](https://github.com/github/copilot-cli/blob/main/changelog.md#1067---2026-06-30)).
+- **Claude Opus 4.8 (fast)** is available; it replaces the deprecated Claude Opus 4.6 (fast) ([copilot-cli changelog 1.0.66](https://github.com/github/copilot-cli/blob/main/changelog.md#1066---2026-06-30)).
+- **kimi-k2.7-code** is supported in Copilot CLI (added in CLI 1.0.68) ([copilot-cli changelog 1.0.68](https://github.com/github/copilot-cli/blob/main/changelog.md#1068---2026-07-01)).
+- Gemini 3.1 Pro (Preview) and Gemini 3.5 Flash are available on Copilot CLI when plan and policy allow them. Gemini 3.5 Flash now additionally supports a **minimal reasoning effort** level for fast, cost-efficient responses; Business/Enterprise admins must opt in via model policy ([Gemini models in Copilot CLI](https://github.blog/changelog/2026-06-02-gemini-models-in-copilot-cli-cloud-agent-and-the-copilot-app), [copilot-cli changelog 1.0.69](https://github.com/github/copilot-cli/blob/main/changelog.md#1069---2026-07-07)).
 - MAI-Code-1-Flash reached general availability for Copilot Business and Copilot Enterprise (admins must enable the policy); it is also available on Copilot CLI with staged availability by plan ([MAI-Code-1-Flash for Copilot Business and Copilot Enterprise](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise), [MAI-Code-1-Flash available on more Copilot surfaces](https://github.blog/changelog/2026-06-18-mai-code-1-flash-available-on-more-copilot-surfaces)).
 - Enterprise-admin configured external-provider models now appear in the Copilot CLI model picker, while individual users can still configure client-side BYOK providers ([Copilot CLI supports enterprise BYOK models](https://github.blog/changelog/2026-06-17-copilot-cli-supports-enterprise-bring-your-own-key-byok-models)).
 - Free and Student plans now use Copilot auto model selection as the default and only experience, and the `(Preview)` label is being retired from Microsoft-released models — another reason to read availability live from `/model` rather than a fixed list ([Changes to model selection for Free and Student plans](https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans)).
@@ -201,9 +205,10 @@ Skills enhance Copilot with instructions, scripts, and resources for specialized
 
 ### Plugins & the awesome-copilot marketplace
 
-Plugins bundle related instructions, skills, agents, and hooks into a single installable unit, distributed through plugin *marketplaces*. Manage them with `/plugin` in a session (or `copilot plugin` from the shell) ([About GitHub Copilot plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins); [CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)):
+Plugins bundle related instructions, skills, agents, and hooks into a single installable unit, distributed through plugin *marketplaces*. Manage them with `/plugin` in a session (or `copilot plugin` from the shell), or open the dedicated **`/plugins` dashboard** (added in CLI 1.0.69) for a full management UI ([About GitHub Copilot plugins](https://docs.github.com/en/copilot/concepts/agents/about-plugins); [CLI command reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference)):
 
 ```text
+> /plugins                                 # open the plugins management dashboard
 > /plugin marketplace list                 # browse registered marketplaces
 > /plugin list                             # see installed plugins
 > /plugin install <name>@awesome-copilot   # install a specific plugin
@@ -217,6 +222,8 @@ GitHub's community collection — [github/awesome-copilot](https://github.com/gi
 ### Hooks
 
 Hooks let you run custom shell commands at key points in the agent's lifecycle — for validation, permission checks, logging, or security scanning ([About hooks for GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/hooks)). Hooks are supported by the CLI, the IDE, and the cloud agent.
+
+As of CLI 1.0.70, **`preToolUse` hooks that exit with code 2 deny the tool call** without marking the hook itself as an error — a clean way to block specific tool invocations from a hook script ([copilot-cli changelog 1.0.70](https://github.com/github/copilot-cli/blob/main/changelog.md#1070---2026-07-09)).
 
 ### Copilot Memory
 
@@ -298,6 +305,8 @@ Local sandboxing runs Copilot in a sandbox **directly on your machine**, restric
 > /sandbox            # open the General / Filesystem / Network config (Tab to switch, Esc to save)
 > /sandbox disable    # turn it off
 ```
+
+Use `--sandbox` or `--no-sandbox` flags at startup to turn the OS-level shell sandbox on or off **for the current session only**, without changing your saved sandbox setting — useful with `-p` (programmatic) mode ([copilot-cli changelog 1.0.70](https://github.com/github/copilot-cli/blob/main/changelog.md#1070---2026-07-09)).
 
 | Tab | Key settings |
 |-----|--------------|
@@ -416,6 +425,7 @@ Requirements and caveats:
 | **Dictate prompts locally** | hold Space, or press ++ctrl+x++ then `V` | [Copilot CLI improved UI, rubber duck, scheduling, and voice input](https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input) |
 | **Toggle reasoning visibility** | ++ctrl+t++ | [Using Copilot CLI](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) |
 | **Get a second opinion** | `/rubber-duck` | [Copilot CLI improved UI, rubber duck, scheduling, and voice input](https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input) |
+| **Rewrite a rough prompt into a clear one** | `/refine` | [copilot-cli changelog 1.0.70](https://github.com/github/copilot-cli/blob/main/changelog.md#1070---2026-07-09) |
 | **Security-focused local review** | `/security-review` (available to all users) | [copilot-cli changelog 1.0.64](https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23) |
 | **Create/switch to a worktree** | `/worktree` (alias `/move`) | [copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09) |
 | **Review session changes** | `/diff` | [copilot-cli changelog](https://github.com/github/copilot-cli/blob/main/changelog.md) |

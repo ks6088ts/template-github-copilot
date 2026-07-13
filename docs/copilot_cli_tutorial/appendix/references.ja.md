@@ -64,6 +64,15 @@
 
 | 日付 | 変更 | 出典 |
 |------|------|------|
+| 2026-07-09 | GPT-5.6 Sol、Terra、Luna が GitHub Copilot（CLI 含む）に展開開始。Sol は Pro+/Max/Business/Enterprise 向け、Terra・Luna は Pro 以上が対象。管理者はポリシーを有効化する必要あり | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-09-openais-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot) |
+| 2026-07-09 | CLI 1.0.70：GPT-5.6 モデル対応、`/refine` コマンド、`--sandbox`/`--no-sandbox` セッションフラグ、信頼済みリポジトリ `.github/copilot/settings.json`（モデル/effort/コンテキスト固定・deny リスト拡張）、`preToolUse` 終了コード 2 でツール呼び出しを拒否 | [copilot-cli changelog 1.0.70](https://github.com/github/copilot-cli/blob/main/changelog.md#1070---2026-07-09) |
+| 2026-07-08 | Copilot CLI と VS Code 向けに Enterprise 管理の OpenTelemetry エクスポートが GA：OTLP エンドポイント・トランスポート・サービス名・コンテンツキャプチャポリシーを管理者が一元制御 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-08-enterprise-managed-opentelemetry-export-for-vs-code-and-cli) |
+| 2026-07-08 | 管理者が Copilot 設定をネイティブ MDM（Windows Registry、macOS managed preferences）およびファイルベースの `managed-settings.json` 経由で配信できるように GA | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-08-deploy-managed-copilot-settings-via-mdm-in-vs-code-and-cli) |
+| 2026-07-07 | Copilot usage metrics API が AI 採用フェーズコホートごとに `avg_pull_requests_minutes_to_review` と `avg_pull_requests_review_cycles` を追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-07-add-review-cycles-and-time-to-adoption-phases-in-the-usage-api) |
+| 2026-07-07 | CLI 1.0.69：インストール済みプラグインを管理する `/plugins` ダッシュボード、`gemini-3.5-flash` に minimal reasoning effort を追加、`/allow-all auto` は experimental モード必須に | [copilot-cli changelog 1.0.69](https://github.com/github/copilot-cli/blob/main/changelog.md#1069---2026-07-07) |
+| 2026-07-01 | CLI 1.0.68：kimi-k2.7-code モデルサポートを追加 | [copilot-cli changelog 1.0.68](https://github.com/github/copilot-cli/blob/main/changelog.md#1068---2026-07-01) |
+| 2026-06-30 | CLI 1.0.67：Claude Sonnet 5 を対応モデルとして追加、セッション制限の最低値を 30 AI クレジットに設定 | [copilot-cli changelog 1.0.67](https://github.com/github/copilot-cli/blob/main/changelog.md#1067---2026-06-30) |
+| 2026-06-30 | CLI 1.0.66：Claude Opus 4.8 (fast) を追加、Claude Opus 4.6 (fast) を deprecated。`/plugins` ダッシュボード、コンパクトタイムライン、`stayInAutopilot` 設定 | [copilot-cli changelog 1.0.66](https://github.com/github/copilot-cli/blob/main/changelog.md#1066---2026-06-30) |
 | 2026-06-29 | Claude Opus 4.8（fast mode）が Copilot CLI を含む各サーフェスでプレビュー提供開始（管理者ポリシーは既定でオフ） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-29-claude-opus-4-8-fast-mode-is-now-in-preview-for-github-copilot) |
 | 2026-06-26 | MAI-Code-1-Flash が Copilot Business / Copilot Enterprise で一般提供（GA） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise) |
 | 2026-06-25 | Copilot コードレビューが CLI/SDK の `grep`/`rg`/`glob`/`view` ファイルツールを利用（レビューコスト約 20% 削減）し、組織レベルの既定 Medium 分析深度を追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates) |

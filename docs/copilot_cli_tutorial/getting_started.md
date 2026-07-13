@@ -131,7 +131,7 @@ Copilot CLI composes configuration from **global** (you) and **repository** (pro
 
 ```mermaid
 graph TD
-    S["Session — highest priority<br/>--model, --experimental, /model, flags"] --> R["Repository<br/>.github/copilot-instructions.md<br/>.github/instructions/**/*.instructions.md<br/>AGENTS.md, .github/agents, .github/skills"]
+    S["Session — highest priority<br/>--model, --experimental, /model, flags"] --> R["Repository<br/>.github/copilot-instructions.md<br/>.github/instructions/**/*.instructions.md<br/>AGENTS.md, .github/agents, .github/skills<br/>.github/copilot/settings.json (trusted repos)"]
     R --> G["Global — user level<br/>~/.copilot/settings.json<br/>~/.copilot/copilot-instructions.md<br/>~/.copilot/agents, mcp-config.json"]
 ```
 
@@ -140,6 +140,7 @@ Key facts to internalize ([Best practices](https://docs.github.com/en/copilot/ho
 - **Custom-instruction files now *combine*** rather than using priority-based fallback. Repository instructions take precedence over global ones on conflict.
 - The global config directory is **`~/.copilot/`** (override with the `COPILOT_HOME` environment variable). User settings are stored in `settings.json`; MCP, LSP, agent, instruction, and session-state files live alongside it. The changelog is the best source for new workspace-level config files such as `.github/mcp.json` ([copilot-cli changelog](https://github.com/github/copilot-cli/blob/main/changelog.md)).
 - Edit settings with `/settings`. It opens a searchable dialog, supports inline values such as `/settings autoUpdate true`, and can reset a key to its default ([GitHub Blog Changelog: `/settings`](https://github.blog/changelog/2026-06-11-copilot-cli-configure-everything-from-one-place-with-settings)).
+- **Trusted-repo settings** (``.github/copilot/settings.json``): a repository you trust can pin the model, reasoning effort level, and context tier for all sessions opened in it, and extend the URL/MCP/skill deny lists. These merge with your user settings and are applied at session start ([copilot-cli changelog 1.0.70](https://github.com/github/copilot-cli/blob/main/changelog.md#1070---2026-07-09)).
 
 We dissect each layer in the [Feature Deep Dive](features.md).
 

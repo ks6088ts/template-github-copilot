@@ -1,0 +1,3833 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://ks6088ts-labs.github.io/template-github-copilot/copilot_cli_tutorial/features/">
+      
+      
+        <link rel="prev" href="../access_methods/">
+      
+      
+        <link rel="next" href="../demos/">
+      
+      
+        
+          <link rel="alternate" href="./" hreflang="en">
+        
+          <link rel="alternate" href="../../ja/copilot_cli_tutorial/features/" hreflang="ja">
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Feature Deep Dive - template-github-copilot</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-0ZTKFXVQ5K"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-0ZTKFXVQ5K",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-0ZTKFXVQ5K",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#feature-deep-dive" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="template-github-copilot" class="md-header__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            template-github-copilot
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Feature Deep Dive
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="Select language">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="../../ja/copilot_cli_tutorial/features/" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ks6088ts/template-github-copilot" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="template-github-copilot" class="md-nav__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    template-github-copilot
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ks6088ts/template-github-copilot" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copilot CLI Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Copilot CLI Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access_methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Access Methods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#models--model-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Models &amp; model selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agentic-modes-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agentic modes in depth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Agentic modes in depth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plan-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autopilot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autopilot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallelism-fleet-and-subagents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallelism: /fleet and subagents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-management--infinite-sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context management &amp; infinite sessions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-customization-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The customization surface
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The customization surface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom instructions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugins--the-awesome-copilot-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugins &amp; the awesome-copilot marketplace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-servers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP servers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permissions--allowed-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permissions &amp; allowed tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandboxing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sandboxing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local sandboxing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud sandboxing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-anywhere-from-remote-control-clis-to-cloud-sandboxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Anywhere: from remote-control CLIs to cloud sandboxes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#byok" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bring your own key (BYOK)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interfacing--interop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interfacing &amp; interop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demo Scenarios
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demo Scenarios
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/01_issue_to_pr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: Issue to PR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/02_code_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Code Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/03_onboarding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Onboarding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/04_cicd_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: CI/CD Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/05_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: MCP Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/06_custom_agents_skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: Custom Agents & Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/07_batch_refactor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07: Batch Refactor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/08_release_notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08: Release Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copilot SDK Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Copilot SDK Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/server_mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Server Mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6_3" id="__nav_3_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/01_chat_bot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: CLI Chatbot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/02_custom_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Custom Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/03_streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/04_skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/05_hooks_permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: Hooks & Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/06_byok/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: BYOK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Go
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_3" id="__nav_3_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/01_chat_bot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: CLI Chatbot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/02_issue_triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Issue Triage Bot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/03_streaming_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Streaming Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/04_skills_docgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: Skills Doc Generation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/05_audit_hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: Audit Log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/06_byok_azure_openai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: BYOK Azure OpenAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CopilotReportForge
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CopilotReportForge
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/overview/problem_and_solution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem & Solution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/web_ui_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web UI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/industry_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Industry Use Case Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/github_oauth_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub OAuth App Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/operations/container_local_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Containers Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/operations/deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/appendix/responsible_ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#models--model-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Models &amp; model selection
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#agentic-modes-in-depth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agentic modes in depth
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Agentic modes in depth">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plan-mode" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan mode
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autopilot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autopilot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallelism-fleet-and-subagents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parallelism: /fleet and subagents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#context-management--infinite-sessions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context management &amp; infinite sessions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-customization-surface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The customization surface
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The customization surface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-instructions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom instructions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skills" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Skills
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plugins--the-awesome-copilot-marketplace" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugins &amp; the awesome-copilot marketplace
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-servers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP servers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permissions--allowed-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Permissions &amp; allowed tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sandboxing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Sandboxing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Local sandboxing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cloud-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Cloud sandboxing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-anywhere-from-remote-control-clis-to-cloud-sandboxes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Anywhere: from remote-control CLIs to cloud sandboxes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#byok" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bring your own key (BYOK)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interfacing--interop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interfacing &amp; interop
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="feature-deep-dive">Feature Deep Dive</h1>
+<p><strong>Part 2 of the workshop.</strong> This chapter is the reference you will return to during the demos. It covers models, the agentic modes, context management, the full customization surface (instructions, agents, skills, hooks, MCP, memory), permissions, sandboxing, and bring-your-own-key. Budget ~75 minutes.</p>
+<blockquote>
+<p>The CLI evolves weekly. Treat specific values here as "true at time of writing, verified against GitHub docs" and confirm live with <code>/help</code>, <code>/model</code>, and <code>copilot help &lt;topic&gt;</code> (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>).</p>
+</blockquote>
+<div class="admonition tip">
+<p class="admonition-title">See these features in action</p>
+<p>Two official GitHub <em>Dev Days</em> videos demonstrate most of this chapter end to end: <a href="https://www.youtube.com/watch?v=zS_40Tfl75w">Less // TODO: more done with GitHub Copilot CLI</a> (modes, <code>/env</code>, Auto model, built-in agents, <code>/review</code>, <code>/rubber-duck</code>, <code>/fleet</code> + <code>/tasks</code>, Copilot Memory, server mode) and <a href="https://www.youtube.com/watch?v=c2QeGuWPnSw">Build with the Copilot CLI — Mona Mayhem</a> (plan mode, autopilot vs. YOLO, plugins / awesome-copilot, <code>/fleet</code>, <code>/delegate</code>). Full breakdown in <a href="../appendix/references/#talks--demos">References → Talks &amp; demos</a>.</p>
+</div>
+<hr />
+<h2 id="models--model-selection">Models &amp; model selection</h2>
+<p>Switch models any time — even mid-session — with <code>/model</code> (or the <code>--model</code> flag) (<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli">About Copilot CLI</a>). Do <strong>not</strong> build workshop instructions around one fixed model name: the model catalog, defaults, plan eligibility, and enterprise policy controls change frequently.</p>
+<p>Use this decision table instead:</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>How to choose in the CLI</th>
+<th>Watch-outs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stable day-to-day workshop flow</td>
+<td>Start with <strong>Auto</strong> or the default shown by <code>/model</code></td>
+<td>Auto trades explicit model control for availability-aware routing</td>
+</tr>
+<tr>
+<td>Complex architecture, hard debugging, large refactors</td>
+<td>Pick a premium reasoning-capable model from <code>/model</code></td>
+<td>Higher reasoning or extended context consumes more AI credits</td>
+</tr>
+<tr>
+<td>Fast mechanical edits or high-volume checks</td>
+<td>Pick a fast/small coding model if your plan exposes one</td>
+<td>Verify output with tests; speed is not a quality guarantee</td>
+</tr>
+<tr>
+<td>Enterprise-controlled model strategy</td>
+<td>Use models exposed by org/enterprise policy in <code>/model</code></td>
+<td>Admins may need to enable alternative models or external-provider models</td>
+</tr>
+<tr>
+<td>Local or external-provider experiments</td>
+<td>Use BYOK settings (see <a href="#byok">BYOK</a>)</td>
+<td>Model must support tool calling and streaming</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Model lifecycle changes quickly</p>
+</div>
+<p>Recent changelog examples show why fixed model lists go stale: GPT-4.1 was deprecated on 2026-06-01, GPT-5.2 and GPT-5.2-Codex were deprecated across most Copilot experiences on 2026-06-05, and Opus 4.6 (fast) is scheduled for deprecation on 2026-06-29 (<a href="https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated">GPT-4.1 deprecated</a>, <a href="https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated">GPT-5.2 and GPT-5.2-Codex deprecated</a>, <a href="https://github.blog/changelog/2026-06-18-upcoming-deprecation-of-opus-4-6-fast">Upcoming deprecation of Opus 4.6 fast</a>). Before running a workshop, check <code>/model</code>, <a href="https://docs.github.com/copilot/reference/ai-models/supported-models">supported models</a>, and the <a href="https://github.blog/changelog/label/copilot/">GitHub Blog Copilot changelog</a>.</p>
+<p>Recent additions worth knowing, without hard-coding them into exercises:</p>
+<ul>
+<li>Gemini 3.1 Pro (Preview) and Gemini 3.5 Flash are available on Copilot CLI when plan and policy allow them; Business/Enterprise admins must opt in via model policy (<a href="https://github.blog/changelog/2026-06-02-gemini-models-in-copilot-cli-cloud-agent-and-the-copilot-app">Gemini models in Copilot CLI</a>).</li>
+<li>MAI-Code-1-Flash reached general availability for Copilot Business and Copilot Enterprise (admins must enable the policy); it is also available on Copilot CLI with staged availability by plan (<a href="https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise">MAI-Code-1-Flash for Copilot Business and Copilot Enterprise</a>, <a href="https://github.blog/changelog/2026-06-18-mai-code-1-flash-available-on-more-copilot-surfaces">MAI-Code-1-Flash available on more Copilot surfaces</a>).</li>
+<li>Enterprise-admin configured external-provider models now appear in the Copilot CLI model picker, while individual users can still configure client-side BYOK providers (<a href="https://github.blog/changelog/2026-06-17-copilot-cli-supports-enterprise-bring-your-own-key-byok-models">Copilot CLI supports enterprise BYOK models</a>).</li>
+<li>Free and Student plans now use Copilot auto model selection as the default and only experience, and the <code>(Preview)</code> label is being retired from Microsoft-released models — another reason to read availability live from <code>/model</code> rather than a fixed list (<a href="https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans">Changes to model selection for Free and Student plans</a>).</li>
+<li>Supported models offer an <strong>extended (1M-token) context</strong> option and <strong>configurable reasoning levels</strong>; GitHub recommends using defaults for everyday tasks and reserving extended context or higher reasoning for complex, multi-file work because they consume more AI credits (<a href="https://github.blog/changelog/2026-06-04-larger-context-windows-and-configurable-reasoning-levels-for-github-copilot">Larger context windows and configurable reasoning levels</a>).</li>
+</ul>
+<hr />
+<h2 id="agentic-modes-in-depth">Agentic modes in depth</h2>
+<h3 id="plan-mode">Plan mode</h3>
+<p>Use plan mode when the cost of a misunderstanding is high: multi-file changes, migrations, new features, or changes that touch security-sensitive code. Enter plan mode with <span class="keys"><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-tab">Tab</kbd></span> or <code>/plan &lt;prompt&gt;</code>. Copilot then (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>):</p>
+<ol>
+<li>Analyzes your request and the codebase.</li>
+<li><strong>Asks clarifying questions</strong> to align on scope.</li>
+<li>Writes a structured <code>plan.md</code> (with checkboxes) into the session folder.</li>
+<li><strong>Waits for your approval</strong> before writing code.</li>
+</ol>
+<p>Press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-y">Y</kbd></span> to open and edit the plan in your Markdown editor. The recommended loop for hard tasks:</p>
+<div class="highlight"><pre><span></span><code>explore → plan → review → implement → verify → commit
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>&gt; Read the authentication files but don&#39;t write code yet
+&gt; /plan Implement password reset flow
+&gt; Proceed with the plan
+&gt; Run the tests and fix any failures
+&gt; Commit these changes with a descriptive message
+</code></pre></div>
+<h3 id="autopilot">Autopilot</h3>
+<p>Autopilot keeps working autonomously until the task is complete. Toggle it with <span class="keys"><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-tab">Tab</kbd></span>; if a feature is still marked experimental in your build, enable experimental features with <code>--experimental</code> or <code>/experimental</code> (<a href="https://github.com/github/copilot-cli">README</a>). As of CLI 1.0.63, agent mode is tracked per session, so it no longer carries over when you create, clear, or switch sessions (<a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15">copilot-cli changelog 1.0.63</a>). Pair autopilot with a <a href="#sandboxing">sandbox</a> for unattended runs.</p>
+<div class="admonition note">
+<p class="admonition-title">Autopilot ≠ YOLO mode</p>
+<p>These two solve different problems and are easy to confuse (the <em>Mona Mayhem</em> video walks through both):</p>
+<ul>
+<li><strong>Autopilot</strong> is an <em>agent mode</em> — it changes <em>how much Copilot decides on its own</em>. Copilot keeps iterating like a developer (plan → act → run tests → verify) and continues until the task is done (<a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/autopilot">autopilot</a>).</li>
+<li><strong>YOLO mode</strong> (<code>/yolo</code>, <code>--yolo</code>, or <code>--allow-all</code>) is a <em>permission setting</em> — it changes <em>whether Copilot asks before acting</em>. It auto-approves every tool call so you are never prompted (<a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a>).</li>
+</ul>
+<p>They compose independently: autopilot decides <em>what to do next</em>; YOLO decides <em>whether to ask first</em>. Autopilot <strong>with</strong> YOLO on your own machine is maximally hands-off <strong>and</strong> maximally risky — prefer pairing autopilot with a <a href="#sandboxing">sandbox</a> instead.</p>
+</div>
+<h3 id="parallelism-fleet-and-subagents">Parallelism: <code>/fleet</code> and subagents</h3>
+<p>For large tasks, prefix your prompt with <code>/fleet</code> to let Copilot split the work into parallel subtasks run by subagents (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>). Subagents keep their working context out of your main thread; you see the summarized results instead of every intermediate read/search/tool call. This is useful for broad exploration, but you still need a verification step that merges and tests the final output.</p>
+<hr />
+<h2 id="context-management--infinite-sessions">Context management &amp; infinite sessions</h2>
+<p>Copilot CLI features <strong>infinite sessions</strong>: when a conversation approaches ~95% of the token limit, it automatically compacts history in the background without interrupting you (<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#automatic-context-management">About Copilot CLI</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/context</code></td>
+<td>Visual breakdown of token usage (system/tools, history, free space, buffer)</td>
+</tr>
+<tr>
+<td><code>/compact</code></td>
+<td>Manually compress history (rarely needed)</td>
+</tr>
+<tr>
+<td><code>/usage</code></td>
+<td>Session stats: AI credits used, duration, lines edited, per-model token breakdown</td>
+</tr>
+<tr>
+<td><code>/session</code></td>
+<td>Info about the current session</td>
+</tr>
+<tr>
+<td><code>/session checkpoints [N]</code></td>
+<td>List or view compaction checkpoints</td>
+</tr>
+<tr>
+<td><code>/session files</code></td>
+<td>Temporary artifacts created this session</td>
+</tr>
+<tr>
+<td><code>/session plan</code></td>
+<td>The current plan, if any</td>
+</tr>
+<tr>
+<td><code>/clear</code> or <code>/new</code></td>
+<td>Start fresh between unrelated tasks (improves quality)</td>
+</tr>
+</tbody>
+</table>
+<p>Session state is persisted on disk (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>):</p>
+<div class="highlight"><pre><span></span><code>~/.copilot/session-state/{session-id}/
+├── events.jsonl      # full session history
+├── workspace.yaml    # metadata
+├── plan.md           # implementation plan (if created)
+├── checkpoints/      # compaction history
+└── files/            # persistent artifacts
+</code></pre></div>
+<p>Resume work with <code>--resume</code>/<code>/resume</code>, or jump back into the most recent session with <code>copilot --continue</code> (<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>).</p>
+<div class="admonition tip">
+<p class="admonition-title">Keep sessions focused</p>
+<p>Infinite ≠ infinitely useful. Use <code>/clear</code> or <code>/new</code> between unrelated tasks — like starting a fresh conversation with a colleague (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>).</p>
+</div>
+<p>For administrators, <code>/usage</code> is only the local/session view. Organization and enterprise owners should also watch the Copilot usage metrics API: as of 2026-06-19, user-level reports include <code>ai_credits_used</code>, an overall per-user AI credit total across Copilot activity (<a href="https://github.blog/changelog/2026-06-19-ai-credits-consumed-per-user-now-in-the-copilot-usage-metrics-api">AI credits consumed per user now in the Copilot usage metrics API</a>).</p>
+<hr />
+<h2 id="the-customization-surface">The customization surface</h2>
+<p>These files and settings are how you make the CLI follow your team's workflow. Most of them are shared with the IDE and SDK surfaces.</p>
+<pre class="mermaid"><code>graph TD
+    subgraph Repo[".github/ — repository scope"]
+      CI[copilot-instructions.md]
+      INST["instructions/**/*.instructions.md"]
+      AG[agents/*.agent.md]
+      SK[skills/*/SKILL.md]
+      WMCP[.github/mcp.json]
+    end
+    subgraph Global["~/.copilot — user scope"]
+      GCI[copilot-instructions.md]
+      GAG[agents/]
+      MCPC[mcp-config.json]
+    end
+    subgraph Root["Git root"]
+      AGENTS[AGENTS.md]
+    end
+    CI --&gt; Agent[Copilot CLI agent]
+    INST --&gt; Agent
+    AG --&gt; Agent
+    SK --&gt; Agent
+    WMCP --&gt; Agent
+    GCI --&gt; Agent
+    GAG --&gt; Agent
+    MCPC --&gt; Agent
+    AGENTS --&gt; Agent</code></pre>
+<h3 id="custom-instructions">Custom instructions</h3>
+<p>Natural-language Markdown that is automatically included in your prompts. Copilot CLI reads from multiple locations, and <strong>they now combine</strong> (rather than priority fallback); repository instructions take precedence over global on conflict (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>; <a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/add-custom-instructions">Adding custom instructions</a>).</p>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>~/.copilot/copilot-instructions.md</code></td>
+<td>All sessions (global)</td>
+</tr>
+<tr>
+<td><code>.github/copilot-instructions.md</code></td>
+<td>Repository</td>
+</tr>
+<tr>
+<td><code>.github/instructions/**/*.instructions.md</code></td>
+<td>Repository (modular, path-scoped)</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code> (Git root or cwd)</td>
+<td>Repository</td>
+</tr>
+<tr>
+<td><code>Copilot.md</code>, <code>GEMINI.md</code>, <code>CODEX.md</code></td>
+<td>Repository</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Keep them concise and actionable — lengthy instructions dilute effectiveness, and conflicting instructions cause non-deterministic behavior (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>).</p>
+</blockquote>
+<h3 id="custom-agents">Custom agents</h3>
+<p>A custom agent is a specialized version of Copilot with its own expertise, tools, and instructions. Copilot CLI ships with built-in agents and lets you define your own (<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>).</p>
+<p><strong>Built-in agents:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Agent</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Explore</strong></td>
+<td>Quick codebase analysis without polluting your main context</td>
+</tr>
+<tr>
+<td><strong>Task</strong></td>
+<td>Runs tests/builds; brief summary on success, full output on failure</td>
+</tr>
+<tr>
+<td><strong>General purpose</strong></td>
+<td>Complex multi-step tasks in a separate context</td>
+</tr>
+<tr>
+<td><strong>Code review</strong></td>
+<td>Surfaces only genuine issues, minimizing noise</td>
+</tr>
+<tr>
+<td><strong>Research</strong></td>
+<td>Deep research across code, repos, and the web, with citations</td>
+</tr>
+<tr>
+<td><strong>Rubber duck</strong></td>
+<td>Constructive critic for a <em>second opinion</em>. Invoke with <code>/rubber-duck</code>; the main agent can also consult it automatically. It deliberately runs on a <strong>complementary model</strong> (a different model family than the one that did the work), so it catches issues a single model tends to miss (<a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/rubber-duck">rubber duck agent</a>)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Define your own</strong> as Markdown "agent profiles":</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Location</th>
+<th>Scope</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User</td>
+<td><code>~/.copilot/agents/</code></td>
+<td>All projects</td>
+</tr>
+<tr>
+<td>Repository</td>
+<td><code>.github/agents/</code></td>
+<td>Current project</td>
+</tr>
+<tr>
+<td>Org / Enterprise</td>
+<td><code>/agents</code> in the <code>.github-private</code> repo</td>
+<td>All projects in the org/enterprise</td>
+</tr>
+</tbody>
+</table>
+<p>Invoke an agent three ways (<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>):</p>
+<div class="highlight"><pre><span></span><code>&gt; /agent                                   # pick from a list
+&gt; Use the refactoring agent to clean this up   # natural language
+$ copilot --agent=refactor-agent -p &quot;Refactor this block&quot;
+</code></pre></div>
+<p>We author one in <a href="../demos/06_custom_agents_skills/">Demo 6</a>.</p>
+<p>GitHub is also rolling out <strong>Agent finder</strong>, which searches an allowed registry of MCP servers, skills, canvases, agents, and tools and returns ranked matches. It does not silently install resources; it helps you discover what to wire in, subject to managed settings and registry policy (<a href="https://github.blog/changelog/2026-06-17-agent-finder-for-github-copilot-now-available">Agent finder for GitHub Copilot</a>).</p>
+<h3 id="skills">Skills</h3>
+<p>Skills enhance Copilot with instructions, scripts, and resources for specialized tasks, packaged as <code>SKILL.md</code> folders (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills">Adding agent skills</a>; <a href="https://docs.github.com/en/copilot/concepts/agents/about-agent-skills">About agent skills</a>). Also covered in <a href="../demos/06_custom_agents_skills/">Demo 6</a>.</p>
+<h3 id="plugins--the-awesome-copilot-marketplace">Plugins &amp; the awesome-copilot marketplace</h3>
+<p>Plugins bundle related instructions, skills, agents, and hooks into a single installable unit, distributed through plugin <em>marketplaces</em>. Manage them with <code>/plugin</code> in a session (or <code>copilot plugin</code> from the shell) (<a href="https://docs.github.com/en/copilot/concepts/agents/about-plugins">About GitHub Copilot plugins</a>; <a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a>):</p>
+<div class="highlight"><pre><span></span><code>&gt; /plugin marketplace list                 # browse registered marketplaces
+&gt; /plugin list                             # see installed plugins
+&gt; /plugin install &lt;name&gt;@awesome-copilot   # install a specific plugin
+</code></pre></div>
+<p>GitHub's community collection — <a href="https://github.com/github/awesome-copilot">github/awesome-copilot</a> (<code>gh.io/awesome-copilot</code>) — ships hundreds of ready-made instructions, agents, skills, hooks, and plugins, and is <strong>pre-registered as a marketplace</strong> in recent CLI builds. If yours doesn't have it yet, register it once with <code>/plugin marketplace add github/awesome-copilot</code>. The <em>Mona Mayhem</em> video discovers and installs from it live.</p>
+<div class="admonition warning">
+<p class="admonition-title">Treat third-party customizations as code</p>
+<p>awesome-copilot content is community-contributed. Inspect an instruction file, agent, skill, or plugin before installing it — it can carry shell commands and tool permissions exactly like code you write yourself.</p>
+</div>
+<h3 id="hooks">Hooks</h3>
+<p>Hooks let you run custom shell commands at key points in the agent's lifecycle — for validation, permission checks, logging, or security scanning (<a href="https://docs.github.com/en/copilot/concepts/agents/hooks">About hooks for GitHub Copilot</a>). Hooks are supported by the CLI, the IDE, and the cloud agent.</p>
+<h3 id="copilot-memory">Copilot Memory</h3>
+<p>Copilot can deduce and store durable "memories" about a repository's conventions and patterns, reducing repeated context in prompts (<a href="https://docs.github.com/en/copilot/concepts/agents/copilot-memory">About GitHub Copilot Memory</a>).</p>
+<h3 id="mcp-servers">MCP servers</h3>
+<p>The CLI ships with the <strong>GitHub MCP server pre-configured</strong>, so GitHub.com operations work out of the box. Add more servers to reach other tools/data (<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>):</p>
+<div class="highlight"><pre><span></span><code>&gt; /mcp           # list configured servers
+&gt; /mcp add       # add a server (Tab between fields, Ctrl+S to save)
+&gt; /mcp search    # browse the GitHub MCP Registry and install a server
+</code></pre></div>
+<p>User-level server definitions live in <code>mcp-config.json</code> under <code>~/.copilot</code> (override with <code>COPILOT_HOME</code>). New servers added with <code>/mcp add</code> or <code>/mcp search</code> are available immediately, without restarting the CLI (<a href="https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available">Copilot CLI: New terminal interface is generally available</a>). Recent CLI versions also auto-load workspace MCP config from <code>.github/mcp.json</code>, and the changelog is the best source for newly supported MCP config locations and keys such as <code>deferTools</code> (<a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09">copilot-cli changelog 1.0.61</a>, <a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15">copilot-cli changelog 1.0.63</a>). We wire up a custom server in <a href="../demos/05_mcp_integration/">Demo 5</a>.</p>
+<hr />
+<h2 id="permissions--allowed-tools">Permissions &amp; allowed tools</h2>
+<p>The first time Copilot wants to use a tool that can modify or execute files (e.g. <code>touch</code>, <code>chmod</code>, <code>node</code>, <code>sed</code>), it asks (<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#security-considerations">About Copilot CLI</a>):</p>
+<div class="highlight"><pre><span></span><code>1. Yes
+2. Yes, and approve TOOL for the rest of the running session
+3. No, and tell Copilot what to do differently (Esc)
+</code></pre></div>
+<p>Pre-authorize (or forbid) tools with flags or slash commands:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--allow-all-tools</code></td>
+<td>Allow any tool without prompting (dangerous)</td>
+</tr>
+<tr>
+<td><code>--allow-tool='shell(git:*)'</code></td>
+<td>Allow all <code>git</code> commands</td>
+</tr>
+<tr>
+<td><code>--allow-tool='write'</code></td>
+<td>Allow file writes</td>
+</tr>
+<tr>
+<td><code>--deny-tool='shell(git push)'</code></td>
+<td>Forbid <code>git push</code> (deny <strong>takes precedence</strong>)</td>
+</tr>
+<tr>
+<td><code>--allow-tool='MyServer'</code> / <code>--deny-tool='MyServer(tool)'</code></td>
+<td>Allow/deny MCP server tools</td>
+</tr>
+<tr>
+<td><code>/allow-all</code> or <code>/yolo</code></td>
+<td>Enable all permissions in-session</td>
+</tr>
+<tr>
+<td><code>/reset-allowed-tools</code></td>
+<td>Reset previously approved tools</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1"># Allow all git EXCEPT push; deny destructive rm</span>
+copilot<span class="w"> </span>--allow-tool<span class="o">=</span><span class="s1">&#39;shell(git:*)&#39;</span><span class="w"> </span>--deny-tool<span class="o">=</span><span class="s1">&#39;shell(git push)&#39;</span><span class="w"> </span>--deny-tool<span class="o">=</span><span class="s1">&#39;shell(rm)&#39;</span>
+</code></pre></div>
+<p>Least-privilege patterns for teams:</p>
+<table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Safer starting point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read-only review/report</td>
+<td>Allow <code>shell(git:*)</code>; allow <code>write</code> only if writing a report file</td>
+</tr>
+<tr>
+<td>CI prompt mode</td>
+<td>Deny <code>git push</code>, <code>git reset</code>, <code>rm</code>, and deployment commands; make prompts idempotent</td>
+</tr>
+<tr>
+<td>Migrations/refactors</td>
+<td>Allow test commands and file writes; require branch-only work and human diff review</td>
+</tr>
+<tr>
+<td>Untrusted repos or generated code</td>
+<td>Use local or cloud sandbox before enabling broad permissions</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Automatic approval = your full access</p>
+<p>With <code>--allow-all-tools</code>/<code>--yolo</code>, Copilot can run any command you can, without review — including destructive ones. Reserve this for sandboxed or disposable environments (<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#security-implications-of-automatic-tool-approval">Security considerations</a>).</p>
+</div>
+<hr />
+<h2 id="sandboxing">Sandboxing</h2>
+<p>As Copilot takes more actions on your behalf — running tools, executing commands, and modifying files — sandboxes provide the <strong>isolation, portability, and policy controls</strong> to adopt agentic workflows safely. They let you choose <em>where</em> Copilot runs, and currently apply to Copilot CLI sessions (cloud sandboxes also back sessions in the Copilot app) (<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>; public preview):</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>How</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Local sandbox</strong></td>
+<td><code>/sandbox enable</code> in-session</td>
+<td>Run Copilot on your own machine with restricted access to filesystem, network, and system capabilities; included in the standard Copilot seat at no extra cost</td>
+</tr>
+<tr>
+<td><strong>Cloud sandbox</strong></td>
+<td><code>copilot --cloud</code></td>
+<td>Run Copilot inside a fully isolated, ephemeral Linux environment hosted by GitHub; use for stronger isolation, cross-device continuation, compute-heavy work, or parallel tasks (billed by usage)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Authentication is shared</p>
+<p>Sandboxes reuse your existing Copilot CLI authentication — no separate cloud provider, API keys, or infrastructure to manage. If you can sign in to Copilot CLI and have Copilot access, you can use sandboxes. Cloud sandboxes additionally require an org/enterprise owner to enable the <strong>Cloud Sandbox access</strong> policy (<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>).</p>
+</div>
+<h3 id="local-sandboxing">Local sandboxing</h3>
+<p>Local sandboxing runs Copilot in a sandbox <strong>directly on your machine</strong>, restricting its access to your filesystem, network connectivity, and system capabilities. Enable it inside a session, then fine-tune it with the interactive <code>/sandbox</code> UI (settings persist in <code>settings.json</code> under the <code>sandbox</code> key) (<a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings">Configuring local sandbox settings</a>):</p>
+<div class="highlight"><pre><span></span><code>&gt; /sandbox enable     # turn sandboxing on
+&gt; /sandbox            # open the General / Filesystem / Network config (Tab to switch, Esc to save)
+&gt; /sandbox disable    # turn it off
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Key settings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>General</strong></td>
+<td><em>Sandboxing enabled</em>; <em>Allow keychain access</em> (macOS Keychain for <code>git</code>/<code>gh</code> credential helpers — turn off to block credential reads)</td>
+</tr>
+<tr>
+<td><strong>Filesystem</strong></td>
+<td><em>Include working directory</em> (auto read/write to your project); <em>Clear policy on exit</em> (reset permissions each session); per-path <strong>read-only</strong> or <strong>read/write</strong> rules for locations outside the working dir</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td><em>Allow outbound connections</em> (turn off to fully isolate); <em>Allow local network</em> (<code>localhost</code>/LAN)</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Per-host network rules are not a security boundary</p>
+<p><code>allowedHosts</code>/<code>blockedHosts</code> filtering is unreliable across platforms: on macOS allow-rules silently degrade to unrestricted outbound and block-rules are unsupported; on Linux host rules can't reliably allow selected hosts while outbound is disabled. Use the <strong>Allow outbound connections</strong> toggle for real isolation, not per-host rules (<a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings">Configuring local sandbox settings</a>).</p>
+</div>
+<ul>
+<li><strong>Cross-platform</strong>: available on macOS and Linux; Windows requires a Windows Insiders build. Isolation behavior varies by OS because each uses a different sandboxing backend (<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>).</li>
+<li><strong>Enterprise policy enforcement</strong>: local sandbox policies can be centrally configured and enforced with Microsoft Intune and other MDM platforms, giving admins control over how Copilot touches local resources on managed devices (<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>).</li>
+<li><strong>Billing</strong>: included in the standard Copilot seat at no additional cost.</li>
+</ul>
+<h3 id="cloud-sandboxing">Cloud sandboxing</h3>
+<p>Cloud sandboxing runs your CLI session inside a <strong>fully isolated, ephemeral Linux environment hosted by GitHub</strong> — isolated from your local machine and from other sessions. It is built on Azure Container Apps Sandboxes, with GitHub providing the identity, policy, and billing layer (<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>):</p>
+<div class="highlight"><pre><span></span><code>copilot<span class="w"> </span>--cloud<span class="w">     </span><span class="c1"># start an interactive session inside a cloud sandbox</span>
+</code></pre></div>
+<p>The commands Copilot runs execute in the cloud environment, not on your machine. This unlocks three patterns:</p>
+<ul>
+<li><strong>Continue across devices</strong> — because the session lives in GitHub-hosted infrastructure, you can pick it up on any device without copying files or reinstalling dependencies.</li>
+<li><strong>Offload compute-intensive work</strong> — run multiple Copilot tasks in parallel in the cloud while your laptop stays lightweight and responsive.</li>
+<li><strong>Unified governance</strong> — cloud sandbox policies share the same configuration as Copilot cloud-agent policies, so existing firewall/security controls extend automatically with no extra setup.</li>
+</ul>
+<p>A cloud sandbox session moves through three states; stopping snapshots its state so you can resume later (<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>):</p>
+<table>
+<thead>
+<tr>
+<th>State</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Active</strong></td>
+<td>Running and interactive from Copilot CLI</td>
+</tr>
+<tr>
+<td><strong>Stopped</strong></td>
+<td>Not running, but state is snapshotted; resuming restores files, environment variables, and in-progress work</td>
+</tr>
+<tr>
+<td><strong>Deleted</strong></td>
+<td>Running environment <strong>and</strong> snapshot removed — not recoverable</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Org enablement and billing</p>
+<p>An organization/enterprise owner must turn on cloud sandbox access (<strong>Organization settings → Sandboxes → Enabled for all members</strong>) before members can use it (<a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization">Enabling or disabling cloud sandboxes</a>). Usage is metered on three axes — confirm current pricing before long-running sessions:</p>
+<table>
+<thead>
+<tr>
+<th>Meter</th>
+<th>What it measures</th>
+<th>Unit</th>
+<th>Price (USD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td>Time a session is running</td>
+<td>Compute second</td>
+<td>$0.000024</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Memory allocated while running</td>
+<td>GiB second</td>
+<td>$0.000003</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>Snapshot storage for stopped sessions</td>
+<td>GiB month</td>
+<td>$0.005</td>
+</tr>
+</tbody>
+</table>
+<p>See <a href="https://docs.github.com/en/billing/concepts/product-billing/cloud-and-local-sandboxes">Billing for cloud and local sandboxes</a> and the <a href="https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview">public-preview announcement</a>.</p>
+</div>
+<h3 id="copilot-anywhere-from-remote-control-clis-to-cloud-sandboxes">Copilot Anywhere: from remote-control CLIs to cloud sandboxes</h3>
+<p>The Microsoft Developer demo <strong>"GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes" (DEM305)</strong> ties these pieces into one story: you don't have to babysit an agent in a single terminal. You can <em>remote-control</em> Copilot and let the heavy, risky, or long-running work execute in an isolated, GitHub-hosted sandbox you can rejoin from anywhere (<a href="https://www.youtube.com/watch?v=JJmmunwXcu8">watch the demo</a>).</p>
+<p>The "remote-control" surfaces this workshop already covers compose naturally with sandboxes:</p>
+<table>
+<thead>
+<tr>
+<th>Want to…</th>
+<th>Reach for</th>
+<th>Covered in</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fire a task with no interactive UI (SSH, CI, scripts)</td>
+<td><code>copilot -p "…"</code> prompt mode</td>
+<td><a href="../demos/04_cicd_automation/">Demo 4 · CI/CD automation</a></td>
+</tr>
+<tr>
+<td>Drive the CLI from another editor or tool</td>
+<td>ACP server</td>
+<td><a href="#interfacing--interop">Interfacing &amp; interop</a></td>
+</tr>
+<tr>
+<td>Hand a long task to GitHub's servers</td>
+<td><code>/delegate &lt;prompt&gt;</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a></td>
+</tr>
+<tr>
+<td>Run isolated, parallel, or compute-heavy work</td>
+<td><code>copilot --cloud</code></td>
+<td>this section</td>
+</tr>
+<tr>
+<td>Pick a session back up on another machine</td>
+<td>cloud sandbox session continuation</td>
+<td>this section</td>
+</tr>
+</tbody>
+</table>
+<pre class="mermaid"><code>graph LR
+    Dev[You — any device] --&gt;|"copilot -p / ACP"| CLI[Copilot CLI agent]
+    CLI --&gt;|"/sandbox enable"| Local[Local sandbox&lt;br/&gt;on your machine]
+    CLI --&gt;|"copilot --cloud"| Cloud[Ephemeral cloud sandbox&lt;br/&gt;Azure Container Apps]
+    Cloud --&gt;|"stop → snapshot"| Snap[(Saved session state)]
+    Snap --&gt;|"resume anywhere"| Dev2[You — another device]
+    CLI --&gt;|"/delegate"| Agent[Copilot cloud agent]
+
+    style Cloud fill:#c8e6c9
+    style Local fill:#bbdefb</code></pre>
+<div class="admonition tip">
+<p class="admonition-title">A safe default for autonomy</p>
+<p>Pair <strong>autopilot</strong> with a sandbox for unattended runs: a local sandbox restricts what Copilot can touch on your machine, while a cloud sandbox moves execution off your machine entirely. Either is far safer than <code>--allow-all-tools</code> / <code>--yolo</code> on your host (<a href="#permissions--allowed-tools">Permissions &amp; allowed tools</a>).</p>
+</div>
+<hr />
+<h2 id="byok">Bring your own key (BYOK)</h2>
+<p>Point the CLI at your own model provider instead of GitHub-hosted models via environment variables (<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#using-your-own-model-provider">About Copilot CLI</a>):</p>
+<p>There are two BYOK paths to distinguish:</p>
+<ul>
+<li><strong>Enterprise-managed provider models</strong>: admins configure external-provider models, and eligible users see them in <code>/model</code> (<a href="https://github.blog/changelog/2026-06-17-copilot-cli-supports-enterprise-bring-your-own-key-byok-models">Copilot CLI supports enterprise BYOK models</a>).</li>
+<li><strong>Client-side BYOK</strong>: individual users point their local CLI at an OpenAI-compatible, Azure OpenAI, Anthropic, or local provider using environment variables.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COPILOT_PROVIDER_BASE_URL</code></td>
+<td>Provider API base URL</td>
+</tr>
+<tr>
+<td><code>COPILOT_PROVIDER_TYPE</code></td>
+<td><code>openai</code> (default; any OpenAI-compatible, incl. Ollama/vLLM), <code>azure</code>, or <code>anthropic</code></td>
+</tr>
+<tr>
+<td><code>COPILOT_PROVIDER_API_KEY</code></td>
+<td>API key (omit for keyless local providers)</td>
+</tr>
+<tr>
+<td><code>COPILOT_MODEL</code></td>
+<td>Model to use (or <code>--model</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Requirements and caveats:</p>
+<ul>
+<li>The model <strong>must support tool calling and streaming</strong>; aim for ≥128k context (<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#using-your-own-model-provider">About Copilot CLI</a>).</li>
+<li>Built-in sub-agents inherit your provider; cost estimates are hidden but token counts still display (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>).</li>
+<li><code>/delegate</code> still requires GitHub sign-in — it transfers to GitHub's server-side Copilot, not your provider (<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>).</li>
+<li>Run <code>copilot help providers</code> for full setup.</li>
+</ul>
+<blockquote>
+<p>The repo's <a href="../../copilot_sdk_tutorial/python/">Copilot SDK Tutorial — BYOK recipes</a> show the programmatic equivalent.</p>
+</blockquote>
+<hr />
+<h2 id="interfacing--interop">Interfacing &amp; interop</h2>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>How</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Run a shell command without the model</strong></td>
+<td>prefix with <code>!</code>, e.g. <code>!git status</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>Add a file to your prompt</strong></td>
+<td><code>@path/to/file</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>Work in another directory</strong></td>
+<td><code>/add-dir</code>, <code>/cwd</code>, <code>/cd</code>, <code>/list-dirs</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>Schedule prompts</strong></td>
+<td><code>/every &lt;interval&gt;</code>, <code>/after &lt;delay&gt;</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>Images for UI work</strong></td>
+<td>drag-drop, <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-v">V</kbd></span>, or <code>@mockup.png</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a></td>
+</tr>
+<tr>
+<td><strong>Dictate prompts locally</strong></td>
+<td>hold Space, or press <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-x">X</kbd></span> then <code>V</code></td>
+<td><a href="https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input">Copilot CLI improved UI, rubber duck, scheduling, and voice input</a></td>
+</tr>
+<tr>
+<td><strong>Toggle reasoning visibility</strong></td>
+<td><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-t">T</kbd></span></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>Get a second opinion</strong></td>
+<td><code>/rubber-duck</code></td>
+<td><a href="https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input">Copilot CLI improved UI, rubber duck, scheduling, and voice input</a></td>
+</tr>
+<tr>
+<td><strong>Security-focused local review</strong></td>
+<td><code>/security-review</code> (available to all users)</td>
+<td><a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23">copilot-cli changelog 1.0.64</a></td>
+</tr>
+<tr>
+<td><strong>Create/switch to a worktree</strong></td>
+<td><code>/worktree</code> (alias <code>/move</code>)</td>
+<td><a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09">copilot-cli changelog 1.0.61</a></td>
+</tr>
+<tr>
+<td><strong>Review session changes</strong></td>
+<td><code>/diff</code></td>
+<td><a href="https://github.com/github/copilot-cli/blob/main/changelog.md">copilot-cli changelog</a></td>
+</tr>
+<tr>
+<td><strong>Use as an agent in other tools (ACP)</strong></td>
+<td>Agent Client Protocol server</td>
+<td><a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#use-copilot-cli-via-acp">About Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>Delegate to the cloud agent</strong></td>
+<td><code>/delegate &lt;prompt&gt;</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="next">Next</h2>
+<p>You now have the full feature map. Apply it in the <a href="../demos/">Demo Scenarios</a>, starting with <a href="../demos/01_issue_to_pr/">Issue → Branch → PR automation</a>.</p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/in/ks6088ts/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ks6088ts" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/ks6088ts" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

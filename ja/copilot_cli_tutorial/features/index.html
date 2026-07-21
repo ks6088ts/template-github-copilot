@@ -1,0 +1,3833 @@
+
+<!doctype html>
+<html lang="ja" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://ks6088ts-labs.github.io/template-github-copilot/ja/copilot_cli_tutorial/features/">
+      
+      
+        <link rel="prev" href="../access_methods/">
+      
+      
+        <link rel="next" href="../demos/">
+      
+      
+        
+          <link rel="alternate" href="../../../copilot_cli_tutorial/features/" hreflang="en">
+        
+          <link rel="alternate" href="./" hreflang="ja">
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Feature Deep Dive - template-github-copilot</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+<script id="__analytics">function __md_analytics(){function e(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],e("js",new Date),e("config","G-0ZTKFXVQ5K"),document.addEventListener("DOMContentLoaded",(function(){document.forms.search&&document.forms.search.query.addEventListener("blur",(function(){this.value&&e("event","search",{search_term:this.value})}));document$.subscribe((function(){var t=document.forms.feedback;if(void 0!==t)for(var a of t.querySelectorAll("[type=submit]"))a.addEventListener("click",(function(a){a.preventDefault();var n=document.location.pathname,d=this.getAttribute("data-md-value");e("event","feedback",{page:n,data:d}),t.firstElementChild.disabled=!0;var r=t.querySelector(".md-feedback__note [data-md-value='"+d+"']");r&&(r.hidden=!1)})),t.hidden=!1})),location$.subscribe((function(t){e("config","G-0ZTKFXVQ5K",{page_path:t.pathname})}))}));var t=document.createElement("script");t.async=!0,t.src="https://www.googletagmanager.com/gtag/js?id=G-0ZTKFXVQ5K",document.getElementById("__analytics").insertAdjacentElement("afterEnd",t)}</script>
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#feature-deep-dive" class="md-skip">
+          コンテンツにスキップ
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="ヘッダー">
+    <a href="../../" title="template-github-copilot" class="md-header__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            template-github-copilot
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Feature Deep Dive
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+      <div class="md-header__option">
+  <div class="md-select">
+    
+    <button class="md-header__button md-icon" aria-label="言語切り替え">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.5 17.5 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2zm-2.62 7 1.62-4.33L19.12 17z"/></svg>
+    </button>
+    <div class="md-select__inner">
+      <ul class="md-select__list">
+        
+          <li class="md-select__item">
+            <a href="../../../copilot_cli_tutorial/features/" hreflang="en" class="md-select__link">
+              English
+            </a>
+          </li>
+        
+          <li class="md-select__item">
+            <a href="./" hreflang="ja" class="md-select__link">
+              日本語
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</div>
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="検索" placeholder="検索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="検索">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="共有" aria-label="共有" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="クリア" aria-label="クリア" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            検索を初期化
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/ks6088ts/template-github-copilot" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="ナビゲーション" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../" title="template-github-copilot" class="md-nav__button md-logo" aria-label="template-github-copilot" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    template-github-copilot
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/ks6088ts/template-github-copilot" title="リポジトリへ" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    ks6088ts/template-github-copilot
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copilot CLI Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Copilot CLI Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../access_methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Access Methods
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Feature Deep Dive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#モデルとモデル選択" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        モデルとモデル選択
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#エージェントモードの詳細" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        エージェントモードの詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="エージェントモードの詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plan-モード" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan モード
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autopilot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autopilot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#並列化-fleet-とサブエージェント" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        並列化: /fleet とサブエージェント
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#コンテキスト管理と無限セッション" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンテキスト管理と無限セッション
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#カスタマイズのサーフェス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタマイズのサーフェス
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="カスタマイズのサーフェス">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#カスタム指示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタム指示
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#カスタムエージェント" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタムエージェント
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#スキル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#プラグインと-awesome-copilot-マーケットプレイス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プラグインと awesome-copilot マーケットプレイス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#フック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フック
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-サーバー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP サーバー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#権限と許可ツール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        権限と許可ツール
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        サンドボックス
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="サンドボックス">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ローカルサンドボックス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ローカルサンドボックス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#クラウドサンドボックス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        クラウドサンドボックス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-anywhere-リモートコントロール-cli-からクラウドサンドボックスまで" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Anywhere: リモートコントロール CLI からクラウドサンドボックスまで
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#byok" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bring Your Own Key（BYOK）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#インタフェースと相互運用" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        インタフェースと相互運用
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#次へ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        次へ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Demo Scenarios
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Demo Scenarios
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/01_issue_to_pr/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: Issue to PR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/02_code_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Code Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/03_onboarding/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Onboarding
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/04_cicd_automation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: CI/CD Automation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/05_mcp_integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: MCP Integration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/06_custom_agents_skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: Custom Agents & Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/07_batch_refactor/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    07: Batch Refactor
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../demos/08_release_notes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    08: Release Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Copilot SDK Tutorial
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Copilot SDK Tutorial
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/server_mode/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Server Mode
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/observability/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Python
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6_3" id="__nav_3_6_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_6_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/01_chat_bot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: CLI Chatbot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/02_custom_tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Custom Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/03_streaming/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Streaming
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/04_skills/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: Skills
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/05_hooks_permissions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: Hooks & Permissions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/python/tutorials/06_byok/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: BYOK
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Go
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Go
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_7_3" id="__nav_3_7_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/01_chat_bot/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01: CLI Chatbot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/02_issue_triage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02: Issue Triage Bot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/03_streaming_review/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03: Streaming Review
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/04_skills_docgen/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04: Skills Doc Generation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/05_audit_hooks/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05: Audit Log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/go/tutorials/06_byok_azure_openai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06: BYOK Azure OpenAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_sdk_tutorial/appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CopilotReportForge
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    CopilotReportForge
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Overview
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/overview/problem_and_solution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Problem & Solution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    User Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    User Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/getting_started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/web_ui_guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Web UI Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/industry_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Industry Use Case Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/guide/github_oauth_app/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub OAuth App Setup
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operations
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Operations
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/operations/container_local_run/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running Containers Locally
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/operations/deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deployment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Appendix
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Appendix
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/appendix/responsible_ai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Responsible AI Notes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../copilot_report_forge/appendix/references/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    References
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目次">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目次
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#モデルとモデル選択" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        モデルとモデル選択
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#エージェントモードの詳細" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        エージェントモードの詳細
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="エージェントモードの詳細">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#plan-モード" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plan モード
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autopilot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autopilot
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#並列化-fleet-とサブエージェント" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        並列化: /fleet とサブエージェント
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#コンテキスト管理と無限セッション" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        コンテキスト管理と無限セッション
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#カスタマイズのサーフェス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタマイズのサーフェス
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="カスタマイズのサーフェス">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#カスタム指示" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタム指示
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#カスタムエージェント" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        カスタムエージェント
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#スキル" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        スキル
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#プラグインと-awesome-copilot-マーケットプレイス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        プラグインと awesome-copilot マーケットプレイス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#フック" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        フック
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Memory
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mcp-サーバー" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        MCP サーバー
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#権限と許可ツール" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        権限と許可ツール
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        サンドボックス
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="サンドボックス">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#ローカルサンドボックス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ローカルサンドボックス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#クラウドサンドボックス" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        クラウドサンドボックス
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#copilot-anywhere-リモートコントロール-cli-からクラウドサンドボックスまで" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Copilot Anywhere: リモートコントロール CLI からクラウドサンドボックスまで
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#byok" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bring Your Own Key（BYOK）
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#インタフェースと相互運用" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        インタフェースと相互運用
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#次へ" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        次へ
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="feature-deep-dive">Feature Deep Dive</h1>
+<p><strong>ワークショップの Part 2。</strong> 本章はデモ中に何度も戻ってくるリファレンスです。モデル、エージェントモード、コンテキスト管理、カスタマイズ全般（指示・エージェント・スキル・フック・MCP・メモリ）、権限、サンドボックス、Bring-Your-Own-Key を扱います。所要時間は約 75 分です。</p>
+<blockquote>
+<p>CLI は毎週進化します。ここに記載した具体値は「執筆時点で GitHub ドキュメントに照らして検証済み」として扱い、<code>/help</code>、<code>/model</code>、<code>copilot help &lt;topic&gt;</code> でライブに確認してください（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</p>
+</blockquote>
+<div class="admonition tip">
+<p class="admonition-title">これらの機能を動画で見る</p>
+<p>GitHub 公式の <em>Dev Days</em> 動画 2 本が、本章の大半をエンドツーエンドでデモします: <a href="https://www.youtube.com/watch?v=zS_40Tfl75w">Less // TODO: more done with GitHub Copilot CLI</a>（モード、<code>/env</code>、Auto モデル、組み込みエージェント、<code>/review</code>、<code>/rubber-duck</code>、<code>/fleet</code> ＋ <code>/tasks</code>、Copilot Memory、サーバーモード）と <a href="https://www.youtube.com/watch?v=c2QeGuWPnSw">Build with the Copilot CLI — Mona Mayhem</a>（plan モード、autopilot と YOLO、プラグイン／awesome-copilot、<code>/fleet</code>、<code>/delegate</code>）。詳細は <a href="../appendix/references/#talks--demos">References → トーク・デモ</a> を参照。</p>
+</div>
+<hr />
+<h2 id="モデルとモデル選択">モデルとモデル選択</h2>
+<p><code>/model</code>（または <code>--model</code> フラグ）でいつでも、セッション途中でもモデルを切り替えられます（<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli">About Copilot CLI</a>）。ただし、ワークショップ資料を 1 つの固定モデル名に依存させないでください。モデルカタログ、既定値、プランごとの利用可否、Enterprise のポリシー制御は頻繁に変わります。</p>
+<p>代わりに次の判断表を使います。</p>
+<table>
+<thead>
+<tr>
+<th>ニーズ</th>
+<th>CLI での選び方</th>
+<th>注意点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>安定した日常的なワークショップ進行</td>
+<td><strong>Auto</strong> または <code>/model</code> に表示される既定モデルから開始</td>
+<td>Auto は明示的なモデル制御よりも、可用性を見たルーティングを優先する</td>
+</tr>
+<tr>
+<td>複雑なアーキテクチャ、難しいデバッグ、大きなリファクタ</td>
+<td><code>/model</code> に表示される推論対応のプレミアムモデルを選ぶ</td>
+<td>高い reasoning や extended context は AI クレジット消費を増やす</td>
+</tr>
+<tr>
+<td>高速な機械的編集や大量チェック</td>
+<td>プランで表示される高速／小型の coding model を選ぶ</td>
+<td>出力はテストで検証する。高速さは品質保証ではない</td>
+</tr>
+<tr>
+<td>Enterprise 管理のモデル戦略</td>
+<td>組織／Enterprise ポリシーで <code>/model</code> に公開されたモデルを使う</td>
+<td>管理者が代替モデルや外部プロバイダーモデルを有効化する必要がある場合がある</td>
+</tr>
+<tr>
+<td>ローカル／外部プロバイダー検証</td>
+<td>BYOK 設定を使う（<a href="#byok">BYOK</a> を参照）</td>
+<td>モデルはツール呼び出しとストリーミングをサポートする必要がある</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">モデルのライフサイクルは短い</p>
+</div>
+<p>最近の changelog だけでも、GPT-4.1 は 2026-06-01 に deprecated、GPT-5.2 と GPT-5.2-Codex は 2026-06-05 に多くの Copilot 体験で deprecated、Opus 4.6 (fast) は 2026-06-29 に deprecated 予定です（<a href="https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated">GPT-4.1 deprecated</a>、<a href="https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated">GPT-5.2 and GPT-5.2-Codex deprecated</a>、<a href="https://github.blog/changelog/2026-06-18-upcoming-deprecation-of-opus-4-6-fast">Upcoming deprecation of Opus 4.6 fast</a>）。ワークショップ実施前に <code>/model</code>、<a href="https://docs.github.com/copilot/reference/ai-models/supported-models">supported models</a>、<a href="https://github.blog/changelog/label/copilot/">GitHub Blog Copilot changelog</a> を確認してください。</p>
+<p>固定の演習手順にしない範囲で、最近の追加として押さえるべき点は次のとおりです。</p>
+<ul>
+<li>Gemini 3.1 Pro (Preview) と Gemini 3.5 Flash は、プランとポリシーが許せば Copilot CLI で利用できます。Business／Enterprise 管理者はモデルポリシーで opt in する必要があります（<a href="https://github.blog/changelog/2026-06-02-gemini-models-in-copilot-cli-cloud-agent-and-the-copilot-app">Gemini models in Copilot CLI</a>）。</li>
+<li>MAI-Code-1-Flash は Copilot Business および Copilot Enterprise で一般提供（GA）になりました（管理者はポリシーを有効化する必要があります）。Copilot CLI でもプランごとに段階的に提供されます（<a href="https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise">MAI-Code-1-Flash for Copilot Business and Copilot Enterprise</a>、<a href="https://github.blog/changelog/2026-06-18-mai-code-1-flash-available-on-more-copilot-surfaces">MAI-Code-1-Flash available on more Copilot surfaces</a>）。</li>
+<li>Enterprise 管理者が構成した外部プロバイダーモデルは Copilot CLI の model picker に表示されます。一方で個人ユーザーはクライアント側 BYOK プロバイダーも構成できます（<a href="https://github.blog/changelog/2026-06-17-copilot-cli-supports-enterprise-bring-your-own-key-byok-models">Copilot CLI supports enterprise BYOK models</a>）。</li>
+<li>Free および Student プランは Copilot の auto モデル選択を既定かつ唯一の方式とするようになり、Microsoft 提供モデルからは <code>(Preview)</code> ラベルが廃止されます。固定の一覧ではなく <code>/model</code> で最新の利用可否を確認すべきもう一つの理由です（<a href="https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans">Changes to model selection for Free and Student plans</a>）。</li>
+<li>対応モデルでは <strong>拡張（100 万トークン）コンテキスト</strong> と <strong>調整可能な推論レベル</strong> が使えます。GitHub は、日常タスクでは既定設定を使い、複雑な複数ファイル作業でのみ extended context や higher reasoning を使うことを推奨しています。どちらも AI クレジット消費を増やします（<a href="https://github.blog/changelog/2026-06-04-larger-context-windows-and-configurable-reasoning-levels-for-github-copilot">Larger context windows and configurable reasoning levels</a>）。</li>
+</ul>
+<hr />
+<h2 id="エージェントモードの詳細">エージェントモードの詳細</h2>
+<h3 id="plan-モード">Plan モード</h3>
+<p>誤解のコストが高いときに Plan モードを使います。複数ファイル変更、移行、新機能、セキュリティに関わるコード変更などです。<span class="keys"><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-tab">Tab</kbd></span> または <code>/plan &lt;prompt&gt;</code> で Plan モードに入ると、Copilot は次を行います（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</p>
+<ol>
+<li>リクエストとコードベースを分析する。</li>
+<li>スコープを合わせるために <strong>確認の質問</strong> をする。</li>
+<li>セッションフォルダに、チェックボックス付きの構造化された <code>plan.md</code> を書く。</li>
+<li>コードを書く前に <strong>承認を待つ</strong>。</li>
+</ol>
+<p><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-y">Y</kbd></span> で計画を Markdown エディタで開いて編集できます。難しいタスクで推奨されるループは次のとおりです。</p>
+<div class="highlight"><pre><span></span><code>explore → plan → review → implement → verify → commit
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>&gt; Read the authentication files but don&#39;t write code yet
+&gt; /plan Implement password reset flow
+&gt; Proceed with the plan
+&gt; Run the tests and fix any failures
+&gt; Commit these changes with a descriptive message
+</code></pre></div>
+<h3 id="autopilot">Autopilot</h3>
+<p>Autopilot はタスクが完了するまで自律的に作業を続けます。<span class="keys"><kbd class="key-shift">Shift</kbd><span>+</span><kbd class="key-tab">Tab</kbd></span> で切り替えます。利用中のビルドで experimental と表示される場合は、<code>--experimental</code> または <code>/experimental</code> で有効化します（<a href="https://github.com/github/copilot-cli">README</a>）。CLI 1.0.63 では、エージェントモードがセッション単位で追跡されるようになり、新規作成・clear・切り替え時に持ち越されなくなりました（<a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15">copilot-cli changelog 1.0.63</a>）。無人実行では <a href="#sandboxing">サンドボックス</a> と併用しましょう。</p>
+<div class="admonition note">
+<p class="admonition-title">Autopilot ≠ YOLO モード</p>
+<p>この 2 つは解決する問題が異なり、混同されがちです（<em>Mona Mayhem</em> 動画で両方を実演しています）。</p>
+<ul>
+<li><strong>Autopilot</strong> は <em>エージェントモード</em> で、<em>Copilot がどれだけ自分で判断して進めるか</em> を変えます。開発者のように反復（計画 → 実行 → テスト → 検証）し、タスクが完了するまで続けます（<a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/autopilot">autopilot</a>）。</li>
+<li><strong>YOLO モード</strong>（<code>/yolo</code>、<code>--yolo</code>、または <code>--allow-all</code>）は <em>権限設定</em> で、<em>Copilot が実行前に確認を取るかどうか</em> を変えます。すべてのツール呼び出しを自動承認し、確認を求めなくなります（<a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a>）。</li>
+</ul>
+<p>両者は独立に組み合わせられます: autopilot は <em>次に何をするか</em> を、YOLO は <em>先に聞くかどうか</em> を決めます。自分のマシンで autopilot を YOLO と併用するのは最大限手放しであり、同時に最大限リスクでもあります——autopilot は <a href="#sandboxing">サンドボックス</a> と組み合わせるのが推奨です。</p>
+</div>
+<h3 id="並列化-fleet-とサブエージェント">並列化: <code>/fleet</code> とサブエージェント</h3>
+<p>大きなタスクでは、プロンプトの先頭に <code>/fleet</code> を付けると、Copilot が作業をサブエージェントが実行する並列サブタスクに分割します（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。サブエージェントの作業コンテキストはメインスレッドにすべて流れ込まず、結果の要約を見る形になります。広範な探索には有効ですが、最後に統合結果をテスト・検証するステップは必要です。</p>
+<hr />
+<h2 id="コンテキスト管理と無限セッション">コンテキスト管理と無限セッション</h2>
+<p>Copilot CLI には <strong>無限セッション</strong> があります。会話がトークン上限の約 95% に近づくと、作業を中断せずバックグラウンドで履歴を自動圧縮します（<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#automatic-context-management">About Copilot CLI</a>）。</p>
+<table>
+<thead>
+<tr>
+<th>コマンド</th>
+<th>目的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/context</code></td>
+<td>トークン使用量の視覚的な内訳（システム／ツール、履歴、空き、バッファ）</td>
+</tr>
+<tr>
+<td><code>/compact</code></td>
+<td>履歴を手動で圧縮（通常は不要）</td>
+</tr>
+<tr>
+<td><code>/usage</code></td>
+<td>セッション統計: 使用した AI クレジット、所要時間、編集行数、モデル別トークン内訳</td>
+</tr>
+<tr>
+<td><code>/session</code></td>
+<td>現在のセッションの情報</td>
+</tr>
+<tr>
+<td><code>/session checkpoints [N]</code></td>
+<td>圧縮チェックポイントの一覧／表示</td>
+</tr>
+<tr>
+<td><code>/session files</code></td>
+<td>このセッションで作成された一時成果物</td>
+</tr>
+<tr>
+<td><code>/session plan</code></td>
+<td>現在の計画（あれば）</td>
+</tr>
+<tr>
+<td><code>/clear</code> または <code>/new</code></td>
+<td>無関係なタスクの間でリセット（品質が向上）</td>
+</tr>
+</tbody>
+</table>
+<p>セッション状態はディスクに永続化されます（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</p>
+<div class="highlight"><pre><span></span><code>~/.copilot/session-state/{session-id}/
+├── events.jsonl      # full session history
+├── workspace.yaml    # metadata
+├── plan.md           # implementation plan (if created)
+├── checkpoints/      # compaction history
+└── files/            # persistent artifacts
+</code></pre></div>
+<p>作業は <code>--resume</code>／<code>/resume</code> で再開でき、<code>copilot --continue</code> で直近のセッションに戻れます（<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>）。</p>
+<div class="admonition tip">
+<p class="admonition-title">セッションは集中させる</p>
+<p>無限 ≠ 無限に有用、です。無関係なタスクの間では <code>/clear</code> や <code>/new</code> を使いましょう。同僚との会話を新しく始めるのと同じです（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</p>
+</div>
+<p>管理者にとって、<code>/usage</code> はローカル／セッション単位の表示にすぎません。組織／Enterprise の所有者は Copilot usage metrics API も監視します。2026-06-19 時点で、ユーザーレベルのレポートに <code>ai_credits_used</code> が追加され、ユーザーごとの Copilot 活動全体の AI クレジット消費を把握できるようになりました（<a href="https://github.blog/changelog/2026-06-19-ai-credits-consumed-per-user-now-in-the-copilot-usage-metrics-api">AI credits consumed per user now in the Copilot usage metrics API</a>）。</p>
+<hr />
+<h2 id="カスタマイズのサーフェス">カスタマイズのサーフェス</h2>
+<p>これらのファイルと設定により、CLI をチームのワークフローに沿って動かせます。多くは IDE・SDK サーフェスとも共有されます。</p>
+<pre class="mermaid"><code>graph TD
+    subgraph Repo[".github/ — repository scope"]
+      CI[copilot-instructions.md]
+      INST["instructions/**/*.instructions.md"]
+      AG[agents/*.agent.md]
+      SK[skills/*/SKILL.md]
+      WMCP[.github/mcp.json]
+    end
+    subgraph Global["~/.copilot — user scope"]
+      GCI[copilot-instructions.md]
+      GAG[agents/]
+      MCPC[mcp-config.json]
+    end
+    subgraph Root["Git root"]
+      AGENTS[AGENTS.md]
+    end
+    CI --&gt; Agent[Copilot CLI agent]
+    INST --&gt; Agent
+    AG --&gt; Agent
+    SK --&gt; Agent
+    WMCP --&gt; Agent
+    GCI --&gt; Agent
+    GAG --&gt; Agent
+    MCPC --&gt; Agent
+    AGENTS --&gt; Agent</code></pre>
+<h3 id="カスタム指示">カスタム指示</h3>
+<p>プロンプトに自動的に含まれる自然言語の Markdown です。Copilot CLI は複数の場所から読み込み、<strong>それらは結合されます</strong>（優先フォールバックではない）。競合時はリポジトリの指示がグローバルより優先されます（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>、<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/add-custom-instructions">Adding custom instructions</a>）。</p>
+<table>
+<thead>
+<tr>
+<th>場所</th>
+<th>スコープ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>~/.copilot/copilot-instructions.md</code></td>
+<td>全セッション（グローバル）</td>
+</tr>
+<tr>
+<td><code>.github/copilot-instructions.md</code></td>
+<td>リポジトリ</td>
+</tr>
+<tr>
+<td><code>.github/instructions/**/*.instructions.md</code></td>
+<td>リポジトリ（モジュラー、パススコープ）</td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code>（Git ルートまたは cwd）</td>
+<td>リポジトリ</td>
+</tr>
+<tr>
+<td><code>Copilot.md</code>、<code>GEMINI.md</code>、<code>CODEX.md</code></td>
+<td>リポジトリ</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>簡潔かつ実行可能に保ちましょう。冗長な指示は効果を薄め、矛盾する指示は非決定的な挙動を招きます（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</p>
+</blockquote>
+<h3 id="カスタムエージェント">カスタムエージェント</h3>
+<p>カスタムエージェントは、独自の専門性・ツール・指示を持つ Copilot の特化版です。Copilot CLI は組み込みエージェントを同梱し、独自に定義することもできます（<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>）。</p>
+<p><strong>組み込みエージェント:</strong></p>
+<table>
+<thead>
+<tr>
+<th>エージェント</th>
+<th>役割</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Explore</strong></td>
+<td>メインのコンテキストを汚さずにコードベースを素早く分析</td>
+</tr>
+<tr>
+<td><strong>Task</strong></td>
+<td>テスト／ビルドを実行。成功時は短い要約、失敗時は全出力</td>
+</tr>
+<tr>
+<td><strong>General purpose</strong></td>
+<td>複雑な複数ステップのタスクを別コンテキストで実行</td>
+</tr>
+<tr>
+<td><strong>Code review</strong></td>
+<td>本当に重要な問題だけを浮かび上がらせ、ノイズを最小化</td>
+</tr>
+<tr>
+<td><strong>Research</strong></td>
+<td>コード・リポジトリ・Web を横断する深い調査を、引用付きで実施</td>
+</tr>
+<tr>
+<td><strong>Rubber duck</strong></td>
+<td><em>セカンドオピニオン</em> を与える建設的な批評役。<code>/rubber-duck</code> で呼び出し、メインエージェントが自動で相談することもある。あえて <strong>補完的なモデル</strong>（作業をしたモデルとは別のモデルファミリー）で動くため、単一モデルが見落としがちな問題を捉える（<a href="https://docs.github.com/en/copilot/concepts/agents/copilot-cli/rubber-duck">rubber duck agent</a>）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>独自に定義</strong> するには Markdown の「エージェントプロファイル」を使います。</p>
+<table>
+<thead>
+<tr>
+<th>種別</th>
+<th>場所</th>
+<th>スコープ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ユーザー</td>
+<td><code>~/.copilot/agents/</code></td>
+<td>すべてのプロジェクト</td>
+</tr>
+<tr>
+<td>リポジトリ</td>
+<td><code>.github/agents/</code></td>
+<td>現在のプロジェクト</td>
+</tr>
+<tr>
+<td>組織／Enterprise</td>
+<td><code>.github-private</code> リポジトリ内の <code>/agents</code></td>
+<td>組織／Enterprise 配下の全プロジェクト</td>
+</tr>
+</tbody>
+</table>
+<p>エージェントは 3 通りで呼び出します（<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>）。</p>
+<div class="highlight"><pre><span></span><code>&gt; /agent                                   # pick from a list
+&gt; Use the refactoring agent to clean this up   # natural language
+$ copilot --agent=refactor-agent -p &quot;Refactor this block&quot;
+</code></pre></div>
+<p><a href="../demos/06_custom_agents_skills/">Demo 6</a> で 1 つ作成します。</p>
+<p>GitHub は <strong>Agent finder</strong> も展開しています。これは許可されたレジストリから MCP サーバー、スキル、キャンバス、エージェント、ツールを検索し、ランキングされた候補を返します。リソースを勝手にインストールするものではなく、managed settings と registry policy の範囲内で、何を配線すべきかを発見するための仕組みです（<a href="https://github.blog/changelog/2026-06-17-agent-finder-for-github-copilot-now-available">Agent finder for GitHub Copilot</a>）。</p>
+<h3 id="スキル">スキル</h3>
+<p>スキルは、特化したタスク向けに指示・スクリプト・リソースで Copilot を強化するもので、<code>SKILL.md</code> フォルダとしてパッケージ化します（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills">Adding agent skills</a>、<a href="https://docs.github.com/en/copilot/concepts/agents/about-agent-skills">About agent skills</a>）。<a href="../demos/06_custom_agents_skills/">Demo 6</a> でも扱います。</p>
+<h3 id="プラグインと-awesome-copilot-マーケットプレイス">プラグインと awesome-copilot マーケットプレイス</h3>
+<p>プラグインは、関連する指示・スキル・エージェント・フックを 1 つのインストール可能な単位にまとめたもので、プラグイン <em>マーケットプレイス</em> を通じて配布されます。セッション内では <code>/plugin</code>（シェルからは <code>copilot plugin</code>）で管理します（<a href="https://docs.github.com/en/copilot/concepts/agents/about-plugins">About GitHub Copilot plugins</a>、<a href="https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference">CLI command reference</a>）。</p>
+<div class="highlight"><pre><span></span><code>&gt; /plugin marketplace list                 # 登録済みマーケットプレイスを一覧
+&gt; /plugin list                             # インストール済みプラグインを確認
+&gt; /plugin install &lt;name&gt;@awesome-copilot   # 特定のプラグインをインストール
+</code></pre></div>
+<p>GitHub のコミュニティコレクション <a href="https://github.com/github/awesome-copilot">github/awesome-copilot</a>（<code>gh.io/awesome-copilot</code>）は、すぐ使える指示・エージェント・スキル・フック・プラグインを数百提供し、最近の CLI ビルドでは <strong>マーケットプレイスとして既定登録済み</strong> です。未登録の場合は <code>/plugin marketplace add github/awesome-copilot</code> で一度登録します。<em>Mona Mayhem</em> 動画では、そこから探してインストールする様子をライブで示します。</p>
+<div class="admonition warning">
+<p class="admonition-title">サードパーティ製のカスタマイズはコードと同じように扱う</p>
+<p>awesome-copilot のコンテンツはコミュニティ提供です。指示ファイル・エージェント・スキル・プラグインは、自分で書くコードと同じくシェルコマンドやツール権限を含みうるため、インストール前に必ず中身を確認してください。</p>
+</div>
+<h3 id="フック">フック</h3>
+<p>フックは、エージェントのライフサイクルの要所でカスタムシェルコマンドを実行できます。検証・権限チェック・ロギング・セキュリティスキャンなどに使えます（<a href="https://docs.github.com/en/copilot/concepts/agents/hooks">About hooks for GitHub Copilot</a>）。フックは CLI・IDE・クラウドエージェントでサポートされます。</p>
+<h3 id="copilot-memory">Copilot Memory</h3>
+<p>Copilot は、リポジトリの規約やパターンに関する持続的な「メモリ」を推論して保存でき、プロンプトでの繰り返しの説明を減らせます（<a href="https://docs.github.com/en/copilot/concepts/agents/copilot-memory">About GitHub Copilot Memory</a>）。</p>
+<h3 id="mcp-サーバー">MCP サーバー</h3>
+<p>CLI は <strong>GitHub MCP サーバーをあらかじめ構成</strong> して同梱しているため、GitHub.com の操作がすぐに使えます。他のツール／データに到達するにはサーバーを追加します（<a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a>）。</p>
+<div class="highlight"><pre><span></span><code>&gt; /mcp           # list configured servers
+&gt; /mcp add       # add a server (Tab between fields, Ctrl+S to save)
+&gt; /mcp search    # browse the GitHub MCP Registry and install a server
+</code></pre></div>
+<p>ユーザーレベルのサーバー定義は <code>~/.copilot</code> 配下の <code>mcp-config.json</code> に保存されます（<code>COPILOT_HOME</code> で上書き可）。<code>/mcp add</code> や <code>/mcp search</code> で追加したサーバーは CLI を再起動せずにすぐ利用できます（<a href="https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available">Copilot CLI: New terminal interface is generally available</a>）。最近の CLI では <code>.github/mcp.json</code> からワークスペース MCP 設定も自動ロードされます。また、<code>deferTools</code> のような新しい MCP 設定キーも changelog で追加されています（<a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09">copilot-cli changelog 1.0.61</a>、<a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15">copilot-cli changelog 1.0.63</a>）。<a href="../demos/05_mcp_integration/">Demo 5</a> でカスタムサーバーを配線します。</p>
+<hr />
+<h2 id="権限と許可ツール">権限と許可ツール</h2>
+<p>Copilot がファイルを変更・実行しうるツール（例: <code>touch</code>、<code>chmod</code>、<code>node</code>、<code>sed</code>）を初めて使うとき、確認します（<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#security-considerations">About Copilot CLI</a>）。</p>
+<div class="highlight"><pre><span></span><code>1. Yes
+2. Yes, and approve TOOL for the rest of the running session
+3. No, and tell Copilot what to do differently (Esc)
+</code></pre></div>
+<p>ツールはフラグやスラッシュコマンドで事前に許可（または禁止）します。</p>
+<table>
+<thead>
+<tr>
+<th>仕組み</th>
+<th>効果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--allow-all-tools</code></td>
+<td>確認なしで任意のツールを許可（危険）</td>
+</tr>
+<tr>
+<td><code>--allow-tool='shell(git:*)'</code></td>
+<td>すべての <code>git</code> コマンドを許可</td>
+</tr>
+<tr>
+<td><code>--allow-tool='write'</code></td>
+<td>ファイル書き込みを許可</td>
+</tr>
+<tr>
+<td><code>--deny-tool='shell(git push)'</code></td>
+<td><code>git push</code> を禁止（deny が <strong>優先</strong>）</td>
+</tr>
+<tr>
+<td><code>--allow-tool='MyServer'</code> / <code>--deny-tool='MyServer(tool)'</code></td>
+<td>MCP サーバーのツールを許可／禁止</td>
+</tr>
+<tr>
+<td><code>/allow-all</code> または <code>/yolo</code></td>
+<td>セッション内ですべての権限を有効化</td>
+</tr>
+<tr>
+<td><code>/reset-allowed-tools</code></td>
+<td>以前に許可したツールをリセット</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight"><pre><span></span><code><span class="c1"># Allow all git EXCEPT push; deny destructive rm</span>
+copilot<span class="w"> </span>--allow-tool<span class="o">=</span><span class="s1">&#39;shell(git:*)&#39;</span><span class="w"> </span>--deny-tool<span class="o">=</span><span class="s1">&#39;shell(git push)&#39;</span><span class="w"> </span>--deny-tool<span class="o">=</span><span class="s1">&#39;shell(rm)&#39;</span>
+</code></pre></div>
+<p>チーム向けの最小権限パターン。</p>
+<table>
+<thead>
+<tr>
+<th>ワークフロー</th>
+<th>安全な開始点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>読み取り中心のレビュー／レポート</td>
+<td><code>shell(git:*)</code> を許可。レポートファイルを書く場合だけ <code>write</code> を許可</td>
+</tr>
+<tr>
+<td>CI の prompt mode</td>
+<td><code>git push</code>、<code>git reset</code>、<code>rm</code>、デプロイコマンドを禁止。プロンプトは冪等にする</td>
+</tr>
+<tr>
+<td>移行／リファクタ</td>
+<td>テストコマンドとファイル書き込みを許可。ブランチ作業と人間の差分レビューを必須にする</td>
+</tr>
+<tr>
+<td>信頼できないリポジトリや生成コード</td>
+<td>広い権限を与える前にローカルまたはクラウドサンドボックスを使う</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">自動承認 = あなたの全権限</p>
+<p><code>--allow-all-tools</code>／<code>--yolo</code> を使うと、Copilot はレビューなしであなたと同じコマンドを実行できます。破壊的なものも含みます。サンドボックスや使い捨て環境に限定してください（<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#security-implications-of-automatic-tool-approval">Security considerations</a>）。</p>
+</div>
+<hr />
+<h2 id="sandboxing">サンドボックス</h2>
+<p>Copilot が代わりに取る操作（ツール実行、コマンド実行、ファイル変更）が増えるほど、エージェント的ワークフローを安全に採用するための <strong>隔離・可搬性・ポリシー制御</strong> が必要になります。サンドボックスは Copilot を <em>どこで</em> 動かすかを選べるようにする仕組みで、現在は Copilot CLI セッションに適用されます（クラウドサンドボックスは Copilot アプリのセッションにも適用）（<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>、public preview）。</p>
+<table>
+<thead>
+<tr>
+<th>種別</th>
+<th>方法</th>
+<th>使うとき</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ローカルサンドボックス</strong></td>
+<td>セッション内で <code>/sandbox enable</code></td>
+<td>自分のマシン上で、ファイルシステム・ネットワーク・システム機能へのアクセスを制限して Copilot を実行。標準の Copilot seat に追加費用なしで含まれる</td>
+</tr>
+<tr>
+<td><strong>クラウドサンドボックス</strong></td>
+<td><code>copilot --cloud</code></td>
+<td>GitHub がホストする、完全に隔離された一時的な Linux 環境で Copilot を実行。強い隔離、別デバイスからの継続、計算量の多い作業、並列タスクに使う（従量課金）</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">認証は共有される</p>
+<p>サンドボックスは既存の Copilot CLI 認証を再利用します。別のクラウドプロバイダー、API キー、インフラの管理は不要です。Copilot CLI にサインインでき Copilot にアクセスできれば、サンドボックスを使えます。クラウドサンドボックスはさらに、組織／Enterprise の所有者が <strong>Cloud Sandbox access</strong> ポリシーを有効化する必要があります（<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>）。</p>
+</div>
+<h3 id="ローカルサンドボックス">ローカルサンドボックス</h3>
+<p>ローカルサンドボックスは、<strong>自分のマシン上で直接</strong> Copilot をサンドボックス内で動かし、ファイルシステム・ネットワーク接続・システム機能へのアクセスを制限します。セッション内で有効化し、対話的な <code>/sandbox</code> UI で微調整します（設定は設定ディレクトリの <code>settings.json</code> の <code>sandbox</code> キー配下に永続化されます）（<a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings">Configuring local sandbox settings</a>）。</p>
+<div class="highlight"><pre><span></span><code>&gt; /sandbox enable     # サンドボックスを有効化
+&gt; /sandbox            # General / Filesystem / Network の設定を開く（Tab で切替、Esc で保存）
+&gt; /sandbox disable    # 無効化
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>タブ</th>
+<th>主な設定</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>General</strong></td>
+<td><em>Sandboxing enabled</em>; <em>Allow keychain access</em>（<code>git</code>／<code>gh</code> の credential helper 用の macOS Keychain。資格情報の読み取りを防ぐにはオフ）</td>
+</tr>
+<tr>
+<td><strong>Filesystem</strong></td>
+<td><em>Include working directory</em>（プロジェクトに自動で read/write）; <em>Clear policy on exit</em>（セッションごとに権限をリセット）; 作業ディレクトリ外の場所に対するパス単位の <strong>read-only</strong> または <strong>read/write</strong> ルール</td>
+</tr>
+<tr>
+<td><strong>Network</strong></td>
+<td><em>Allow outbound connections</em>（完全に隔離するにはオフ）; <em>Allow local network</em>（<code>localhost</code>／LAN）</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">ホスト単位のネットワークルールはセキュリティ境界ではない</p>
+<p><code>allowedHosts</code>／<code>blockedHosts</code> のフィルタはプラットフォーム間で信頼できません。macOS では allow ルールが無制限のアウトバウンドに静かに劣化し、block ルールは未対応です。Linux では、アウトバウンド無効時にホストルールで特定ホストだけを確実に許可することはできません。実際の隔離には、ホスト単位のルールではなく <strong>Allow outbound connections</strong> のトグルを使ってください（<a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/configuring-local-sandbox-settings">Configuring local sandbox settings</a>）。</p>
+</div>
+<ul>
+<li><strong>クロスプラットフォーム</strong>: macOS と Linux で利用可能。Windows は Windows Insiders ビルドが必要です。各 OS が異なるサンドボックスバックエンドを使うため、隔離の挙動は OS ごとに異なります（<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>）。</li>
+<li><strong>Enterprise ポリシー適用</strong>: ローカルサンドボックスのポリシーは Microsoft Intune などの MDM プラットフォームで集中構成・強制でき、管理対象デバイス上で Copilot がローカルリソースにどう触れるかを管理者が制御できます（<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>）。</li>
+<li><strong>課金</strong>: 標準の Copilot seat に追加費用なしで含まれます。</li>
+</ul>
+<h3 id="クラウドサンドボックス">クラウドサンドボックス</h3>
+<p>クラウドサンドボックスは、CLI セッションを <strong>GitHub がホストする、完全に隔離された一時的な Linux 環境</strong> 内で実行します。ローカルマシンからも他のセッションからも隔離されます。Azure Container Apps Sandboxes 上に構築され、GitHub が ID・ポリシー・課金のレイヤーを提供します（<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>）。</p>
+<div class="highlight"><pre><span></span><code>copilot<span class="w"> </span>--cloud<span class="w">     </span><span class="c1"># クラウドサンドボックス内で対話セッションを開始</span>
+</code></pre></div>
+<p>Copilot が実行するコマンドは、自分のマシンではなくクラウド環境で実行されます。これにより 3 つのパターンが可能になります。</p>
+<ul>
+<li><strong>デバイス間で継続</strong> — セッションが GitHub ホストのインフラ上にあるため、ファイルをコピーしたり依存関係を再インストールしたりせずに、どのデバイスからでも再開できます。</li>
+<li><strong>計算量の多い作業をオフロード</strong> — ローカルを軽量・快適に保ったまま、複数の Copilot タスクをクラウドで並列実行できます。</li>
+<li><strong>統一されたガバナンス</strong> — クラウドサンドボックスのポリシーは Copilot cloud agent のポリシーと同じ構成を共有するため、既存のファイアウォール／セキュリティ制御が追加設定なしで自動的に拡張されます。</li>
+</ul>
+<p>クラウドサンドボックスのセッションは 3 つの状態を遷移します。停止時に状態をスナップショットするため、後で再開できます（<a href="https://docs.github.com/en/copilot/concepts/about-cloud-and-local-sandboxes">About cloud and local sandboxes</a>）。</p>
+<table>
+<thead>
+<tr>
+<th>状態</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Active</strong></td>
+<td>実行中で、Copilot CLI から対話できる</td>
+</tr>
+<tr>
+<td><strong>Stopped</strong></td>
+<td>実行されていないが状態はスナップショット済み。再開するとファイル・環境変数・作業途中の状態が復元される</td>
+</tr>
+<tr>
+<td><strong>Deleted</strong></td>
+<td>実行環境 <strong>と</strong> スナップショットが削除される。復元不可</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">組織での有効化と課金</p>
+<p>メンバーが使えるようにするには、組織／Enterprise の所有者がクラウドサンドボックスアクセスを有効化する必要があります（<strong>組織設定 → Sandboxes → Enabled for all members</strong>）（<a href="https://docs.github.com/en/copilot/how-tos/cloud-and-local-sandboxes/enabling-or-disabling-cloud-sandboxes-for-your-organization">Enabling or disabling cloud sandboxes</a>）。利用は 3 つの軸で計測されます。長時間のセッション前に最新の pricing を確認してください。</p>
+<table>
+<thead>
+<tr>
+<th>メーター</th>
+<th>計測対象</th>
+<th>単位</th>
+<th>価格（USD）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td>セッションが実行されている時間</td>
+<td>Compute 秒</td>
+<td>$0.000024</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>実行中に割り当てられたメモリ</td>
+<td>GiB 秒</td>
+<td>$0.000003</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>停止したセッションのスナップショット保管</td>
+<td>GiB 月</td>
+<td>$0.005</td>
+</tr>
+</tbody>
+</table>
+<p>詳細は <a href="https://docs.github.com/en/billing/concepts/product-billing/cloud-and-local-sandboxes">Billing for cloud and local sandboxes</a> と <a href="https://github.blog/changelog/2026-06-02-cloud-and-local-sandboxes-for-github-copilot-now-in-public-preview">public preview の発表</a> を参照してください。</p>
+</div>
+<h3 id="copilot-anywhere-リモートコントロール-cli-からクラウドサンドボックスまで">Copilot Anywhere: リモートコントロール CLI からクラウドサンドボックスまで</h3>
+<p>Microsoft Developer のデモ <strong>「GitHub Copilot Anywhere: From Remote Control CLIs to Cloud Sandboxes」（DEM305）</strong> は、これらを 1 つのストーリーにまとめています。エージェントを 1 つのターミナルに張り付いて見守る必要はありません。Copilot を <em>リモートコントロール</em> し、重い・リスクの高い・長時間の作業を、どこからでも再参加できる GitHub ホストの隔離サンドボックスで実行させられます（<a href="https://www.youtube.com/watch?v=JJmmunwXcu8">デモを見る</a>）。</p>
+<p>本ワークショップが既に扱っている「リモートコントロール」のサーフェスは、サンドボックスと自然に組み合わさります。</p>
+<table>
+<thead>
+<tr>
+<th>やりたいこと</th>
+<th>使うもの</th>
+<th>扱う章</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>対話 UI なしでタスクを起動（SSH、CI、スクリプト）</td>
+<td><code>copilot -p "…"</code> prompt mode</td>
+<td><a href="../demos/04_cicd_automation/">Demo 4 · CI/CD 自動化</a></td>
+</tr>
+<tr>
+<td>別のエディタ／ツールから CLI を駆動</td>
+<td>ACP サーバー</td>
+<td><a href="#インタフェースと相互運用">インタフェースと相互運用</a></td>
+</tr>
+<tr>
+<td>長いタスクを GitHub のサーバーに委譲</td>
+<td><code>/delegate &lt;prompt&gt;</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a></td>
+</tr>
+<tr>
+<td>隔離・並列・計算量の多い作業を実行</td>
+<td><code>copilot --cloud</code></td>
+<td>本節</td>
+</tr>
+<tr>
+<td>別マシンでセッションを再開</td>
+<td>クラウドサンドボックスのセッション継続</td>
+<td>本節</td>
+</tr>
+</tbody>
+</table>
+<pre class="mermaid"><code>graph LR
+    Dev[あなた — 任意のデバイス] --&gt;|"copilot -p / ACP"| CLI[Copilot CLI エージェント]
+    CLI --&gt;|"/sandbox enable"| Local[ローカルサンドボックス&lt;br/&gt;自分のマシン上]
+    CLI --&gt;|"copilot --cloud"| Cloud[一時的なクラウドサンドボックス&lt;br/&gt;Azure Container Apps]
+    Cloud --&gt;|"stop → snapshot"| Snap[(保存されたセッション状態)]
+    Snap --&gt;|"どこからでも再開"| Dev2[あなた — 別のデバイス]
+    CLI --&gt;|"/delegate"| Agent[Copilot cloud agent]
+
+    style Cloud fill:#c8e6c9
+    style Local fill:#bbdefb</code></pre>
+<div class="admonition tip">
+<p class="admonition-title">自律性の安全な既定</p>
+<p>無人実行では <strong>autopilot</strong> とサンドボックスを併用しましょう。ローカルサンドボックスは Copilot が自分のマシン上で触れられる範囲を制限し、クラウドサンドボックスは実行を完全にマシン外へ移します。どちらもホスト上の <code>--allow-all-tools</code>／<code>--yolo</code> よりはるかに安全です（<a href="#権限と許可ツール">権限と許可ツール</a>）。</p>
+</div>
+<hr />
+<h2 id="byok">Bring Your Own Key（BYOK）</h2>
+<p>環境変数で、GitHub ホスト型モデルの代わりに独自のモデルプロバイダーを CLI に向けられます（<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#using-your-own-model-provider">About Copilot CLI</a>）。</p>
+<p>BYOK には 2 つの経路があります。</p>
+<ul>
+<li><strong>Enterprise 管理のプロバイダーモデル</strong>: 管理者が外部プロバイダーモデルを構成し、対象ユーザーの <code>/model</code> に表示されます（<a href="https://github.blog/changelog/2026-06-17-copilot-cli-supports-enterprise-bring-your-own-key-byok-models">Copilot CLI supports enterprise BYOK models</a>）。</li>
+<li><strong>クライアント側 BYOK</strong>: 個人ユーザーが、環境変数でローカル CLI を OpenAI 互換、Azure OpenAI、Anthropic、ローカルプロバイダーに向けます。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>変数</th>
+<th>意味</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>COPILOT_PROVIDER_BASE_URL</code></td>
+<td>プロバイダー API のベース URL</td>
+</tr>
+<tr>
+<td><code>COPILOT_PROVIDER_TYPE</code></td>
+<td><code>openai</code>（既定。Ollama／vLLM を含む OpenAI 互換）、<code>azure</code>、<code>anthropic</code></td>
+</tr>
+<tr>
+<td><code>COPILOT_PROVIDER_API_KEY</code></td>
+<td>API キー（キー不要のローカルプロバイダーでは省略）</td>
+</tr>
+<tr>
+<td><code>COPILOT_MODEL</code></td>
+<td>使用するモデル（または <code>--model</code>）</td>
+</tr>
+</tbody>
+</table>
+<p>要件と注意点。</p>
+<ul>
+<li>モデルは <strong>ツール呼び出しとストリーミングをサポート</strong> する必要があります。コンテキストは 128k 以上を目安に（<a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#using-your-own-model-provider">About Copilot CLI</a>）。</li>
+<li>組み込みサブエージェントはプロバイダー設定を継承します。コスト見積もりは非表示ですが、トークン数は表示されます（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</li>
+<li><code>/delegate</code> は依然として GitHub サインインが必要です。プロバイダーではなく GitHub のサーバーサイド Copilot に転送されます（<a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a>）。</li>
+<li>完全なセットアップは <code>copilot help providers</code> を実行してください。</li>
+</ul>
+<blockquote>
+<p>本リポジトリの <a href="../../copilot_sdk_tutorial/python/">Copilot SDK チュートリアル — BYOK レシピ</a> にプログラム的な等価例があります。</p>
+</blockquote>
+<hr />
+<h2 id="インタフェースと相互運用">インタフェースと相互運用</h2>
+<table>
+<thead>
+<tr>
+<th>機能</th>
+<th>方法</th>
+<th>出典</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>モデルを介さずにシェルコマンドを実行</strong></td>
+<td>先頭に <code>!</code>、例: <code>!git status</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>プロンプトにファイルを追加</strong></td>
+<td><code>@path/to/file</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>別ディレクトリで作業</strong></td>
+<td><code>/add-dir</code>、<code>/cwd</code>、<code>/cd</code>、<code>/list-dirs</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>プロンプトをスケジュール</strong></td>
+<td><code>/every &lt;interval&gt;</code>、<code>/after &lt;delay&gt;</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>UI 作業のための画像</strong></td>
+<td>ドラッグ＆ドロップ、<span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-v">V</kbd></span>、または <code>@mockup.png</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a></td>
+</tr>
+<tr>
+<td><strong>ローカル音声入力</strong></td>
+<td>Space を長押し、または <span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-x">X</kbd></span> のあと <code>V</code></td>
+<td><a href="https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input">Copilot CLI improved UI, rubber duck, scheduling, and voice input</a></td>
+</tr>
+<tr>
+<td><strong>推論の可視化を切り替え</strong></td>
+<td><span class="keys"><kbd class="key-control">Ctrl</kbd><span>+</span><kbd class="key-t">T</kbd></span></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli">Using Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>セカンドオピニオンを得る</strong></td>
+<td><code>/rubber-duck</code></td>
+<td><a href="https://github.blog/changelog/2026-06-02-copilot-cli-improved-ui-rubber-duck-prompt-scheduling-and-voice-input">Copilot CLI improved UI, rubber duck, scheduling, and voice input</a></td>
+</tr>
+<tr>
+<td><strong>セキュリティに絞ったローカルレビュー</strong></td>
+<td><code>/security-review</code>（全ユーザーが利用可能）</td>
+<td><a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1064---2026-06-23">copilot-cli changelog 1.0.64</a></td>
+</tr>
+<tr>
+<td><strong>worktree を作成／切り替え</strong></td>
+<td><code>/worktree</code>（alias <code>/move</code>）</td>
+<td><a href="https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09">copilot-cli changelog 1.0.61</a></td>
+</tr>
+<tr>
+<td><strong>セッションの変更をレビュー</strong></td>
+<td><code>/diff</code></td>
+<td><a href="https://github.com/github/copilot-cli/blob/main/changelog.md">copilot-cli changelog</a></td>
+</tr>
+<tr>
+<td><strong>他ツールのエージェントとして使う（ACP）</strong></td>
+<td>Agent Client Protocol サーバー</td>
+<td><a href="https://docs.github.com/en/copilot/concepts/agents/about-copilot-cli#use-copilot-cli-via-acp">About Copilot CLI</a></td>
+</tr>
+<tr>
+<td><strong>クラウドエージェントに委譲</strong></td>
+<td><code>/delegate &lt;prompt&gt;</code></td>
+<td><a href="https://docs.github.com/en/copilot/how-tos/copilot-cli/cli-best-practices">Best practices</a></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="次へ">次へ</h2>
+<p>これで機能の全体像が手に入りました。<a href="../demos/">Demo Scenarios</a> で実践しましょう。まずは <a href="../demos/01_issue_to_pr/">Issue → Branch → PR 自動化</a> から。</p>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/in/ks6088ts/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zM102.2 96a38.5 38.5 0 1 1 0 77 38.5 38.5 0 1 1 0-77m282.1 320h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/ks6088ts" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://x.com/ks6088ts" target="_blank" rel="noopener" title="x.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M357.2 48h70.6L273.6 224.2 455 464H313L201.7 318.6 74.5 464H3.8l164.9-188.5L-5.2 48h145.6l100.5 132.9zm-24.8 373.8h39.1L119.1 88h-42z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "search.highlight", "search.share"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f", "clipboard.copy": "\u30af\u30ea\u30c3\u30d7\u30dc\u30fc\u30c9\u3078\u30b3\u30d4\u30fc", "search.result.more.one": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3082\u30461\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.more.other": "\u3053\u306e\u30da\u30fc\u30b8\u5185\u306b\u3042\u3068#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.none": "\u4f55\u3082\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f", "search.result.one": "1\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.other": "#\u4ef6\u898b\u3064\u304b\u308a\u307e\u3057\u305f", "search.result.placeholder": "\u691c\u7d22\u30ad\u30fc\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044", "search.result.term.missing": "\u691c\u7d22\u306b\u542b\u307e\u308c\u306a\u3044", "select.version": "\u30d0\u30fc\u30b8\u30e7\u30f3\u5207\u308a\u66ff\u3048"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

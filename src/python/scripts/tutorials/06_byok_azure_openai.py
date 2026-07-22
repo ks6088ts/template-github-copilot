@@ -11,7 +11,6 @@ import asyncio
 import os
 import sys
 
-from azure.identity import DefaultAzureCredential
 from _telemetry import add_telemetry_arguments, apply_telemetry_arguments, make_client
 from copilot.generated.rpc import PermissionDecisionApproveOnce
 from copilot.generated.session_events import (
@@ -73,6 +72,16 @@ def parse_args() -> argparse.Namespace:
 
 def _build_entra_bearer_token() -> str:
     """Obtain an Azure Entra ID bearer token via DefaultAzureCredential."""
+    try:
+        from azure.identity import DefaultAzureCredential
+    except ImportError:
+        print(
+            "Error: azure-identity is required for Entra ID auth.\n"
+            "Install with: pip install azure-identity",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     scope = "https://cognitiveservices.azure.com/.default"
     credential = DefaultAzureCredential()
     return credential.get_token(scope).token

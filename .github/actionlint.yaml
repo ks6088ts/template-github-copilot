@@ -1,0 +1,14 @@
+# actionlint configuration
+#
+# gh-aw (github/gh-aw) compiles agentic workflows (`*.md`) into `*.lock.yml`
+# workflows and emits `queue: max` under `concurrency` to opt into GitHub
+# Actions concurrency *queuing*. actionlint does not yet recognize the `queue`
+# key, so it reports a false positive ("unexpected key ... for concurrency
+# section") on the generated lock files. Suppress only that specific message,
+# and only on the generated lock files, so real errors are still reported.
+#
+# Upstream tracking issue: https://github.com/rhysd/actionlint/issues/687
+paths:
+  "**/*.lock.yml":
+    ignore:
+      - 'unexpected key "queue" for "concurrency" section'

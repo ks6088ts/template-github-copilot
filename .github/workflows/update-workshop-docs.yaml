@@ -1,5 +1,33 @@
-name: update-workshop-docs
-
+# =============================================================================
+# ⚠️  DEPRECATED — DO NOT USE FOR NEW RUNS. DISABLED BY DEFAULT.
+# =============================================================================
+# This workflow drives the GitHub Copilot CLI *directly* on the runner with
+# `--allow-all-tools --allow-all-paths --allow-all-urls` while a write-scoped
+# token (COPILOT_GITHUB_TOKEN) and `contents: write` / `pull-requests: write`
+# permissions are in scope. That hands an autonomous agent unrestricted tool,
+# filesystem, and network access on a runner that can push branches and open
+# PRs — a large blast radius if a fetched changelog/blog page smuggles in a
+# prompt-injection payload. Running the Copilot CLI this way is considered
+# unsafe, so it is no longer maintained.
+#
+# ➡️  Migrate to the GitHub Agentic Workflows (gh-aw) replacement instead:
+#
+#       .github/workflows/refresh-workshop-docs.md
+#
+#     It performs the same doc refresh through the gh-aw engine with a sandboxed
+#     agent, an explicit network allow-list, least-privilege `contents: read`
+#     permissions, and a `safe-outputs.create-pull-request` gate scoped to
+#     `docs/**` and `mkdocs.yml`, so the agent never holds write tokens or opens
+#     pull requests itself.
+#
+# This file is retained only as a historical fallback and is DISABLED BY DEFAULT:
+#   * the automatic weekly `schedule` trigger is commented out, and
+#   * even manual `workflow_dispatch` runs are a deliberate no-op unless the
+#     operator explicitly opts in via `acknowledge_deprecated: true` (see the
+#     input below and the job-level `if:` guard).
+# =============================================================================
+#
+# --- Original notes (retained for reference) ---------------------------------
 # Tracks GitHub Copilot CLI/SDK upstream changes and opens a PR that refreshes the workshop
 # docs. The Copilot run needs COPILOT_GITHUB_TOKEN (a user fine-grained PAT with Copilot
 # Requests); the default GITHUB_TOKEN cannot drive Copilot and is used only to push the branch
@@ -12,12 +40,22 @@ name: update-workshop-docs
 # Create-pull-request step fails with: "GitHub Actions is not permitted to create or approve
 # pull requests (createPullRequest)".
 
+name: update-workshop-docs (DEPRECATED)
+
 on:
-  schedule:
-    # Weekly on Monday 00:00 UTC. The Copilot CLI evolves quickly; weekly keeps drift small.
-    - cron: "0 0 * * 1"
+  # DEPRECATED: automatic scheduling is disabled so this deprecated CLI path never
+  # runs on its own. The supported replacement (.github/workflows/refresh-workshop-docs.md)
+  # owns the weekly refresh now. Re-enable this block only for a temporary fallback.
+  # schedule:
+  #   # Weekly on Monday 00:00 UTC. The Copilot CLI evolves quickly; weekly keeps drift small.
+  #   - cron: "0 0 * * 1"
   workflow_dispatch:
     inputs:
+      acknowledge_deprecated:
+        type: boolean
+        description: "I understand this workflow is DEPRECATED (use refresh-workshop-docs.md instead) and want to run it anyway"
+        required: false
+        default: false
       scope:
         type: choice
         description: Which tutorial tree to refresh
@@ -58,6 +96,12 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    # DEPRECATED guard: run only when an operator explicitly opts in on a manual
+    # dispatch by setting `acknowledge_deprecated: true`. Every other trigger —
+    # including a dispatch that leaves the box unchecked — is a deliberate no-op,
+    # so this deprecated direct-CLI path stays disabled by default. Prefer the
+    # agentic replacement: .github/workflows/refresh-workshop-docs.md
+    if: ${{ github.event.inputs.acknowledge_deprecated == 'true' }}
     timeout-minutes: 30
     environment: dev
     steps:

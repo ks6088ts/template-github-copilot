@@ -64,6 +64,13 @@ Check these sources before each workshop run. Copilot CLI changes quickly enough
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-07-24 | Claude Opus 5 now available in GitHub Copilot; CLI 1.0.75 adds native support — designed for complex, long-running coding tasks | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot) |
+| 2026-07-21 | Gemini 3.6 Flash now available in GitHub Copilot | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-21-gemini-3-6-flash-is-now-available-in-github-copilot) |
+| 2026-07-09 | OpenAI GPT-5.6 Sol, Terra, and Luna now available in GitHub Copilot | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-09-openai-s-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot) |
+| 2026-07-02 | Copilot CLI can now authenticate in GitHub Actions using the built-in `GITHUB_TOKEN` with `permissions: copilot: write` — no PAT required | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions) |
+| 2026-07-02 | Gemini 2.5 Pro and Gemini 3 Flash scheduled for upcoming deprecation across Copilot surfaces | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-02-upcoming-deprecation-of-gemini-2-5-pro-and-gemini-3-flash) |
+| 2026-07-01 | Copilot CLI auto model selection now routes to the best model based on task type | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-01-copilot-cli-auto-model-selection-routes-based-on-task) |
+| 2026-07-01 | AI credit session limits can be set in Copilot CLI and SDK to cap per-session spend | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-01-set-ai-credit-session-limits-in-copilot-cli-and-sdk) |
 | 2026-06-29 | Claude Opus 4.8 (fast mode) entered preview across Copilot surfaces including Copilot CLI (admin policy off by default) | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-29-claude-opus-4-8-fast-mode-is-now-in-preview-for-github-copilot) |
 | 2026-06-26 | MAI-Code-1-Flash reached general availability for Copilot Business and Copilot Enterprise | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise) |
 | 2026-06-25 | Copilot code review now uses the CLI/SDK `grep`/`rg`/`glob`/`view` file tools (~20% lower review cost) and adds org-level default Medium analysis depth | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates) |

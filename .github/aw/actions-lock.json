@@ -1,0 +1,14 @@
+{
+  "entries": {
+    "astral-sh/setup-uv@v7": {
+      "repo": "astral-sh/setup-uv",
+      "version": "v7",
+      "sha": "37802adc94f370d6bfd71619e3f0bf239e1f3b78"
+    },
+    "github/gh-aw-actions/setup@v0.83.1": {
+      "repo": "github/gh-aw-actions/setup",
+      "version": "v0.83.1",
+      "sha": "8bdba8075360648fe6802302a5b4e016361dc6ac"
+    }
+  }
+}

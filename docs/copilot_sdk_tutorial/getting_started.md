@@ -116,9 +116,10 @@ You can run the Copilot CLI non-interactively inside a workflow. This repository
 
 ### 1. Create the token
 
-Follow [Option C: Fine-grained PAT](#option-c-fine-grained-pat-recommended-for-ci) above.
+!!! note "2026-07-02: PAT no longer required in GitHub Actions"
+    As of [July 2, 2026](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions), the Copilot CLI can authenticate in GitHub Actions using the built-in `GITHUB_TOKEN` — no PAT required. Add `permissions: copilot: write` to your job (or workflow), and the CLI picks up the token automatically. The PAT approach below still works, so both options are valid; the built-in token approach reduces secret management overhead.
 
-> **Why not `GITHUB_TOKEN`?** The automatic `secrets.GITHUB_TOKEN` provided by Actions **cannot** authenticate the Copilot CLI, because **Copilot Requests** can only be granted on a *user-owned* fine-grained PAT. You must create your own PAT and store it as a secret.
+Follow [Option C: Fine-grained PAT](#option-c-fine-grained-pat-recommended-for-ci) above, **or** use the built-in `GITHUB_TOKEN` with `permissions: copilot: write` in your workflow (see the note above).
 
 ### 2. Choose the permissions
 
@@ -159,9 +160,11 @@ In the repository (or organization) settings, add the token as a secret named `C
 
 ---
 
-## Why `GITHUB_TOKEN` or `gh auth login` Won't Work
+## Why `gh auth login` Without Copilot Access Won't Work
 
-A common question is whether you can skip the static PAT and authenticate with the built-in `GITHUB_TOKEN` (or `gh auth login` using it). For the Copilot CLI/SDK, **this does not work** — and the reason is structural, not a configuration mistake:
+> **Update (2026-07-02):** For GitHub Actions specifically, the built-in `GITHUB_TOKEN` now *can* authenticate the Copilot CLI when `permissions: copilot: write` is granted ([Copilot CLI no longer needs a PAT in GitHub Actions](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions)). The limitation below applies to older token types and to contexts outside GitHub Actions.
+
+A common question is whether you can skip the static PAT and authenticate with `gh auth login` using a token that lacks Copilot access. For the Copilot CLI/SDK, **this does not work** — and the reason is structural:
 
 - **`GITHUB_TOKEN` is a GitHub App installation token.** It is scoped to repository operations (contents, issues, pull requests) and is **not bound to a user account**, so it can never carry the Copilot entitlement that **Copilot Requests** represents.
 - **`gh auth login` backed by `GITHUB_TOKEN` does not help either.** That authenticates the GitHub REST/GraphQL **API**, not a Copilot subscription. There is no user identity behind the token for Copilot to bill the request against.
@@ -169,7 +172,7 @@ A common question is whether you can skip the static PAT and authenticate with t
 
 ### "I want to avoid static tokens"
 
-Understandable — but for the Copilot CLI/SDK a **user-owned fine-grained PAT is currently the only supported CI credential**. You cannot fully eliminate the static token; instead, minimize the blast radius:
+For **GitHub Actions**, you can now use the built-in `GITHUB_TOKEN` with `permissions: copilot: write` — no static PAT required ([Copilot CLI no longer needs a PAT in GitHub Actions](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions)). For other CI environments, a user-owned fine-grained PAT remains the supported credential. Minimize the blast radius:
 
 - Grant **only** `Copilot Requests` (add repository permissions sparingly).
 - Scope the token to **Only select repositories**.

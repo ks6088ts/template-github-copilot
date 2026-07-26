@@ -116,9 +116,10 @@ export COPILOT_GITHUB_TOKEN="github_pat_xxxxxxxxxxxxxxxxxxxx"
 
 ### 1. トークンを作成する
 
-上記の「オプション C: Fine-grained PAT（CI 向け推奨）」に従います。
+!!! note "2026-07-02: GitHub Actions では PAT が不要になりました"
+    [2026 年 7 月 2 日](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions)以降、Copilot CLI は GitHub Actions の組み込み `GITHUB_TOKEN` を使って認証できるようになりました。PAT の作成・管理が不要になります。ジョブ（またはワークフロー）に `permissions: copilot: write` を追加すれば、CLI が自動的にトークンを取得します。以下の PAT 方式も引き続き使えます。
 
-> **なぜ `GITHUB_TOKEN` ではダメか?** Actions が自動提供する `secrets.GITHUB_TOKEN` では Copilot CLI を認証**できません**。**Copilot Requests** は*ユーザー所有*の fine-grained PAT でのみ付与できるためです。自分で PAT を作成し、Secret として保存する必要があります。
+上記の「オプション C: Fine-grained PAT（CI 向け推奨）」に従うか、**または**ワークフローに `permissions: copilot: write` を追加して組み込みの `GITHUB_TOKEN` を使います（上記の注を参照）。
 
 ### 2. 権限を選ぶ
 
@@ -159,9 +160,11 @@ export COPILOT_GITHUB_TOKEN="github_pat_xxxxxxxxxxxxxxxxxxxx"
 
 ---
 
-## なぜ `GITHUB_TOKEN` や `gh auth login` では動作しないのか
+## `GITHUB_TOKEN` なしの `gh auth login` が動作しない理由
 
-「静的な PAT を使わず、組み込みの `GITHUB_TOKEN`（やそれを使った `gh auth login`）で認証できないか?」というのはよくある疑問です。Copilot CLI/SDK では**これは動作しません**。しかもこれは設定ミスではなく、仕組み上の制約です。
+> **更新（2026-07-02）：** GitHub Actions に限っては、`permissions: copilot: write` を付与した組み込みの `GITHUB_TOKEN` で Copilot CLI を認証*できる*ようになりました（[Copilot CLI no longer needs a PAT in GitHub Actions](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions)）。下記の制約は古いトークン種別や GitHub Actions 以外の環境に適用されます。
+
+「静的な PAT を使わず、Copilot アクセス権のないトークンを使った `gh auth login` で認証できないか?」というのはよくある疑問です。Copilot CLI/SDK では**これは動作しません**。設定ミスではなく、仕組み上の制約です。
 
 - **`GITHUB_TOKEN` は GitHub App のインストールトークンです。** リポジトリ操作（contents・issues・pull requests）にスコープされており、**ユーザーアカウントに紐づきません**。そのため **Copilot Requests** が表す Copilot のエンタイトルメントを持つことができません。
 - **`GITHUB_TOKEN` を使った `gh auth login` でも解決しません。** これは GitHub REST/GraphQL **API** の認証であって、Copilot サブスクリプションの認証ではありません。トークンの背後に課金対象となるユーザー ID が存在しないためです。
@@ -169,7 +172,7 @@ export COPILOT_GITHUB_TOKEN="github_pat_xxxxxxxxxxxxxxxxxxxx"
 
 ### 「静的なトークンを使いたくない」場合
 
-気持ちは分かりますが、Copilot CLI/SDK では**ユーザー所有の fine-grained PAT が現時点で唯一サポートされる CI 認証情報**です。静的トークンを完全に排除することはできないため、代わりに影響範囲を最小化します。
+**GitHub Actions の場合**、`permissions: copilot: write` を追加することで組み込みの `GITHUB_TOKEN` を使えます（静的 PAT 不要）（[Copilot CLI no longer needs a PAT in GitHub Actions](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions)）。他の CI 環境では、ユーザー所有の fine-grained PAT が引き続きサポートされる認証情報です。影響範囲を最小化するために：
 
 - `Copilot Requests` **のみ**を付与する（Repository 権限の追加は最小限に）。
 - トークンの対象を **Only select repositories** に絞る。

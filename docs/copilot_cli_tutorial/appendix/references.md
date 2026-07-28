@@ -64,6 +64,10 @@ Check these sources before each workshop run. Copilot CLI changes quickly enough
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-07-27 | Enterprise managed settings (MDM/settings JSON) now apply to the GitHub Copilot app and Copilot cloud agent | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-27-enterprise-managed-settings-now-apply-to-the-github-copilot-app) |
+| 2026-07-23 | GitHub MCP Server now supports the next MCP specification | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-23-github-mcp-server-supports-the-next-mcp-specification) |
+| 2026-07-23 | CLI 1.0.74: `/model plan` subcommand for plan-mode model selection; `mcp.json` (Open Plugin Spec v1) support; sandbox opt-in splash on first run | [copilot-cli changelog 1.0.74](https://github.com/github/copilot-cli/blob/main/changelog.md#1074---2026-07-23) |
+| 2026-07-17 | Copilot code review: customization and configurability improvements | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-17-copilot-code-review-customization-and-configurability-improvements) |
 | 2026-07-24 | Claude Opus 5 now available in GitHub Copilot; CLI 1.0.75 adds native support — designed for complex, long-running coding tasks | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot) |
 | 2026-07-21 | Gemini 3.6 Flash now available in GitHub Copilot | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-21-gemini-3-6-flash-is-now-available-in-github-copilot) |
 | 2026-07-09 | OpenAI GPT-5.6 Sol, Terra, and Luna now available in GitHub Copilot | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-09-openai-s-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot) |

@@ -87,6 +87,7 @@ Check these sources before each workshop run. The SDK and the Copilot CLI it dep
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-07-08 | Enterprise-managed OpenTelemetry export: enterprises can centrally enforce OTLP endpoint and export settings for VS Code and CLI via MDM or settings JSON | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-08-enterprise-managed-opentelemetry-export-for-vs-code-and-cli) |
 | 2026-07-22 | SDK v1.0.8 (Python, Go, Java): per-agent reasoning effort — custom sub-agents can now have their own `reasoningEffort` level independent of the parent session | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
 | 2026-07-22 | SDK v1.0.8 also adds AI credit session limits (from CLI 1.0.73) and stronger typing for `expAssignments` across SDKs | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
 | 2026-07-16 | SDK v1.0.7 (Python, Go, Java): in-process (FFI) transport support for Python and Go SDK integrations; tool search configuration; opaque metadata passthrough on tool definitions; `canvasProvider` and managed settings support | [Copilot SDK v1.0.7](https://github.com/github/copilot-sdk/releases/tag/v1.0.7) |

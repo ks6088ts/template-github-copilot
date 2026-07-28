@@ -58,6 +58,8 @@
 explore → plan → review → implement → verify → commit
 ```
 
+プランニング用のモデルを個別に指定することもできます。`/model plan <model-id>`（または `/model --plan`）でプランモード専用モデルを選択できます。`off` を指定するとクリア、ID を省略するとピッカーが開きます。それ以外のモードではセッションモデルが使われます（[copilot-cli changelog 1.0.74](https://github.com/github/copilot-cli/blob/main/changelog.md#1074---2026-07-23)）。
+
 ```text
 > Read the authentication files but don't write code yet
 > /plan Implement password reset flow
@@ -237,7 +239,7 @@ CLI は **GitHub MCP サーバーをあらかじめ構成** して同梱して�
 > /mcp search    # browse the GitHub MCP Registry and install a server
 ```
 
-ユーザーレベルのサーバー定義は `~/.copilot` 配下の `mcp-config.json` に保存されます（`COPILOT_HOME` で上書き可）。`/mcp add` や `/mcp search` で追加したサーバーは CLI を再起動せずにすぐ利用できます（[Copilot CLI: New terminal interface is generally available](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available)）。最近の CLI では `.github/mcp.json` からワークスペース MCP 設定も自動ロードされます。また、`deferTools` のような新しい MCP 設定キーも changelog で追加されています（[copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09)、[copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)）。[Demo 5](demos/05_mcp_integration.md) でカスタムサーバーを配線します。
+ユーザーレベルのサーバー定義は `~/.copilot` 配下の `mcp-config.json` に保存されます（`COPILOT_HOME` で上書き可）。`/mcp add` や `/mcp search` で追加したサーバーは CLI を再起動せずにすぐ利用できます（[Copilot CLI: New terminal interface is generally available](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available)）。最近の CLI では `.github/mcp.json` からワークスペース MCP 設定も自動ロードされます。また、`deferTools` のような新しい MCP 設定キーも changelog で追加されています（[copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09)、[copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)）。CLI 1.0.74 では Open Plugin Spec v1 の `mcp.json` 形式も `mcp-config.json` と並行してサポートされています（[copilot-cli changelog 1.0.74](https://github.com/github/copilot-cli/blob/main/changelog.md#1074---2026-07-23)）。GitHub MCP サーバーは次世代 MCP 仕様もサポートするようになりました。GitHub MCP ツールを使うワークショップを実施する前に[変更内容](https://github.blog/changelog/2026-07-23-github-mcp-server-supports-the-next-mcp-specification)を確認してください。[Demo 5](demos/05_mcp_integration.md) でカスタムサーバーを配線します。
 
 ---
 

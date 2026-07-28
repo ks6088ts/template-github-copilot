@@ -68,6 +68,9 @@ Copilot は GitHub.com 上の PR の変更を確認し、重大な問題を報�
 !!! note "コードレビューは CLI/SDK のファイルツールを再利用するようになりました"
     GitHub.com 上の Copilot コードレビューは、ソースの探索に Copilot CLI・SDK に組み込まれた `grep`・`rg`・`glob`・`view` ツールを使うようになり、ワークフローを変えずにレビューコストを約 20% 削減しました。Medium 分析深度プレビューに参加している組織は、組織レベルの既定レビューレベルも設定できます（[Copilot code review: Analysis depth and efficiency updates](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates)）。
 
+!!! note "コードレビューのカスタマイズ改善（2026-07-17）"
+    Copilot コードレビューのカスタマイズ性と設定の柔軟性が向上しました。レビューの焦点と報告内容を細かく調整できます。最新のオプションは[変更内容](https://github.blog/changelog/2026-07-17-copilot-code-review-customization-and-configurability-improvements)と `AGENTS.md` サポートを確認してから、レビューポリシーを設定してください。
+
 ---
 
 ## IDE のインラインレビューとの違い

@@ -58,6 +58,8 @@ Press ++ctrl+y++ to open and edit the plan in your Markdown editor. The recommen
 explore → plan → review → implement → verify → commit
 ```
 
+You can also set a dedicated model for planning: `/model plan <model-id>` (or `/model --plan`) picks a model used only while in plan mode; pass `off` to clear it, or omit the ID to open the picker. The session model is used for all other modes ([copilot-cli changelog 1.0.74](https://github.com/github/copilot-cli/blob/main/changelog.md#1074---2026-07-23)).
+
 ```text
 > Read the authentication files but don't write code yet
 > /plan Implement password reset flow
@@ -237,7 +239,7 @@ The CLI ships with the **GitHub MCP server pre-configured**, so GitHub.com opera
 > /mcp search    # browse the GitHub MCP Registry and install a server
 ```
 
-User-level server definitions live in `mcp-config.json` under `~/.copilot` (override with `COPILOT_HOME`). New servers added with `/mcp add` or `/mcp search` are available immediately, without restarting the CLI ([Copilot CLI: New terminal interface is generally available](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available)). Recent CLI versions also auto-load workspace MCP config from `.github/mcp.json`, and the changelog is the best source for newly supported MCP config locations and keys such as `deferTools` ([copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09), [copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)). We wire up a custom server in [Demo 5](demos/05_mcp_integration.md).
+User-level server definitions live in `mcp-config.json` under `~/.copilot` (override with `COPILOT_HOME`). New servers added with `/mcp add` or `/mcp search` are available immediately, without restarting the CLI ([Copilot CLI: New terminal interface is generally available](https://github.blog/changelog/2026-06-23-copilot-cli-new-terminal-interface-is-generally-available)). Recent CLI versions also auto-load workspace MCP config from `.github/mcp.json`, and the changelog is the best source for newly supported MCP config locations and keys such as `deferTools` ([copilot-cli changelog 1.0.61](https://github.com/github/copilot-cli/blob/main/changelog.md#1061---2026-06-09), [copilot-cli changelog 1.0.63](https://github.com/github/copilot-cli/blob/main/changelog.md#1063---2026-06-15)). CLI 1.0.74 also adds support for `mcp.json` (Open Plugin Spec v1) alongside `mcp-config.json` ([copilot-cli changelog 1.0.74](https://github.com/github/copilot-cli/blob/main/changelog.md#1074---2026-07-23)). The GitHub MCP server now supports the next MCP specification — check the [GitHub MCP Server changelog](https://github.blog/changelog/2026-07-23-github-mcp-server-supports-the-next-mcp-specification) for protocol updates before running workshops that rely on GitHub MCP tools. We wire up a custom server in [Demo 5](demos/05_mcp_integration.md).
 
 ---
 

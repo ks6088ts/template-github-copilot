@@ -68,6 +68,9 @@ For security-specific checks, the CLI includes `/security-review`, now available
 !!! note "Code review now reuses the CLI/SDK file tools"
     Copilot code review on GitHub.com now explores source with the same `grep`, `rg`, `glob`, and `view` tools built into the Copilot CLI and SDK, which trimmed review cost by about 20% with no workflow change. Organizations in the Medium analysis-depth preview can also set an organization-level default review level ([Copilot code review: Analysis depth and efficiency updates](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates)).
 
+!!! note "Code review customization improvements (2026-07-17)"
+    Copilot code review now supports enhanced customization and configurability: reviewers can tune what the review focuses on and how it reports findings. Check the [changelog entry](https://github.blog/changelog/2026-07-17-copilot-code-review-customization-and-configurability-improvements) and `AGENTS.md` support for the latest options before configuring your review policy.
+
 ---
 
 ## Why this is different from inline IDE review

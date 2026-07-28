@@ -87,7 +87,8 @@ GitHub Copilot SDK に関する外部リンクとさらなる参考情報です�
 
 | 日付 | 変更内容 | 出典 |
 |------|---------|------|
-| 2026-06-25 | SDK v1.0.4（Python・Go）: Python パッケージは CLI ランタイムを同梱せずダウンロードする方式に変更（`python -m copilot download-runtime`）。推論リクエストを傍受する HTTP リクエストコールバック、BYOK プロバイダー向けの `getBearerToken` コールバック（Managed Identity など）、実験的なマルチプロバイダー BYOK レジストリ、`preamble`/`preserve` のシステムメッセージセクション制御、`capi.enableWebSocketResponses` / `provider.transport` セッションオプションを追加 | [Copilot SDK v1.0.4](https://github.com/github/copilot-sdk/releases/tag/v1.0.4) |
+| 2026-07-08 | Enterprise マネージド OpenTelemetry エクスポート：MDM または設定 JSON で VS Code および CLI の OTLP エンドポイントとエクスポート設定を一元管理・強制適用可能に | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-08-enterprise-managed-opentelemetry-export-for-vs-code-and-cli) |
+| 2026-07-22 | SDK v1.0.8（Python・Go・Java）: エージェントごとの推論努力レベル — カスタムサブエージェントが親セッションとは独立した `reasoningEffort` レベルを持てるように | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
 | 2026-06-19 | Python・Go の SDK チュートリアルを、当時の最新 SDK パッケージと Copilot CLI サーバーモードに合わせて整備 | [github/copilot-sdk releases](https://github.com/github/copilot-sdk/releases) |
 | 2026-06-18 | SDK v1.0.2: 作成・再開時のオプトインなセッションメモリ、ツール検索向けのツール `defer` オプション、`otlpProtocol` テレメトリトランスポート（`http/json` \| `http/protobuf`）、`ModelBilling.tokenPrices`、クライアント停止時の確定的なテレメトリフラッシュ | [Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2) |
 

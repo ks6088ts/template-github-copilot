@@ -64,7 +64,11 @@
 
 | 日付 | 変更 | 出典 |
 |------|------|------|
-| 2026-06-29 | Claude Opus 4.8（fast mode）が Copilot CLI を含む各サーフェスでプレビュー提供開始（管理者ポリシーは既定でオフ） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-29-claude-opus-4-8-fast-mode-is-now-in-preview-for-github-copilot) |
+| 2026-07-27 | Enterprise マネージド設定（MDM/設定 JSON）が GitHub Copilot アプリおよび Copilot クラウドエージェントに適用されるように | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-27-enterprise-managed-settings-now-apply-to-the-github-copilot-app) |
+| 2026-07-23 | GitHub MCP サーバーが次世代 MCP 仕様をサポート | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-23-github-mcp-server-supports-the-next-mcp-specification) |
+| 2026-07-23 | CLI 1.0.74：Plan モード専用モデルを選ぶ `/model plan` サブコマンド、Open Plugin Spec v1 の `mcp.json` 対応、初回起動時のサンドボックス opt-in スプラッシュ表示 | [copilot-cli changelog 1.0.74](https://github.com/github/copilot-cli/blob/main/changelog.md#1074---2026-07-23) |
+| 2026-07-17 | Copilot コードレビューのカスタマイズ性と設定の柔軟性が向上 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-17-copilot-code-review-customization-and-configurability-improvements) |
+| 2026-07-24 | Claude Opus 5 が GitHub Copilot で利用可能に。CLI 1.0.75 でネイティブサポート — 慎重な推論と効果的なツール使用を必要とする複雑な長時間タスク向け | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot) |
 | 2026-06-26 | MAI-Code-1-Flash が Copilot Business / Copilot Enterprise で一般提供（GA） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise) |
 | 2026-06-25 | Copilot コードレビューが CLI/SDK の `grep`/`rg`/`glob`/`view` ファイルツールを利用（レビューコスト約 20% 削減）し、組織レベルの既定 Medium 分析深度を追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates) |
 | 2026-06-24 | Free / Student プランが Copilot auto モデル選択のみを既定に。Microsoft 提供モデルから `(Preview)` ラベルを廃止 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-24-changes-to-model-selection-for-free-and-student-plans) |

@@ -69,6 +69,8 @@ Use these points when you move from the tutorial stack to a real application:
 > flushed deterministically before the process exits
 > ([Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)).
 
+> **Enterprise-managed OpenTelemetry export (2026-07-08).** Enterprises can now centrally manage and enforce the OTLP endpoint and export settings for VS Code and Copilot CLI via MDM or enterprise settings JSON — the same `managed settings` mechanism that controls other CLI options. If your organization controls the CLI deployment this way, the locally set `OTEL_EXPORTER_OTLP_ENDPOINT` may be overridden by the managed policy ([Enterprise-managed OpenTelemetry export for VS Code and CLI](https://github.blog/changelog/2026-07-08-enterprise-managed-opentelemetry-export-for-vs-code-and-cli)).
+
 ---
 
 ## 1. Start the observability stack

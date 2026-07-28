@@ -65,6 +65,8 @@ graph LR
 
 > **SDK v1.0.2 以降のテレメトリオプション。** `TelemetryConfig` に OTLP エクスポートのトランスポートを選択する `otlpProtocol` オプション（`http/json` または `http/protobuf`）が追加されました。また、通常停止時にクライアントが `runtime.shutdown` を呼び出すようになり、プロセス終了前にテレメトリが確定的にフラッシュされます（[Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2)）。
 
+> **Enterprise によるマネージド OpenTelemetry エクスポート（2026-07-08）。** Enterprise は MDM または Enterprise 設定 JSON（CLI のその他オプションと同じ「マネージド設定」の仕組み）を通じて、VS Code および Copilot CLI の OTLP エンドポイントとエクスポート設定を一元管理・強制適用できるようになりました。組織が CLI のデプロイをこの方式で管理している場合、ローカルで設定した `OTEL_EXPORTER_OTLP_ENDPOINT` がマネージドポリシーで上書きされる可能性があります（[Enterprise-managed OpenTelemetry export for VS Code and CLI](https://github.blog/changelog/2026-07-08-enterprise-managed-opentelemetry-export-for-vs-code-and-cli)）。
+
 ---
 
 ## 1. オブザーバビリティスタックを起動

@@ -40,7 +40,7 @@
 #   - actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
 #   - actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0 (source v9)
 #   - actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-#   - actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0 (source v6)
+#   - actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6.3.0 (source v6)
 #   - actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
 #   - astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
 #   - github/gh-aw-actions/setup@8bdba8075360648fe6802302a5b4e016361dc6ac # v0.83.1
@@ -992,7 +992,7 @@ jobs:
             echo '{"items":[]}' > /tmp/gh-aw/agent_output.json
           fi
       - name: Setup Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0 (source v6)
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v6.3.0 (source v6)
         with:
           python-version: 3.x
       - name: Setup uv with caching enabled

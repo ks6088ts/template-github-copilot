@@ -87,6 +87,13 @@ GitHub Copilot SDK に関する外部リンクとさらなる参考情報です�
 
 | 日付 | 変更内容 | 出典 |
 |------|---------|------|
+| 2026-07-31 | SDK v1.0.9-preview.2（Python・Go）: バグ修正 — Python の `sessions.list()` が非空リストで `ValueError` を発生させる問題、バイナリツール結果（base64 画像など）がサイレントに破棄される問題、権限タイプのコードジェン名エイリアスの修正 | [Copilot SDK v1.0.9-preview.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.9-preview.2) |
+| 2026-07-29 | SDK v1.0.9-preview.1: Agent Factories [実験的] — サブエージェントのフリートをオーケストレーションする JavaScript クロージャを宣言し、ジャーナリング・並列化・進捗報告が可能（TypeScript；`agent_factories` フラグが必要） | [Copilot SDK v1.0.9-preview.1](https://github.com/github/copilot-sdk/releases/tag/v1.0.9-preview.1) |
+| 2026-07-29 | SDK v1.0.9-preview.0: 全 SDK に `agentStop` ライフサイクルフックを追加 — トップレベルエージェントの自然な停止点をインターセプトし、フォローアップメッセージをエンキューして継続させることが可能 | [Copilot SDK v1.0.9-preview.0](https://github.com/github/copilot-sdk/releases/tag/v1.0.9-preview.0) |
+| 2026-07-22 | SDK v1.0.8（Python・Go・Java）: エージェントごとの reasoning effort — カスタムサブエージェントが親セッションとは独立した `reasoningEffort` レベルを持てるようになった | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
+| 2026-07-22 | SDK v1.0.8: AI クレジットセッション制限（CLI 1.0.73 から）と `expAssignments` の強い型付けを追加 | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
+| 2026-07-16 | SDK v1.0.7（Python・Go・Java）: Python・Go SDK 向けのインプロセス（FFI）トランスポートサポート、ツール検索設定、ツール定義へのメタデータパススルー、`canvasProvider` と管理設定のサポート | [Copilot SDK v1.0.7](https://github.com/github/copilot-sdk/releases/tag/v1.0.7) |
+| 2026-07-02 | Copilot CLI が GitHub Actions で組み込み `GITHUB_TOKEN`（`permissions: copilot: write`）による認証に対応。PAT 不要 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions) |
 | 2026-06-25 | SDK v1.0.4（Python・Go）: Python パッケージは CLI ランタイムを同梱せずダウンロードする方式に変更（`python -m copilot download-runtime`）。推論リクエストを傍受する HTTP リクエストコールバック、BYOK プロバイダー向けの `getBearerToken` コールバック（Managed Identity など）、実験的なマルチプロバイダー BYOK レジストリ、`preamble`/`preserve` のシステムメッセージセクション制御、`capi.enableWebSocketResponses` / `provider.transport` セッションオプションを追加 | [Copilot SDK v1.0.4](https://github.com/github/copilot-sdk/releases/tag/v1.0.4) |
 | 2026-06-19 | Python・Go の SDK チュートリアルを、当時の最新 SDK パッケージと Copilot CLI サーバーモードに合わせて整備 | [github/copilot-sdk releases](https://github.com/github/copilot-sdk/releases) |
 | 2026-06-18 | SDK v1.0.2: 作成・再開時のオプトインなセッションメモリ、ツール検索向けのツール `defer` オプション、`otlpProtocol` テレメトリトランスポート（`http/json` \| `http/protobuf`）、`ModelBilling.tokenPrices`、クライアント停止時の確定的なテレメトリフラッシュ | [Copilot SDK v1.0.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.2) |

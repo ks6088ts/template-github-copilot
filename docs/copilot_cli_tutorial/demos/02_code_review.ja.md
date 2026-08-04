@@ -68,6 +68,9 @@ Copilot は GitHub.com 上の PR の変更を確認し、重大な問題を報�
 !!! note "コードレビューは CLI/SDK のファイルツールを再利用するようになりました"
     GitHub.com 上の Copilot コードレビューは、ソースの探索に Copilot CLI・SDK に組み込まれた `grep`・`rg`・`glob`・`view` ツールを使うようになり、ワークフローを変えずにレビューコストを約 20% 削減しました。Medium 分析深度プレビューに参加している組織は、組織レベルの既定レビューレベルも設定できます（[Copilot code review: Analysis depth and efficiency updates](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates)）。
 
+!!! info "コードレビュー：エージェントスキルと MCP が一般提供（GA）になりました"
+    Copilot コードレビューにおけるエージェントスキルと MCP サーバーのサポートが、Copilot Pro・Pro+・Business・Enterprise の全ユーザー向けに一般提供されました。スキルや MCP ツールを設定してレビュアーの検査範囲を拡張できます（[Copilot code review: Agent skills and MCP now GA](https://github.blog/changelog/2026-07-29-copilot-code-review-agent-skills-and-mcp-now-generally-available)）。
+
 ---
 
 ## IDE のインラインレビューとの違い

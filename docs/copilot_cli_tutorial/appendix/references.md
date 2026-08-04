@@ -64,6 +64,11 @@ Check these sources before each workshop run. Copilot CLI changes quickly enough
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-08-03 | CLI 1.0.78 adds `/permissions` command to switch approval modes, `allowDevToolCaches` sandbox setting, ACP token usage in prompt results, `/rewind` without git dependency, and timeline tool-duration display | [copilot-cli changelog 1.0.78](https://github.com/github/copilot-cli/blob/main/changelog.md#1078---2026-08-03) |
+| 2026-07-31 | Gemini 2.5 Pro and Gemini 3 Flash deprecated across all GitHub Copilot surfaces (including CLI) | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-31-gemini-2-5-pro-and-gemini-3-flash-deprecated) |
+| 2026-07-30 | CLI 1.0.77 adds browser-based OAuth login as the new default for interactive terminals (`copilot login`); device code remains for remote/headless | [copilot-cli changelog 1.0.77](https://github.com/github/copilot-cli/blob/main/changelog.md#1077---2026-07-30) |
+| 2026-07-29 | Copilot code review support for agent skills and MCP servers is now generally available for all Copilot plans | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-29-copilot-code-review-agent-skills-and-mcp-now-generally-available) |
+| 2026-07-28 | Grok 4.5 (xAI) rolling out in GitHub Copilot; designed for fast, agentic coding and complex multi-step workflows. CLI 1.0.76 adds `grok-4.5` model support | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-28-grok-4-5-is-now-available-in-github-copilot) |
 | 2026-07-24 | Claude Opus 5 now available in GitHub Copilot; CLI 1.0.75 adds native support — designed for complex, long-running coding tasks | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot) |
 | 2026-07-21 | Gemini 3.6 Flash now available in GitHub Copilot | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-21-gemini-3-6-flash-is-now-available-in-github-copilot) |
 | 2026-07-09 | OpenAI GPT-5.6 Sol, Terra, and Luna now available in GitHub Copilot | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-09-openai-s-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot) |

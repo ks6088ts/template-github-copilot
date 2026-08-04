@@ -68,6 +68,9 @@ For security-specific checks, the CLI includes `/security-review`, now available
 !!! note "Code review now reuses the CLI/SDK file tools"
     Copilot code review on GitHub.com now explores source with the same `grep`, `rg`, `glob`, and `view` tools built into the Copilot CLI and SDK, which trimmed review cost by about 20% with no workflow change. Organizations in the Medium analysis-depth preview can also set an organization-level default review level ([Copilot code review: Analysis depth and efficiency updates](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates)).
 
+!!! info "Code review: agent skills and MCP now generally available"
+    Support for agent skills and MCP servers in Copilot code review is now generally available for all Copilot Pro, Pro+, Business, and Enterprise users. You can configure skills and MCP tools to extend what the reviewer can inspect ([Copilot code review: Agent skills and MCP now GA](https://github.blog/changelog/2026-07-29-copilot-code-review-agent-skills-and-mcp-now-generally-available)).
+
 ---
 
 ## Why this is different from inline IDE review

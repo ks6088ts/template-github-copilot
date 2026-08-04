@@ -64,6 +64,18 @@
 
 | 日付 | 変更 | 出典 |
 |------|------|------|
+| 2026-08-03 | CLI 1.0.78 が `/permissions` コマンド（承認モードの切り替え）、`allowDevToolCaches` サンドボックス設定、ACP プロンプト結果へのトークン使用量公開、git 不要の `/rewind`、タイムラインへのツール実行時間表示を追加 | [copilot-cli changelog 1.0.78](https://github.com/github/copilot-cli/blob/main/changelog.md#1078---2026-08-03) |
+| 2026-07-31 | Gemini 2.5 Pro と Gemini 3 Flash が GitHub Copilot の全サーフェス（CLI 含む）で deprecated | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-31-gemini-2-5-pro-and-gemini-3-flash-deprecated) |
+| 2026-07-30 | CLI 1.0.77 がインタラクティブ端末での `copilot login` の既定をブラウザ型 OAuth フローに変更（リモート/ヘッドレスは引き続き device code） | [copilot-cli changelog 1.0.77](https://github.com/github/copilot-cli/blob/main/changelog.md#1077---2026-07-30) |
+| 2026-07-29 | Copilot コードレビューでのエージェントスキルと MCP サーバーのサポートが全 Copilot プラン向けに一般提供（GA） | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-29-copilot-code-review-agent-skills-and-mcp-now-generally-available) |
+| 2026-07-28 | Grok 4.5（xAI）が GitHub Copilot で展開中。高速なエージェント型コーディングと複雑なマルチステップワークフロー向け。CLI 1.0.76 で `grok-4.5` モデルサポートを追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-28-grok-4-5-is-now-available-in-github-copilot) |
+| 2026-07-24 | Claude Opus 5 が GitHub Copilot で利用可能に。CLI 1.0.75 でネイティブサポートを追加。複雑な長時間コーディングタスク向けに設計 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot) |
+| 2026-07-21 | Gemini 3.6 Flash が GitHub Copilot で利用可能に | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-21-gemini-3-6-flash-is-now-available-in-github-copilot) |
+| 2026-07-09 | OpenAI GPT-5.6 Sol、Terra、Luna が GitHub Copilot で利用可能に | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-09-openai-s-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot) |
+| 2026-07-02 | Copilot CLI が GitHub Actions で組み込み `GITHUB_TOKEN`（`permissions: copilot: write`）による認証に対応。PAT 不要 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-02-copilot-cli-no-longer-needs-a-personal-access-token-in-github-actions) |
+| 2026-07-02 | Gemini 2.5 Pro と Gemini 3 Flash の近く予定される deprecated が告知（2026-07-31 に確定） | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-02-upcoming-deprecation-of-gemini-2-5-pro-and-gemini-3-flash) |
+| 2026-07-01 | Copilot CLI の auto モデル選択がタスク種別に基づく最適モードへのルーティングに対応 | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-01-copilot-cli-auto-model-selection-routes-based-on-task) |
+| 2026-07-01 | CLI と SDK でセッションごとの AI クレジット上限を設定可能に | [GitHub Blog Changelog](https://github.blog/changelog/2026-07-01-set-ai-credit-session-limits-in-copilot-cli-and-sdk) |
 | 2026-06-29 | Claude Opus 4.8（fast mode）が Copilot CLI を含む各サーフェスでプレビュー提供開始（管理者ポリシーは既定でオフ） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-29-claude-opus-4-8-fast-mode-is-now-in-preview-for-github-copilot) |
 | 2026-06-26 | MAI-Code-1-Flash が Copilot Business / Copilot Enterprise で一般提供（GA） | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-26-mai-code-1-flash-for-copilot-business-and-copilot-enterprise) |
 | 2026-06-25 | Copilot コードレビューが CLI/SDK の `grep`/`rg`/`glob`/`view` ファイルツールを利用（レビューコスト約 20% 削減）し、組織レベルの既定 Medium 分析深度を追加 | [GitHub Blog Changelog](https://github.blog/changelog/2026-06-25-copilot-code-review-analysis-depth-and-efficiency-updates) |

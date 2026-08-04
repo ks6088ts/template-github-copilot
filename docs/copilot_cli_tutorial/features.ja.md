@@ -24,11 +24,12 @@
 | ローカル／外部プロバイダー検証 | BYOK 設定を使う（[BYOK](#byok) を参照） | モデルはツール呼び出しとストリーミングをサポートする必要がある |
 
 !!! warning "モデルのライフサイクルは短い"
-  最近の changelog だけでも、GPT-4.1 は 2026-06-01 に deprecated、GPT-5.2 と GPT-5.2-Codex は 2026-06-05 に多くの Copilot 体験で deprecated、Opus 4.6 (fast) は 2026-06-29 に deprecated、Gemini 2.5 Pro と Gemini 3 Flash は近く deprecated 予定です（[GPT-4.1 deprecated](https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated)、[GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated)、[Upcoming deprecation of Gemini 2.5 Pro and Gemini 3 Flash](https://github.blog/changelog/2026-07-02-upcoming-deprecation-of-gemini-2-5-pro-and-gemini-3-flash)）。ワークショップ実施前に `/model`、[supported models](https://docs.github.com/copilot/reference/ai-models/supported-models)、[GitHub Blog Copilot changelog](https://github.blog/changelog/label/copilot/) を確認してください。
+  最近の changelog だけでも、GPT-4.1 は 2026-06-01 に deprecated、GPT-5.2 と GPT-5.2-Codex は 2026-06-05 に多くの Copilot 体験で deprecated、Opus 4.6 (fast) は 2026-06-29 に deprecated、Gemini 2.5 Pro と Gemini 3 Flash は 2026-07-31 に deprecated されました（[GPT-4.1 deprecated](https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated)、[GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated)、[Gemini 2.5 Pro and Gemini 3 Flash deprecated](https://github.blog/changelog/2026-07-31-gemini-2-5-pro-and-gemini-3-flash-deprecated)）。ワークショップ実施前に `/model`、[supported models](https://docs.github.com/copilot/reference/ai-models/supported-models)、[GitHub Blog Copilot changelog](https://github.blog/changelog/label/copilot/) を確認してください。
 
 固定の演習手順にしない範囲で、最近の追加として押さえるべき点は次のとおりです。
 
 - **Claude Opus 5** が GitHub Copilot で利用可能になりました。慎重な推論と効果的なツール使用を必要とする複雑な長時間コーディングタスク向けで、CLI 1.0.75 でネイティブサポートされます（[Claude Opus 5 available](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot)）。
+- **Grok 4.5**（xAI）が GitHub Copilot で展開中です。高速なエージェント型コーディングと複雑なマルチステップワークフロー向けに設計されています（[Grok 4.5 available](https://github.blog/changelog/2026-07-28-grok-4-5-is-now-available-in-github-copilot)）。CLI 1.0.76 で `grok-4.5` のネイティブサポートが追加されました。
 - **Gemini 3.6 Flash** が GitHub Copilot で利用可能になりました（[Gemini 3.6 Flash available](https://github.blog/changelog/2026-07-21-gemini-3-6-flash-is-now-available-in-github-copilot)）。
 - **GPT-5.6 Sol、Terra、Luna**（OpenAI）が GitHub Copilot で利用可能になりました（[GPT-5.6 Sol, Terra, Luna available](https://github.blog/changelog/2026-07-09-openai-s-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot)）。
 - **Auto モデル選択** がタスクの種類に基づいて最適なモデルにルーティングするようになりました。ワークショップのスクリプトにモデル名を固定しないもう一つの理由です（[Copilot CLI auto model selection routes based on task](https://github.blog/changelog/2026-07-01-copilot-cli-auto-model-selection-routes-based-on-task)）。
@@ -262,6 +263,7 @@ Copilot がファイルを変更・実行しうるツール（例: `touch`、`ch
 | `--allow-tool='MyServer'` / `--deny-tool='MyServer(tool)'` | MCP サーバーのツールを許可／禁止 |
 | `/allow-all` または `/yolo` | セッション内ですべての権限を有効化 |
 | `/reset-allowed-tools` | 以前に許可したツールをリセット |
+| `/permissions` | 承認モードをインタラクティブに切り替え（CLI 1.0.78）|
 
 ```bash
 # Allow all git EXCEPT push; deny destructive rm

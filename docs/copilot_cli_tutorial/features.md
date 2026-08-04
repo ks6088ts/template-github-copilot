@@ -24,11 +24,12 @@ Use this decision table instead:
 | Local or external-provider experiments | Use BYOK settings (see [BYOK](#byok)) | Model must support tool calling and streaming |
 
 !!! warning "Model lifecycle changes quickly"
-  Recent changelog examples show why fixed model lists go stale: GPT-4.1 was deprecated on 2026-06-01, GPT-5.2 and GPT-5.2-Codex were deprecated across most Copilot experiences on 2026-06-05, Opus 4.6 (fast) was deprecated on 2026-06-29, and Gemini 2.5 Pro and Gemini 3 Flash are scheduled for deprecation ([GPT-4.1 deprecated](https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated), [GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated), [Upcoming deprecation of Gemini 2.5 Pro and Gemini 3 Flash](https://github.blog/changelog/2026-07-02-upcoming-deprecation-of-gemini-2-5-pro-and-gemini-3-flash)). Before running a workshop, check `/model`, [supported models](https://docs.github.com/copilot/reference/ai-models/supported-models), and the [GitHub Blog Copilot changelog](https://github.blog/changelog/label/copilot/).
+  Recent changelog examples show why fixed model lists go stale: GPT-4.1 was deprecated on 2026-06-01, GPT-5.2 and GPT-5.2-Codex were deprecated across most Copilot experiences on 2026-06-05, Opus 4.6 (fast) was deprecated on 2026-06-29, and Gemini 2.5 Pro and Gemini 3 Flash were deprecated on 2026-07-31 ([GPT-4.1 deprecated](https://github.blog/changelog/2026-06-02-gpt-4-1-deprecated), [GPT-5.2 and GPT-5.2-Codex deprecated](https://github.blog/changelog/2026-06-05-gpt-5-2-and-gpt-5-2-codex-deprecated), [Gemini 2.5 Pro and Gemini 3 Flash deprecated](https://github.blog/changelog/2026-07-31-gemini-2-5-pro-and-gemini-3-flash-deprecated)). Before running a workshop, check `/model`, [supported models](https://docs.github.com/copilot/reference/ai-models/supported-models), and the [GitHub Blog Copilot changelog](https://github.blog/changelog/label/copilot/).
 
 Recent additions worth knowing, without hard-coding them into exercises:
 
 - **Claude Opus 5** is now available in GitHub Copilot, designed for complex, long-running coding tasks that require careful reasoning and effective tool use. CLI 1.0.75 adds native support ([Claude Opus 5 available](https://github.blog/changelog/2026-07-24-claude-opus-5-is-now-available-in-github-copilot)).
+- **Grok 4.5** (xAI) is now rolling out in GitHub Copilot — designed for fast, agentic coding and complex multi-step workflows ([Grok 4.5 available](https://github.blog/changelog/2026-07-28-grok-4-5-is-now-available-in-github-copilot)). CLI 1.0.76 adds native `grok-4.5` support.
 - **Gemini 3.6 Flash** is now available in GitHub Copilot ([Gemini 3.6 Flash available](https://github.blog/changelog/2026-07-21-gemini-3-6-flash-is-now-available-in-github-copilot)).
 - **GPT-5.6 Sol, Terra, and Luna** (OpenAI) are now available in GitHub Copilot ([GPT-5.6 Sol, Terra, Luna available](https://github.blog/changelog/2026-07-09-openai-s-gpt-5-6-sol-terra-and-luna-are-now-available-in-github-copilot)).
 - **Auto model selection** now routes to the best model for the task type rather than a single default — another reason not to fix a model name in workshop scripts ([Copilot CLI auto model selection routes based on task](https://github.blog/changelog/2026-07-01-copilot-cli-auto-model-selection-routes-based-on-task)).
@@ -262,6 +263,7 @@ Pre-authorize (or forbid) tools with flags or slash commands:
 | `--allow-tool='MyServer'` / `--deny-tool='MyServer(tool)'` | Allow/deny MCP server tools |
 | `/allow-all` or `/yolo` | Enable all permissions in-session |
 | `/reset-allowed-tools` | Reset previously approved tools |
+| `/permissions` | Switch between approval modes interactively (CLI 1.0.78) |
 
 ```bash
 # Allow all git EXCEPT push; deny destructive rm

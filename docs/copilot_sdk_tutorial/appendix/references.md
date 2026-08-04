@@ -87,6 +87,9 @@ Check these sources before each workshop run. The SDK and the Copilot CLI it dep
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-07-31 | SDK v1.0.9-preview.2 (Python, Go): bug fixes — Python `sessions.list()` crash on non-empty lists, binary tool results (e.g. base64 images) silently dropped, and permission-type codegen aliases corrected | [Copilot SDK v1.0.9-preview.2](https://github.com/github/copilot-sdk/releases/tag/v1.0.9-preview.2) |
+| 2026-07-29 | SDK v1.0.9-preview.1: Agent Factories [experimental] — declare JavaScript closures that orchestrate fleets of subagents with journaling, parallelism, and progress reporting (TypeScript; gated by `agent_factories` flag) | [Copilot SDK v1.0.9-preview.1](https://github.com/github/copilot-sdk/releases/tag/v1.0.9-preview.1) |
+| 2026-07-29 | SDK v1.0.9-preview.0: `agentStop` lifecycle hook across all SDKs — intercept the top-level agent's natural stopping point and optionally enqueue a follow-up message to keep it running | [Copilot SDK v1.0.9-preview.0](https://github.com/github/copilot-sdk/releases/tag/v1.0.9-preview.0) |
 | 2026-07-22 | SDK v1.0.8 (Python, Go, Java): per-agent reasoning effort — custom sub-agents can now have their own `reasoningEffort` level independent of the parent session | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
 | 2026-07-22 | SDK v1.0.8 also adds AI credit session limits (from CLI 1.0.73) and stronger typing for `expAssignments` across SDKs | [Copilot SDK v1.0.8](https://github.com/github/copilot-sdk/releases/tag/v1.0.8) |
 | 2026-07-16 | SDK v1.0.7 (Python, Go, Java): in-process (FFI) transport support for Python and Go SDK integrations; tool search configuration; opaque metadata passthrough on tool definitions; `canvasProvider` and managed settings support | [Copilot SDK v1.0.7](https://github.com/github/copilot-sdk/releases/tag/v1.0.7) |
